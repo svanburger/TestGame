@@ -1,14 +1,15 @@
-# Våra spel 🎮
+# Bajskorv Studios 💩🎮
 
 Små spel som körs helt i webbläsaren. Inga servrar, inga databaser och
 inget att installera. Startsidan är en meny där man väljer spel.
 
 | Fil / mapp   | Vad det är                                                |
 |--------------|-----------------------------------------------------------|
-| `index.html` | Menyn man ser först.                                      |
+| `index.html` | Menyn man ser först, med Bajskorv Studios-loggan.         |
 | `spel.css`   | Gemensam stil för spelen (fyller skärmen, hus-knappen).   |
 | `stjarnor/`  | Spelet "Fånga stjärnorna".                                |
 | `parkour/`   | Spelet "Parkourkatten".                                   |
+| `pappa/`     | Spelet "Låt pappa vila".                                  |
 
 Varje spel är en egen mapp med en `index.html` och en `game.js`. Det mesta
 man vill ändra finns i `INSTALLNINGAR` högst upp i `game.js`. Spara filen
@@ -83,6 +84,50 @@ Testa att ändra i `parkour/game.js`:
 - hur mycket poäng varje trick ger (`poang`)
 - kattens färg (`kattFarg`, `ondKattFarg`)
 
+## Låt pappa vila 🛋️
+
+Pappa vilar i fåtöljen och scrollar på telefonen. Du är ett barn som
+springer runt i vardagsrummet och leker, men tyst, så att pappa får vila.
+
+- **Dra med fingret** (eller tryck någonstans) så springer barnet dit. På
+  datorn går det också med piltangenterna eller WASD.
+- **Tryck på en sak** så springer barnet dit och börjar leka. Man leker så
+  länge man står still bredvid saken.
+- Varje sekund som pappa får vila ger 1 poäng. Leker man ger det mer, men
+  ju roligare sak, desto mer låter det:
+
+  | Sak       | Poäng per sekund | Ljud |
+  |-----------|------------------|------|
+  | 📖 Läsa    | 1                | Tyst 🤫 |
+  | 🖍️ Rita    | 2 (+20 när teckningen är klar) | Lite 🔈 |
+  | ⚽ Boll    | 3                | Mellan 🔉 |
+  | 🧱 Klossar | 5 (men tornet rasar ibland – KRASCH!) | Lite 🔈 |
+  | 🥁 Trumma  | 12               | Jättemycket 🔊 |
+
+- **Städa:** Hunden 🐕 släpar fram leksaker. Spring över dem för att plocka
+  upp (man kan bära 3) och lägg dem i leksakslådan. Varje leksak ger 25
+  poäng, och 3 på en gång ger lite extra. Har man händerna fulla och kliver
+  på en leksak säger det "Aj!" och låter.
+- **Ljudmätaren** högst upp visar hur mycket det låter. Blir den full blir
+  pappa störd och man förlorar ett ❤️. Efter 3 gånger är spelet slut.
+- **Pappas matta** runt fåtöljen ska man inte gå på – då märker han dig
+  direkt. Barnet går själv runt mattan om man trycker på andra sidan.
+- Är det tyst en stund **somnar pappa** 😴. Då blir alla poäng dubbla, men
+  han vaknar lättare.
+- Ju längre man spelar, desto tröttare blir pappa och desto lättare blir
+  han störd.
+
+Testa att ändra i `pappa/game.js`:
+
+- vad man kan leka med, hur mycket poäng det ger och hur mycket det låter
+  (`lekar`)
+- vilka leksaker hunden släpar fram (`leksaker`) och hur ofta (`hundTappar`)
+- hur mycket poäng det blir för att städa (`poang`)
+- hur lätt pappa blir störd (`lugnStart`, `lugnMinst`, `blirTrott`)
+- hur många gånger man får störa pappa (`liv`)
+- barnets och pappas färger (`barnFarg`, `harFarg`, `pappaFarg`)
+- vaggvisan: längst ner i `game.js` finns `MUSIK`
+
 ## Lägga till ett nytt spel
 
 1. Kopiera en av spelmapparna, till exempel `stjarnor/`, och ge den ett nytt namn.
@@ -94,7 +139,7 @@ Testa att ändra i `parkour/game.js`:
 
 ### På datorn
 
-Dubbelklicka på `stjarnor/index.html` eller `parkour/index.html`.
+Dubbelklicka på `stjarnor/index.html`, `parkour/index.html` eller `pappa/index.html`.
 
 Menyn länkar till mappar, och det fungerar bara när sidan ligger på en
 webbserver. Vill du testa menyn på datorn, kör `python3 -m http.server 8000`
@@ -134,7 +179,7 @@ startar först när man tryckt på skärmen en gång (det kräver Safari).
 
 ## Idéer på vad spelet kan bli
 
-Båda spelen är byggda på samma sätt: reglerna finns i `uppdatera()` och
+Alla spelen är byggda på samma sätt: reglerna finns i `uppdatera()` och
 det som syns på skärmen ritas i `rita()`. Några idéer på fler spel:
 
 - **Hoppspel:** figuren hoppar över hinder när man trycker
