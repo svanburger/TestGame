@@ -9,14 +9,27 @@
 //  lite mer tilltufsad. Efter 3 gånger förvandlas den till en ond katt.
 //  Då är det katten som skrämmer de söta djuren, och det ger mest poäng.
 //
+//  Plocka godsaker på vägen. Ju ovanligare godsak, desto mer poäng.
+//
 //  Börja med att ändra i INSTALLNINGAR här nedanför.
 // =====================================================================
 
 const INSTALLNINGAR = {
-  ondaDjur: ["🐺", "🐍", "🐊", "🐗"],   // Står i vägen och skrämmer katten
-  orn: "🦅",                            // Flyger lågt – rulla under den!
+  ondaDjur: ["🐺", "🐍", "🐊", "🐗", "🐻", "🦂", "🕷️", "🦍"], // Står i vägen och skrämmer katten
+  springandeDjur: ["🐀", "🐕", "🦡"],   // Springer emot katten – hoppa över dem!
+  flygandeDjur: ["🦅", "🦇", "🐝"],     // Flyger lågt – rulla under dem!
   sotaDjur: ["🐱", "🐰", "🐥", "🐹", "🐶", "🦔"], // Dem skrämmer den onda katten
-  fisk: "🐟",                           // Plocka för extrapoäng
+
+  // Godsaker att plocka. Ju lägre "vanlighet", desto mer sällan dyker den upp.
+  godsaker: [
+    { bild: "🐟", poang: 5, vanlighet: 60 },
+    { bild: "🥛", poang: 10, vanlighet: 20 },
+    { bild: "🧀", poang: 20, vanlighet: 10 },
+    { bild: "🍗", poang: 40, vanlighet: 6 },
+    { bild: "👑", poang: 100, vanlighet: 3 },
+    { bild: "💎", poang: 250, vanlighet: 1 },
+  ],
+
   skramdGanger: 3,                      // Hur många gånger man kan bli skrämd innan man blir ond
   ondTid: 45,                           // Hur många sekunder man är ond katt innan spelet tar slut
   fartStart: 6,                         // Hur fort katten springer i början
@@ -27,12 +40,12 @@ const INSTALLNINGAR = {
     kullerbytta: 10,
     uppPaTak: 10,
     langhopp: 15,
-    fisk: 5,
     skramma: 100,                       // När den onda katten skrämmer ett sött djur
   },
   kattFarg: "#f2a65a",
   ondKattFarg: "#3d2c4f",
   ljud: true,
+  musik: true,                          // Trudilutten i bakgrunden
 };
 
 // ---------------------------------------------------------------------
@@ -47,6 +60,9 @@ const P = INSTALLNINGAR.poang;
 const canvas = document.getElementById("spel");
 const ctx = canvas.getContext("2d");
 const hemKnapp = document.getElementById("hem");
+const pausKnapp = document.getElementById("paus");
+const pausmeny = document.getElementById("pausmeny");
+const musikKnapp = document.getElementById("musikKnapp");
 const TYPSNITT = 'ui-rounded, system-ui, -apple-system, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif';
 
 const TYNGD = 40;      // Hur snabbt katten faller
@@ -74,7 +90,7 @@ let nastaX = 0;  // Var nästa bit av banan ska byggas
 let katt = nyKatt();
 let plattformar = []; // Taken man kan springa på
 let djur = [];
-let fiskar = [];
+let godis = [];       // Godsakerna som ligger på banan
 let texter = [];      // Poängtexter som flyger upp
 
 let combo = 0;        // Gör man trick tätt efter varandra blir poängen gånger fler
@@ -151,10 +167,11 @@ function nerKnapp() {
 canvas.addEventListener("pointerdown", (e) => {
   e.preventDefault();
   startaLjud();
-  if (lage !== "spelar") {
-    if (lage === "start" || tidSedanSlut > 1) startaSpel();
+  if (lage === "start" || (lage === "slut" && tidSedanSlut > 1)) {
+    startaSpel();
     return;
   }
+  if (lage !== "spelar") return;
   const knapp = nerKnapp();
   if (Math.hypot(e.clientX - knapp.x, e.clientY - knapp.y) < knapp.r * 1.3) ner();
   else hoppa();
@@ -163,19 +180,63 @@ canvas.addEventListener("pointerdown", (e) => {
 window.addEventListener("keydown", (e) => {
   if (e.repeat) return;
   const hopp = e.key === " " || e.key === "ArrowUp" || e.key === "w";
-  if (lage !== "spelar") {
+  if (e.key === "p" || e.key === "Escape") {
+    if (lage === "spelar") pausa();
+    else if (lage === "paus") fortsatt();
+    return;
+  }
+  if (lage === "start" || (lage === "slut" && tidSedanSlut > 1)) {
     if (hopp || e.key === "Enter") {
       startaLjud();
-      if (lage === "start" || tidSedanSlut > 1) startaSpel();
+      startaSpel();
     }
     return;
   }
+  if (lage !== "spelar") return;
   if (hopp) hoppa();
   if (e.key === "ArrowDown" || e.key === "s") ner();
 });
 
 // Stoppa nyp-zoom i Safari på iPad/iPhone
 document.addEventListener("gesturestart", (e) => e.preventDefault());
+
+// ---------- Paus ----------
+
+function pausa() {
+  if (lage !== "spelar") return;
+  lage = "paus";
+  pausmeny.hidden = false;
+  document.getElementById("fortsatt").focus();
+}
+
+function fortsatt() {
+  if (lage !== "paus") return;
+  lage = "spelar";
+  pausmeny.hidden = true;
+  startaLjud();
+}
+
+function visaMusikKnapp() {
+  musikKnapp.textContent = musikPa ? "♪ Musik: på" : "♪ Musik: av";
+}
+
+pausKnapp.addEventListener("click", pausa);
+document.getElementById("fortsatt").addEventListener("click", fortsatt);
+document.getElementById("borjaOm").addEventListener("click", () => {
+  pausmeny.hidden = true;
+  startaLjud();
+  startaSpel();
+});
+musikKnapp.addEventListener("click", () => {
+  musikPa = !musikPa;
+  sparaInstallning("musik-parkour", musikPa ? "pa" : "av");
+  visaMusikKnapp();
+});
+
+// Pausa av sig själv om man byter app eller flik
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) pausa();
+});
 
 function hoppa() {
   const k = katt;
@@ -230,14 +291,16 @@ function slumpTal(n) {
   return s - Math.floor(s);
 }
 
+// typ är "ond" (står still), "springer", "flyger" eller "sot" (söta djur)
 function laggDjur(typ, x, yta) {
   let bild = slumpa(INSTALLNINGAR.sotaDjur);
   if (typ === "ond") bild = slumpa(INSTALLNINGAR.ondaDjur);
-  if (typ === "orn") bild = INSTALLNINGAR.orn;
+  if (typ === "springer") bild = slumpa(INSTALLNINGAR.springandeDjur);
+  if (typ === "flyger") bild = slumpa(INSTALLNINGAR.flygandeDjur);
   djur.push({
     typ,
     x,
-    h: typ === "orn" ? 0.6 : yta.h,
+    h: typ === "flyger" ? 0.6 : yta.h,
     bild,
     fas: Math.random() * 6,
     flyr: false,
@@ -246,23 +309,45 @@ function laggDjur(typ, x, yta) {
   });
 }
 
-function fiskrad(x, h, langd) {
+// Väljer en godsak. Vanliga godsaker väljs oftare än ovanliga.
+function slumpaGodsak(minstPoang = 0) {
+  const lista = INSTALLNINGAR.godsaker.filter((g) => g.poang >= minstPoang);
+  let kvar = Math.random() * lista.reduce((summa, g) => summa + g.vanlighet, 0);
+  for (const g of lista) {
+    kvar -= g.vanlighet;
+    if (kvar < 0) return g;
+  }
+  return lista[0];
+}
+
+function laggGodsak(x, h, godsak) {
+  godis.push({ x, h, bild: godsak.bild, poang: godsak.poang, tagen: false });
+}
+
+function godisrad(x, h, langd) {
   const antal = Math.max(1, Math.floor(langd / 1.2));
-  for (let i = 0; i < antal; i++) fiskar.push({ x: x + i * 1.2, h: h + 0.7, tagen: false });
+  for (let i = 0; i < antal; i++) laggGodsak(x + i * 1.2, h + 0.7, slumpaGodsak());
+}
+
+// Ett onda djur som passar på gatan
+function ondPaGatan() {
+  const r = Math.random();
+  if (r < 0.3) return "flyger";
+  if (r < 0.55) return "springer";
+  return "ond";
 }
 
 function byggSektion() {
   const val = Math.random();
   const fara = katt.ond ? "sot" : "ond";
 
-  // En lugn bit gata, kanske med ett djur eller en örn
+  // En lugn bit gata, kanske med ett djur som springer eller flyger
   if (val < 0.3) {
     const langd = 8 + Math.random() * 6;
-    if (Math.random() < 0.6) {
-      const typ = !katt.ond && Math.random() < 0.4 ? "orn" : fara;
-      laggDjur(typ, nastaX + langd * 0.6, MARK);
+    if (Math.random() < 0.65) {
+      laggDjur(katt.ond ? "sot" : ondPaGatan(), nastaX + langd * 0.6, MARK);
     } else {
-      fiskrad(nastaX + 2, 0, langd - 4);
+      godisrad(nastaX + 2, 0, langd - 4);
     }
     nastaX += langd;
     return;
@@ -295,11 +380,18 @@ function byggSektion() {
 
   const mittTak = tak[Math.floor(tak.length / 2)];
   if (paTak) laggDjur(fara, mittTak.x + mittTak.w * 0.6, mittTak);
-  else for (const p of tak) fiskrad(p.x + 0.8, p.h, p.w - 1.6);
+  else for (const p of tak) godisrad(p.x + 0.8, p.h, p.w - 1.6);
 
   const forsta = tak[0];
-  if (paMark) laggDjur(fara, forsta.x + 3.5 + Math.random() * Math.max(0, slut - forsta.x - 6), MARK);
-  else fiskrad(forsta.x + 2, 0, slut - forsta.x - 4);
+  const markTyp = katt.ond ? "sot" : Math.random() < 0.35 ? "springer" : "ond";
+  if (paMark) laggDjur(markTyp, forsta.x + 3.5 + Math.random() * Math.max(0, slut - forsta.x - 6), MARK);
+  else godisrad(forsta.x + 2, 0, slut - forsta.x - 4);
+
+  // Ibland svävar en ovanlig godsak högt upp mellan två tak – gör en volt för att nå den!
+  if (tak.length >= 2 && Math.random() < 0.3) {
+    const glipa = tak[0].x + tak[0].w + 0.8;
+    laggGodsak(glipa, Math.max(tak[0].h, tak[1].h) + 3, slumpaGodsak(40));
+  }
 
   nastaX = slut + 1;
 }
@@ -313,7 +405,7 @@ function rensa() {
   const hoger = kameraX + bredd / u + 20;
   plattformar = plattformar.filter((p) => p.x + p.w > vanster);
   djur = djur.filter((a) => a.x > vanster && a.x < hoger && a.h < 40);
-  fiskar = fiskar.filter((f) => !f.tagen && f.x > vanster);
+  godis = godis.filter((g) => !g.tagen && g.x > vanster);
   texter = texter.filter((t) => t.kvar > 0);
 }
 
@@ -321,7 +413,7 @@ function aterstallVarld() {
   katt = nyKatt();
   plattformar = [];
   djur = [];
-  fiskar = [];
+  godis = [];
   texter = [];
   nastaX = 14; // Lite tom gata i början
   kameraX = katt.x - (bredd * 0.25) / u;
@@ -340,6 +432,7 @@ function startaSpel() {
   forvandlingVisas = 0;
   antalTrick = 0;
   antalSkramda = 0;
+  musikSteg = 0;
   aterstallVarld();
 }
 
@@ -394,10 +487,11 @@ function forvandla() {
   ondTidKvar = INSTALLNINGAR.ondTid;
   forvandlingVisas = 3;
   skakning = 0.6;
+  musikSteg = 0; // Byt till den läskiga trudilutten
   // Alla onda djur som finns kvar blir söta djur
   for (const a of djur) {
     if (a.flyr || a.typ === "sot") continue;
-    if (a.typ === "orn") a.h = 0;
+    if (a.typ === "flyger") a.h = 0;
     a.typ = "sot";
     a.bild = slumpa(INSTALLNINGAR.sotaDjur);
   }
@@ -478,6 +572,7 @@ function uppdateraKatt(dt) {
 }
 
 function uppdatera(dt) {
+  if (lage === "paus") return; // Allt står still under pausen
   tid += dt;
   for (const t of texter) {
     t.h += 1.5 * dt;
@@ -515,7 +610,8 @@ function uppdatera(dt) {
       a.h += a.vy * dt;
       continue;
     }
-    if (a.typ === "orn") a.x -= 2.5 * dt;
+    if (a.typ === "flyger") a.x -= 2.5 * dt;
+    if (a.typ === "springer") a.x -= 3 * dt;
     if (!traffar(a)) continue;
     if (a.typ === "sot") {
       if (katt.ond) skrammaDjur(a);
@@ -524,11 +620,19 @@ function uppdatera(dt) {
     }
   }
 
-  for (const f of fiskar) {
-    if (!f.tagen && Math.abs(f.x - (katt.x + 0.1)) < 0.6 && f.h > katt.h - 0.2 && f.h < katt.h + 1.1) {
-      f.tagen = true;
-      ge("", P.fisk, false, f.x, f.h + 0.5);
-      spelaTon(900, 1400, 0.08, "sine", 0.08);
+  for (const g of godis) {
+    if (!g.tagen && Math.abs(g.x - (katt.x + 0.1)) < 0.6 && g.h > katt.h - 0.2 && g.h < katt.h + 1.1) {
+      g.tagen = true;
+      const ovanlig = g.poang >= 40;
+      ge("", g.poang, false, g.x, g.h + 0.5);
+      if (ovanlig) {
+        texter[texter.length - 1].stor = true;
+        texter[texter.length - 1].farg = "#ffe14d";
+        spelaTon(700, 1400, 0.1, "square", 0.08);
+        setTimeout(() => spelaTon(1000, 2000, 0.15, "square", 0.08), 90);
+      } else {
+        spelaTon(900, 1400, 0.08, "sine", 0.08);
+      }
     }
   }
 
@@ -633,14 +737,24 @@ function ritaGata() {
 }
 
 function ritaSaker() {
-  for (const f of fiskar) {
-    const gung = Math.sin(tid * 4 + f.x) * u * 0.08;
-    ritaEmoji(INSTALLNINGAR.fisk, skarmX(f.x), skarmY(f.h) + gung, u * 0.6);
+  for (const g of godis) {
+    const gung = Math.sin(tid * 4 + g.x) * u * 0.08;
+    const ovanlig = g.poang >= 40;
+    if (ovanlig) {
+      // Ovanliga godsaker glittrar
+      ctx.fillStyle = `rgba(255, 240, 150, ${0.35 + Math.sin(tid * 6 + g.x) * 0.2})`;
+      ctx.beginPath();
+      ctx.arc(skarmX(g.x), skarmY(g.h) + gung, u * 0.5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ritaEmoji(g.bild, skarmX(g.x), skarmY(g.h) + gung, u * (ovanlig ? 0.7 : 0.6));
   }
   for (const a of djur) {
     const x = skarmX(a.x);
     if (x < -u * 2 || x > bredd + u * 2) continue;
-    const gung = a.typ === "orn" ? Math.sin(a.fas * 8) * u * 0.12 : Math.abs(Math.sin(a.fas * 3)) * -u * 0.12;
+    let gung = Math.abs(Math.sin(a.fas * 3)) * -u * 0.12;
+    if (a.typ === "flyger") gung = Math.sin(a.fas * 8) * u * 0.12;
+    if (a.typ === "springer") gung = Math.abs(Math.sin(a.fas * 12)) * -u * 0.15;
     const y = skarmY(a.h + 0.5) + gung;
     ritaEmoji(a.bild, x, y, u * 1.05);
     if (a.flyr) ritaEmoji("😱", x + u * 0.3, y - u * 0.8, u * 0.55);
@@ -947,8 +1061,8 @@ function ritaTexter() {
 }
 
 function ritaPanel() {
-  const topp = marginal.topp + u * 0.7;
-  const vanster = marginal.vanster + u * 0.5;
+  const topp = marginal.topp + Math.max(u * 0.7, 40);
+  const vanster = marginal.vanster + 150; // Till höger om hus- och pausknapparna
   const hoger = bredd - marginal.hoger - u * 0.5;
   const storlek = Math.max(20, u * 0.6);
 
@@ -1004,7 +1118,7 @@ function ritaSkarmar() {
     ctx.globalAlpha = 1;
   }
 
-  if (lage === "spelar") return;
+  if (lage === "spelar" || lage === "paus") return;
 
   ctx.fillStyle = "rgba(15, 10, 35, 0.45)";
   ctx.fillRect(0, 0, bredd, hojd);
@@ -1038,7 +1152,11 @@ function ritaSkarmar() {
 }
 
 function rita() {
-  hemKnapp.hidden = lage === "spelar"; // Hus-knappen syns bara när man inte spelar
+  // Pausknappen syns bara när man spelar. Under pausen finns allt i pausmenyn.
+  const visaPaus = lage === "spelar";
+  if (pausKnapp.hidden === visaPaus) pausKnapp.hidden = !visaPaus;
+  const visaHem = lage !== "paus";
+  if (hemKnapp.hidden === visaHem) hemKnapp.hidden = !visaHem;
 
   ctx.save();
   if (skakning > 0) ctx.translate((Math.random() - 0.5) * u * 0.3, (Math.random() - 0.5) * u * 0.3);
@@ -1050,7 +1168,7 @@ function rita() {
   ritaTexter();
   ctx.restore();
 
-  if (lage === "spelar") ritaPanel();
+  if (lage === "spelar" || lage === "paus") ritaPanel();
   ritaSkarmar();
 }
 
@@ -1064,6 +1182,7 @@ function loop(nu) {
   forraTiden = nu;
   uppdatera(dt);
   rita();
+  schemalaggMusik();
   requestAnimationFrame(loop);
 }
 requestAnimationFrame(loop);
@@ -1102,7 +1221,85 @@ function spelaTon(fran, till, langd, typ, volym) {
   }
 }
 
-// ---------- Rekord sparas i webbläsaren på just den här enheten ----------
+// ---------- Trudilutten (bakgrundsmusik) ----------
+//
+//  Varje siffra är en ton (60 = mellersta C, 62 = D, 64 = E ...).
+//  null betyder paus. Ändra siffrorna för att göra en egen melodi!
+
+const MUSIK = {
+  glad: {
+    steg: 0.15, // Sekunder per ton – lägre = snabbare
+    melodi: [72, null, 76, 79, 76, null, 72, 74, 76, null, 77, 76, 74, null, null, null,
+             72, null, 76, 79, 81, null, 79, 76, 77, 76, 74, 71, 72, null, null, null],
+    bas: [48, 55, 48, 55, 53, 60, 55, 50, 48, 55, 57, 52, 53, 55, 48, 48],
+  },
+  ond: {
+    steg: 0.19,
+    melodi: [69, null, 72, null, 71, null, 68, null, 69, null, 76, null, 75, null, null, null,
+             69, null, 72, 74, 75, null, 74, 72, 71, null, 68, null, 69, null, null, null],
+    bas: [45, 45, 52, 52, 44, 44, 52, 52, 45, 45, 48, 48, 44, 44, 45, 45],
+  },
+};
+
+let musikPa = INSTALLNINGAR.musik && lasInstallning("musik-parkour") !== "av";
+let musikSteg = 0;
+let musikNastaTid = 0;
+visaMusikKnapp();
+
+function spelaNot(not, start, langd, typ, volym) {
+  const ton = ljudmotor.createOscillator();
+  const styrka = ljudmotor.createGain();
+  ton.type = typ;
+  ton.frequency.value = 440 * Math.pow(2, (not - 69) / 12);
+  styrka.gain.setValueAtTime(0, start);
+  styrka.gain.linearRampToValueAtTime(volym, start + 0.01);
+  styrka.gain.exponentialRampToValueAtTime(0.001, start + langd);
+  ton.connect(styrka);
+  styrka.connect(ljudmotor.destination);
+  ton.start(start);
+  ton.stop(start + langd + 0.02);
+}
+
+// Lägger ut tonerna en liten bit i förväg så att musiken inte hackar
+function schemalaggMusik() {
+  if (!ljudmotor || !musikPa || lage !== "spelar") return;
+  const latt = katt.ond ? MUSIK.ond : MUSIK.glad;
+  const nu = ljudmotor.currentTime;
+  if (musikNastaTid < nu) musikNastaTid = nu + 0.05;
+  try {
+    while (musikNastaTid < nu + 0.25) {
+      const i = musikSteg % latt.melodi.length;
+      const not = latt.melodi[i];
+      if (not) spelaNot(not, musikNastaTid, latt.steg * 0.9, "square", 0.035);
+      if (i % 2 === 0) {
+        const bas = latt.bas[(i / 2) % latt.bas.length];
+        if (bas) spelaNot(bas, musikNastaTid, latt.steg * 1.8, "triangle", 0.07);
+      }
+      musikNastaTid += latt.steg;
+      musikSteg += 1;
+    }
+  } catch (e) {
+    musikPa = false; // Webbläsaren klarar inte ljudet – spela vidare utan musik
+  }
+}
+
+// ---------- Rekord och inställningar sparas i webbläsaren på just den här enheten ----------
+
+function lasInstallning(namn) {
+  try {
+    return localStorage.getItem(namn);
+  } catch (e) {
+    return null;
+  }
+}
+
+function sparaInstallning(namn, varde) {
+  try {
+    localStorage.setItem(namn, varde);
+  } catch (e) {
+    // Privat läge e.d. – inställningen sparas inte
+  }
+}
 
 function lasRekord() {
   try {

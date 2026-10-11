@@ -27,23 +27,116 @@ canvas {
   touch-action: none;
 }
 
-/* Hus-knappen som tar en tillbaka till menyn */
-.hem {
+/* Hus- och pausknappen uppe till vänster */
+.knappar {
   position: fixed;
   top: calc(env(safe-area-inset-top, 0px) + 12px);
   left: calc(env(safe-area-inset-left, 0px) + 12px);
+  display: flex;
+  gap: 10px;
+}
+
+.rund-knapp {
   width: 56px;
   height: 56px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 30px;
-  text-decoration: none;
+  padding: 0;
+  border: 0;
   border-radius: 50%;
+  font-size: 30px;
+  color: #ffffff;
+  text-decoration: none;
   background: rgba(0, 0, 0, 0.35);
+  cursor: pointer;
   touch-action: manipulation;
 }
 
-.hem[hidden] {
+.rund-knapp svg {
+  width: 26px;
+  height: 26px;
+  fill: currentColor;
+}
+
+/* Pausmenyn täcker hela skärmen */
+.pausmeny {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(10, 8, 30, 0.6);
+}
+
+.pausruta {
+  display: grid;
+  gap: 14px;
+  width: min(340px, 100%);
+  padding: 28px;
+  border-radius: 28px;
+  background: #ffffff;
+  color: #2b1d0e;
+  text-align: center;
+  font-family: ui-rounded, "SF Pro Rounded", system-ui, -apple-system, sans-serif;
+}
+
+.pausruta h2 {
+  margin: 0 0 4px;
+  font-size: 2rem;
+}
+
+.menyknapp {
+  display: block;
+  padding: 14px 20px;
+  border: 0;
+  border-radius: 18px;
+  font: inherit;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #2b1d0e;
+  text-decoration: none;
+  background: #ffd95e;
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.menyknapp.sekundar {
+  background: #e6ecf5;
+}
+
+.menyknapp:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.2);
+}
+
+.rund-knapp:focus-visible,
+.menyknapp:focus-visible {
+  outline: 4px solid #4a90e2;
+  outline-offset: 3px;
+}
+
+/* Låga skärmar, t.ex. telefon på bredden: knapparna i två kolumner */
+@media (max-height: 430px) {
+  .pausruta {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    width: min(480px, 100%);
+    padding: 18px;
+  }
+  .pausruta h2 {
+    grid-column: 1 / -1;
+    font-size: 1.6rem;
+  }
+  .menyknapp {
+    padding: 10px 14px;
+    font-size: 1.1rem;
+  }
+}
+
+.rund-knapp[hidden],
+.pausmeny[hidden] {
   display: none;
 }

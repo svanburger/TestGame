@@ -14,8 +14,10 @@ Varje spel är en egen mapp med en `index.html` och en `game.js`. Det mesta
 man vill ändra finns i `INSTALLNINGAR` högst upp i `game.js`. Spara filen
 och ladda om sidan, så syns ändringen.
 
-Spelen fungerar på iPad, telefon och dator. Hus-knappen 🏠 uppe till vänster
-tar en tillbaka till menyn.
+Spelen fungerar på iPad, telefon och dator. Uppe till vänster finns två
+knappar: 🏠 tar en tillbaka till menyn och ⏸ pausar. I pausmenyn kan man
+fortsätta, börja om eller gå till menyn. På datorn pausar man med P eller
+Esc. Spelen pausar också av sig själva om man byter app.
 
 ## Fånga stjärnorna ⭐
 
@@ -37,19 +39,44 @@ Katten springer av sig själv genom staden.
 - **⬇-knappen** gör en kullerbytta på gatan (bra för att komma under örnen
   🦅), eller hoppar ner från ett tak.
 - Varje bit av staden har två vägar: uppe på taken eller nere på gatan. På
-  den ena står ofta ett ont djur 🐺🐍🐊🐗. Tar man fel väg blir katten skrämd
-  och lite mer tilltufsad: lurvig päls, vikt öra, plåster och hängande svans.
+  den ena står ofta ett ont djur. Tar man fel väg blir katten skrämd och lite
+  mer tilltufsad: lurvig päls, vikt öra, plåster och hängande svans.
+- Det finns tre sorters skurkar:
+  - de som står still: 🐺🐍🐊🐗🐻🦂🕷️🦍
+  - de som springer emot katten: 🐀🐕🦡 (hoppa över dem!)
+  - de som flyger lågt: 🦅🦇🐝 (rulla under dem!)
 - Blir katten skrämd 3 gånger förvandlas den till en **ond katt** 😈. Då blir
   alla djur söta 🐱🐰🐥🐹🐶🦔, och nu är det katten som skrämmer dem. Det ger
   mest poäng. Efter 45 sekunder som ond katt är spelet slut.
 
-Poäng får man för hopp, volter, kullerbyttor, att ta sig upp på tak,
-långhopp mellan tak och fiskar 🐟. Gör man trick tätt efter varandra får
-man combo (upp till x5), som gör poängen flera gånger större.
+Poäng får man för hopp, volter, kullerbyttor, att ta sig upp på tak och
+långhopp mellan tak. Gör man trick tätt efter varandra får man combo (upp
+till x5), som gör poängen flera gånger större.
+
+På vägen ligger godsaker. Ju ovanligare, desto mer poäng:
+
+| Godsak | Poäng | Hur vanlig |
+|--------|-------|------------|
+| 🐟     | 5     | Överallt   |
+| 🥛     | 10    | Ganska ofta |
+| 🧀     | 20    | Ibland     |
+| 🍗     | 40    | Sällan     |
+| 👑     | 100   | Mycket sällan |
+| 💎     | 250   | Jättesällan |
+
+De ovanliga godsakerna glittrar. Ibland svävar en av dem högt upp mellan
+två tak, och då måste man göra en volt för att nå den.
+
+I bakgrunden spelar en trudilutt. När katten blir ond byter den till en
+läskigare melodi. Musiken kan stängas av i pausmenyn.
 
 Testa att ändra i `parkour/game.js`:
 
-- vilka djur som är onda och söta (`ondaDjur`, `sotaDjur`)
+- vilka djur som är onda och söta (`ondaDjur`, `springandeDjur`,
+  `flygandeDjur`, `sotaDjur`)
+- vilka godsaker som finns, hur mycket poäng de ger och hur vanliga de är
+  (`godsaker`)
+- melodin: längst ner i `game.js` finns `MUSIK`, där varje siffra är en ton
 - hur många gånger man kan bli skrämd (`skramdGanger`)
 - hur länge man är ond katt (`ondTid`)
 - hur fort katten springer (`fartStart`, `fartMax`)
