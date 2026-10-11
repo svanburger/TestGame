@@ -10,6 +10,7 @@ inget att installera. Startsidan är en meny där man väljer spel.
 | `stjarnor/`  | Spelet "Fånga stjärnorna".                                |
 | `parkour/`   | Spelet "Parkourkatten".                                   |
 | `pappa/`     | Spelet "Låt pappa vila".                                  |
+| `fis/`       | Spelet "Lagom tryck".                                     |
 
 Varje spel är en egen mapp med en `index.html` och en `game.js`. Det mesta
 man vill ändra finns i `INSTALLNINGAR` högst upp i `game.js`. Spara filen
@@ -142,6 +143,56 @@ Testa att ändra i `pappa/game.js`:
 - barnets och pappas färger (`barnFarg`, `harFarg`, `pappaFarg`)
 - vaggvisan: längst ner i `game.js` finns `MUSIK`
 
+## Lagom tryck 💨
+
+Pappa har ätit bönor. Han ska fisa så mycket som möjligt, men får inte
+trycka så hårt att han bajsar på sig.
+
+- **Håll fingret** på skärmen så krystar pappa. Ju längre man håller,
+  desto större fis och desto mer poäng. På datorn håller man inne
+  mellanslag.
+- **Släpp** så kommer fisen. Små fisar heter t.ex. *Pipet*, stora heter
+  *Trumpeten* eller *Tubakonserten*.
+- Någonstans finns en **gräns** där pappa bajsar på sig. Den flyttar sig
+  varje gång, så man får titta efter tecknen:
+  1. magen kurrar (*kurr*)
+  2. pappa svettas 💧
+  3. ögonen spärras upp, han håller sig för baken och det säger *blubb*
+- Släpper man precis innan gränsen blir det **bromsspår**: 1,5 gånger
+  poängen, men underbyxorna får en brun fläck. Två bromsspår och
+  underbyxorna är slut. Bajsar pappa på sig går ett helt par åt direkt.
+  Pappa har 3 par 🩲. När alla är slut är spelet slut.
+- **Ljudmätaren** högst upp: det blå är hur mycket det låter i rummet.
+  Medan man håller åker pappas ansikte med mätaren. Släpper man när
+  ansiktet är i det blå hör ingen fisen, och då blir det dubbla poäng.
+  Hör någon den blir de andra i rummet generade.
+- **Skyll på hunden** 🐕: hör någon fisen lyser knappen nere till höger i
+  3 sekunder. Trycker man då får hunden skulden och man får lite extra
+  poäng. Det går 2 gånger per bana. På datorn trycker man H.
+- Fyra banor, med olika ljud runt omkring:
+  - 🛗 **Hissen:** hissmusik, pling, någon nyser. Ibland tystnar musiken.
+  - 📚 **Biblioteket:** nästan helt tyst. Vänta på stämpeln, bebisen
+    eller boken som tappas.
+  - 🎂 **Mormor fyller 80:** alla sjunger, och då är det fritt fram. Mormor
+    hör ändå inte så bra.
+  - 💒 **Bröllopet:** orgeln är din bästa vän. Akta dig för *"Om någon har
+    något att invända…"*. Här finns ingen hund…
+- Efter alla fyra banorna börjar en ny dag. Då krystar pappa fortare och
+  gränsen kan komma tidigare.
+- När spelet är slut får man en titel, från *Pruttpraktikant* till
+  *Klimatbov*.
+
+Testa att ändra i `fis/game.js`:
+
+- hur många underbyxor pappa har (`underbyxor`)
+- hur fort trycket ökar och var gränsen hamnar (`krystFart`, `grans`)
+- hur tidigt varningarna kommer (`varningar`)
+- fisarnas namn och ljud (`fisar`)
+- tipsen, texterna när det går fel och titlarna (`tips`, `olyckor`, `titlar`)
+- banorna: varje bana har en `tidslinje` där man bestämmer hur mycket
+  det låter och när. Man kan också göra en helt egen bana.
+- musiken: längst ner i `game.js` finns `MUSIK`
+
 ## Lägga till ett nytt spel
 
 1. Kopiera en av spelmapparna, till exempel `stjarnor/`, och ge den ett nytt namn.
@@ -153,7 +204,7 @@ Testa att ändra i `pappa/game.js`:
 
 ### På datorn
 
-Dubbelklicka på `stjarnor/index.html`, `parkour/index.html` eller `pappa/index.html`.
+Dubbelklicka på `stjarnor/index.html`, `parkour/index.html`, `pappa/index.html` eller `fis/index.html`.
 
 Menyn länkar till mappar, och det fungerar bara när sidan ligger på en
 webbserver. Vill du testa menyn på datorn, kör `python3 -m http.server 8000`
