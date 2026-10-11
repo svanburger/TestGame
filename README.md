@@ -10,6 +10,7 @@ inget att installera. Startsidan är en meny där man väljer spel.
 | `stjarnor/`  | Spelet "Fånga stjärnorna".                                |
 | `parkour/`   | Spelet "Parkourkatten".                                   |
 | `pappa/`     | Spelet "Låt pappa vila".                                  |
+| `hund/`      | Spelet "Hundpromenaden".                                  |
 | `fis/`       | Spelet "Lagom tryck".                                     |
 
 Varje spel är en egen mapp med en `index.html` och en `game.js`. Det mesta
@@ -143,6 +144,53 @@ Testa att ändra i `pappa/game.js`:
 - barnets och pappas färger (`barnFarg`, `harFarg`, `pappaFarg`)
 - vaggvisan: längst ner i `game.js` finns `MUSIK`
 
+## Hundpromenaden 🐕
+
+Du är ute och går med hunden. Hunden vill nosa på allt, jaga allt och
+bajsa överallt. Ta dig hem med en glad hund och en ren trottoar!
+
+- **Dra med fingret** (eller använd piltangenterna/WASD) så går barnet dit.
+  Hunden sitter i kopplet och drar åt sitt eget håll. När den drar riktigt
+  hårt blir barnet släpat efter ("Wiiiii!").
+- **Tryck på hunden** (eller mellanslag) så säger barnet **"Fot!"** och
+  hunden kommer tillbaka. Sedan dröjer det en liten stund innan man kan säga
+  det igen (ringen runt hunden visar när). När hunden fått syn på något
+  visas ett ❗ – säger man "Fot!" precis då får man extra poäng.
+- **💩 Bajs:** Hunden bajsar ibland. Gå över bajset för att plocka upp det,
+  så går det åt en påse 🛍️. Påsar finns i påsautomaterna och ibland på
+  marken. Lämnar man bajset dyker en granne upp. Har man inga påsar kvar
+  kliver man i det. Ibland kommer ett glittrande **🌈 regnbågsbajs** som
+  ger 250 poäng.
+- **Hundmätaren** högst upp visar hur hunden mår, från 🥱 till 🤪. Hunden
+  får tråkigt om den bara går, så låt den nosa på träd och stolpar och hälsa
+  på andra hundar. Men jagar den katter, ekorrar och ankor blir den vild,
+  och når mätaren 🤪 smiter den. Då måste man springa ikapp. Smiter hunden
+  3 gånger är promenaden slut.
+- **Trassel:** Jagar hunden en ekorre runt ett träd trasslar kopplet sig.
+  Gå runt trädet åt det håll som pilen visar för att få loss det.
+- Promenaden går genom **🏘️ Kvarteret** (lyktstolpar med lappar, katter på
+  staketen och en sur gubbe med en perfekt gräsmatta som hunden gärna vill
+  bajsa på) och sedan **🌳 Parken** (dammen med ankor, ekorrar, korvkiosken,
+  hundrastgården och en pappa på en parkbänk) hela vägen hem.
+- På vägen möter man folk som säger saker, och ibland får man en
+  🏆 utmärkelse. När man kommer fram får man ⭐⭐⭐ för en glad hund och en
+  ren trottoar.
+
+Testa att ändra i `hund/game.js`:
+
+- vad folk säger (`pratbubblor`), lapparna på lyktstolparna (`lappar`) och
+  betygen när man kommer hem (`betyg`)
+- hur ofta hunden bajsar (`bajsTakt`) och hur ofta det blir regnbågsbajs
+  (`regnbage`)
+- hur många påsar man har (`pasarStart`, `pasarMax`)
+- hur långt kopplet är (`koppel`) och hur fort barnet och hunden går
+  (`fart`, `hundFart`, `jaktFart`)
+- hur fort hunden får tråkigt eller blir vild (`humor`)
+- vilka godsaker som finns och hur mycket poäng de ger (`godsaker`)
+- vilka hundar och katter man möter (`andraHundar`, `katter`)
+- hur långa promenaderna är (`banor`)
+- promenadvisslan: längst ner i `game.js` finns `MUSIK`
+
 ## Lagom tryck 💨
 
 Pappa har ätit bönor. Han ska fisa så mycket som möjligt, men får inte
@@ -204,7 +252,7 @@ Testa att ändra i `fis/game.js`:
 
 ### På datorn
 
-Dubbelklicka på `stjarnor/index.html`, `parkour/index.html`, `pappa/index.html` eller `fis/index.html`.
+Dubbelklicka på `index.html` i någon av spelmapparna, till exempel `stjarnor/index.html` eller `fis/index.html`.
 
 Menyn länkar till mappar, och det fungerar bara när sidan ligger på en
 webbserver. Vill du testa menyn på datorn, kör `python3 -m http.server 8000`
