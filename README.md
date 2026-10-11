@@ -108,8 +108,21 @@ springer runt i vardagsrummet och leker, men tyst, så att pappa får vila.
   upp (man kan bära 3) och lägg dem i leksakslådan. Varje leksak ger 25
   poäng, och 3 på en gång ger lite extra. Har man händerna fulla och kliver
   på en leksak säger det "Aj!" och låter.
-- **Ljudmätaren** högst upp visar hur mycket det låter. Blir den full blir
-  pappa störd och man förlorar ett ❤️. Efter 3 gånger är spelet slut.
+- **Ljudmätaren** högst upp visar hur mycket det låter. Pappas ansikte åker
+  med på mätaren (😌 → 🤨 → 😒), och når den 😡 längst till höger blir pappa
+  störd och man förlorar ett ❤️. Efter 3 gånger är spelet slut. Små pilar
+  visar om det blir mer ljud (›››) eller om pappa lugnar sig (‹‹‹), och
+  ikonen till vänster visar vad som låter just nu. När pappa börjar bli
+  störd syns samma ansikte i en tankebubbla ovanför honom.
+- **Oväntade händelser** dyker upp då och då (efter ett ❗) och då måste man
+  springa och fixa dem:
+  - ⚽ **Bollen rullar iväg** mot pappa. Fånga den innan den når fåtöljen,
+    annars blir det BONK!
+  - 🐕 **Hunden skäller.** Spring dit och klappa den.
+  - 🏎️ **Leksaksbilen startar** och kör runt och tutar. Det låter extra
+    mycket när den kör på mattan. Fånga den och lägg den i lådan.
+
+  Varje fixad händelse ger 10 poäng.
 - **Pappas matta** runt fåtöljen ska man inte gå på – då märker han dig
   direkt. Barnet går själv runt mattan om man trycker på andra sidan.
 - Är det tyst en stund **somnar pappa** 😴. Då blir alla poäng dubbla, men
@@ -125,6 +138,7 @@ Testa att ändra i `pappa/game.js`:
 - hur mycket poäng det blir för att städa (`poang`)
 - hur lätt pappa blir störd (`lugnStart`, `lugnMinst`, `blirTrott`)
 - hur många gånger man får störa pappa (`liv`)
+- hur ofta det händer något oväntat och hur mycket det låter (`handelser`)
 - barnets och pappas färger (`barnFarg`, `harFarg`, `pappaFarg`)
 - vaggvisan: längst ner i `game.js` finns `MUSIK`
 
