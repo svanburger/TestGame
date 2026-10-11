@@ -42,6 +42,16 @@ const INSTALLNINGAR = {
     rasa: 30,       // När klosstornet rasar
   },
 
+  // Oväntade händelser som man måste springa och fixa. "ljud" är per sekund.
+  handelser: {
+    forstaEfter: 12,   // Sekunder innan den första händelsen
+    mellanrum: 14,     // Ungefär så många sekunder mellan händelserna
+    boll: { ljud: 3, bonk: 35, fart: 1.1 },   // Bollen rullar mot pappa. Når den fåtöljen: BONK!
+    hund: { ljud: 18 },                       // Hunden skäller tills man klappar den
+    bil: { ljud: 12, paMattan: 18, fart: 1.8 }, // Leksaksbilen kör runt och tutar
+    rakna: 10,         // Poäng när man fixar en händelse
+  },
+
   liv: 3,              // Hur många gånger man får störa pappa
   lugnStart: 16,       // Hur snabbt pappa lugnar sig i början...
   lugnMinst: 6,        // ...och när han är som tröttast
@@ -105,6 +115,7 @@ let tidSedanSlut = 0;
 
 let buller = 0;      // 0–100. När det når 100 blir pappa störd.
 let bullerIn = 0;    // Hur mycket det låter just nu, per sekund
+let bullerBarn = 0;  // ...och hur mycket av det som barnet självt låter
 let livKvar = INSTALLNINGAR.liv;
 let stordTid = 0;    // Tid kvar som pappa säger till (då står allt still)
 let sover = false;
@@ -115,6 +126,11 @@ let pratTid = 0;
 let skakning = 0;
 let antalStadade = 0;
 let aktivLek = null; // Det barnet leker med just nu
+let handelse = null; // Något oväntat som händer, t.ex. att bollen rullar iväg
+let nastaHandelse = 0;
+let tips = "";
+let tipsTid = 0;
+let visatHalvTips = false;
 
 const matta = { x: 0, y: 0, r: 2 }; // Pappas matta. Fåtöljen står mitt på den.
 const lada = { x: 0, y: 0, pop: 0 }; // Leksakslådan
@@ -487,6 +503,10 @@ function startaSpel() {
   pratTid = 0;
   antalStadade = 0;
   aktivLek = null;
+  handelse = null;
+  nastaHandelse = INSTALLNINGAR.handelser.forstaEfter;
+  visaTips("Ljudmätaren: blir den full blir pappa störd!", 5);
+  visatHalvTips = false;
   musikSteg = 0;
   aterstall();
 }
@@ -689,6 +709,7 @@ function uppdateraLek(dt) {
   let ny = null;
   if (!barn.ror && !barn.harMal) {
     for (const l of lekar) {
+      if (handelse && handelse.lek === l) continue;
       if (Math.hypot(barn.x - l.standX, barn.y - l.standY) < 0.7 || Math.hypot(barn.x - l.x, barn.y - l.y) < 1.1) {
         ny = l;
         break;
@@ -785,12 +806,158 @@ function uppdateraBitar(l, dt) {
   l.bitar = l.bitar.filter((b) => b.kvar > 0);
 }
 
+// ---------- Oväntade händelser ----------
+
+const H = INSTALLNINGAR.handelser;
+
+function visaTips(text, langd) {
+  tips = text;
+  tipsTid = langd;
+}
+
+function startaHandelse() {
+  const bollLek = lekar.find((l) => l.typ === "boll");
+  const val = ["hund", "bil"];
+  if (bollLek) val.push("boll");
+  const typ = slumpa(val);
+  let rubrik = "";
+  if (typ === "boll") {
+    // Bollen rullar iväg mot pappa
+    const dx = matta.x - bollLek.x;
+    const dy = matta.y - bollLek.y;
+    const d = Math.hypot(dx, dy) || 1;
+    handelse = { typ, bild: bollLek.bild, lek: bollLek, x: bollLek.x, y: bollLek.y, vx: (dx / d) * H.boll.fart, vy: (dy / d) * H.boll.fart, vinkel: 0 };
+    rubrik = "Bollen rullar iväg!";
+    visaTips("Fånga bollen innan den når pappa!", 3);
+  } else if (typ === "hund") {
+    handelse = { typ, bild: INSTALLNINGAR.hund, x: hund.x, y: hund.y, skall: 0 };
+    hund.vila = 999; // Står still och skäller
+    rubrik = "Hunden skäller!";
+    visaTips("Spring och klappa hunden!", 3);
+  } else {
+    // Leksaksbilen startar av sig själv och kör runt
+    const [x, y] = slumpPunkt();
+    const v = Math.random() * Math.PI * 2;
+    handelse = { typ, bild: "🏎️", x, y, vx: Math.cos(v) * H.bil.fart, vy: Math.sin(v) * H.bil.fart, tut: 0, tid: 0 };
+    rubrik = "Leksaksbilen startade!";
+    visaTips("Fånga leksaksbilen!", 3);
+  }
+  texter.push({ x: handelse.x, y: handelse.y - 1.5, text: rubrik, kvar: 2, stor: true, farg: "#ffe14d" });
+  spelaTon(880, 1320, 0.12, "square", 0.07);
+  setTimeout(() => spelaTon(1320, 880, 0.12, "square", 0.07), 140);
+}
+
+function avslutaHandelse(text) {
+  if (text) {
+    ge(text, H.rakna, handelse.x, handelse.y - 1.3, "#b6f09c");
+    spelaTon(600, 1000, 0.12, "triangle", 0.1);
+  }
+  if (handelse.typ === "hund") hund.vila = 1.5;
+  handelse = null;
+  nastaHandelse = Math.max(6, H.mellanrum - speltid * 0.02) * (0.7 + Math.random() * 0.6);
+}
+
+function handelseLjud() {
+  if (!handelse) return 0;
+  if (handelse.typ === "boll") return H.boll.ljud;
+  if (handelse.typ === "hund") return H.hund.ljud;
+  const paMatta = Math.hypot(handelse.x - matta.x, handelse.y - matta.y) < matta.r;
+  return H.bil.ljud + (paMatta ? H.bil.paMattan : 0);
+}
+
+function uppdateraHandelse(dt) {
+  if (!handelse) {
+    nastaHandelse -= dt;
+    if (nastaHandelse <= 0) startaHandelse();
+    return;
+  }
+  const h = handelse;
+  const nara = (r) => Math.hypot(barn.x - h.x, barn.y - h.y) < r;
+
+  if (h.typ === "boll") {
+    h.x += h.vx * dt;
+    h.y += h.vy * dt;
+    h.vinkel += dt * 7 * (h.vx >= 0 ? 1 : -1);
+    if (nara(0.65)) {
+      avslutaHandelse("Fångad!");
+    } else if (Math.hypot(h.x - matta.x, h.y - matta.y) < STOL) {
+      // BONK! Bollen studsade på fåtöljen
+      larm(H.boll.bonk);
+      skakning = 0.25;
+      texter.push({ x: h.x, y: h.y - 1.3, text: "BONK!", kvar: 1.2, stor: true, farg: "#ff8a7a" });
+      if (pratTid <= 0) prata("Aj! Vem kastade bollen?", 1.6);
+      spelaTon(200, 90, 0.3, "sine", 0.3);
+      avslutaHandelse("");
+    }
+  } else if (h.typ === "hund") {
+    h.x = hund.x;
+    h.y = hund.y;
+    h.skall -= dt;
+    if (h.skall <= 0) {
+      h.skall = 0.7;
+      texter.push({ x: h.x + (Math.random() - 0.5) * 0.6, y: h.y - 1.2, text: "VOFF!", kvar: 0.8, stor: true });
+      spelaTon(300, 180, 0.12, "square", 0.12);
+      setTimeout(() => spelaTon(280, 160, 0.12, "square", 0.1), 150);
+    }
+    if (nara(0.9)) avslutaHandelse("Klapp klapp!");
+  } else {
+    h.tid += dt;
+    // Bilen svänger lite hit och dit
+    const v = Math.atan2(h.vy, h.vx) + Math.sin(h.tid * 1.3) * dt * 1.5;
+    h.vx = Math.cos(v) * H.bil.fart;
+    h.vy = Math.sin(v) * H.bil.fart;
+    h.x += h.vx * dt;
+    h.y += h.vy * dt;
+    // Studsar mot väggarna och fåtöljen
+    if (h.x < 0.5 || h.x > golv.b - 0.5) {
+      h.vx *= -1;
+      h.x = begr(h.x, 0.5, golv.b - 0.5);
+    }
+    if (h.y < 0.7 || h.y > golv.h - 0.3) {
+      h.vy *= -1;
+      h.y = begr(h.y, 0.7, golv.h - 0.3);
+    }
+    const dx = h.x - matta.x;
+    const dy = h.y - matta.y;
+    const d = Math.hypot(dx, dy) || 1;
+    if (d < STOL) {
+      const nx = dx / d;
+      const ny = dy / d;
+      const mot = h.vx * nx + h.vy * ny;
+      if (mot < 0) {
+        h.vx -= 2 * mot * nx;
+        h.vy -= 2 * mot * ny;
+      }
+      h.x = matta.x + nx * STOL;
+      h.y = matta.y + ny * STOL;
+    }
+    h.tut -= dt;
+    if (h.tut <= 0) {
+      h.tut = 1.2 + Math.random();
+      texter.push({ x: h.x, y: h.y - 1, text: "TUT!", kvar: 0.8, stor: true });
+      spelaTon(520, 520, 0.1, "square", 0.07);
+      setTimeout(() => spelaTon(520, 520, 0.1, "square", 0.07), 160);
+    }
+    if (nara(0.65)) {
+      // Fångad! Bilen blir en vanlig leksak som man kan lägga i lådan
+      if (barn.bar.length < INSTALLNINGAR.barMax) barn.bar.push(h.bild);
+      else laggLeksak(h.x, h.y, h.bild);
+      avslutaHandelse("Avstängd!");
+    }
+  }
+}
+
 function uppdateraBuller(dt) {
   bullerIn = 0;
   if (barn.ror) bullerIn += B.springa;
   if (paMattan()) bullerIn += B.matta;
   if (aktivLek) bullerIn += aktivLek.ljud;
-  if (sover) bullerIn *= 1.5; // När pappa sover vaknar han lätt
+  bullerBarn = bullerIn;
+  bullerIn += handelseLjud();
+  if (sover) {
+    bullerIn *= 1.5; // När pappa sover vaknar han lätt
+    bullerBarn *= 1.5;
+  }
   buller = Math.max(0, buller + (bullerIn - lugnNu()) * dt);
 
   if (sover) {
@@ -816,6 +983,10 @@ function uppdateraBuller(dt) {
     spelaTon(200, 170, 0.35, "triangle", 0.15);
   }
   if (buller < 55) varnad = false;
+  if (!visatHalvTips && buller >= 50) {
+    visatHalvTips = true;
+    visaTips("Shh! Var tystare innan pappa blir arg!", 3.5);
+  }
 
   if (buller >= 100) bliStord();
 }
@@ -835,6 +1006,7 @@ function uppdatera(dt) {
   }
   if (skakning > 0) skakning -= dt;
   if (pratTid > 0) pratTid -= dt;
+  if (tipsTid > 0) tipsTid -= dt;
   if (lada.pop > 0) lada.pop -= dt * 2;
   uppdateraHund(dt);
   if (lage === "slut") tidSedanSlut += dt;
@@ -853,6 +1025,7 @@ function uppdatera(dt) {
   speltid += dt;
   uppdateraBarn(dt);
   uppdateraLeksaker();
+  uppdateraHandelse(dt);
   uppdateraLek(dt);
   uppdateraBuller(dt);
   if (stordTid > 0) return;
@@ -1084,7 +1257,7 @@ function ritaLek(l) {
     ctx.restore();
     ritaEmoji(l.bild, x + s * 0.5, y + s * 0.25, s * 0.4);
   } else if (l.typ === "boll") {
-    if (!aktiv) {
+    if (!aktiv && !(handelse && handelse.lek === l)) {
       skugga(x, y + s * 0.05, s * 0.25, s * 0.08);
       ritaEmoji(l.bild, x, y - s * 0.2, s * 0.5);
     }
@@ -1149,7 +1322,9 @@ function ritaHund() {
   const x = X(h.x);
   const y = Y(h.y);
   const gar = h.vila <= 0;
-  const studs = gar ? Math.abs(Math.sin(h.fas * 10)) * u * 0.06 : 0;
+  const skaller = handelse && handelse.typ === "hund";
+  let studs = gar ? Math.abs(Math.sin(h.fas * 10)) * u * 0.06 : 0;
+  if (skaller) studs = Math.abs(Math.sin(tid * 18)) * u * 0.08;
   skugga(x, y, u * 0.38, u * 0.1);
   // Emojin tittar åt vänster, så den speglas när hunden går åt höger
   ritaEmoji(INSTALLNINGAR.hund, x, y - u * 0.35 - studs, u * 0.8, "center", h.riktning > 0);
@@ -1157,6 +1332,29 @@ function ritaHund() {
     // Hunden bär nästa leksak i munnen
     ritaEmoji(h.bar, x + h.riktning * u * 0.4, y - u * 0.3 - studs, u * 0.35);
   }
+}
+
+function ritaHandelse() {
+  const h = handelse;
+  const x = X(h.x);
+  const y = Y(h.y);
+  if (h.typ === "boll") {
+    skugga(x, y, u * 0.25, u * 0.08);
+    ctx.save();
+    ctx.translate(x, y - u * 0.25);
+    ctx.rotate(h.vinkel);
+    ritaEmoji(h.bild, 0, 0, u * 0.5);
+    ctx.restore();
+  } else if (h.typ === "bil") {
+    skugga(x, y, u * 0.35, u * 0.1);
+    const skak = Math.sin(tid * 30) * u * 0.02;
+    // Emojin tittar åt vänster, så den speglas när bilen kör åt höger
+    ritaEmoji(h.bild, x, y - u * 0.3 + skak, u * 0.8, "center", h.vx > 0);
+  }
+  if (h.typ !== "boll" && lage === "spelar" && stordTid <= 0) ritaVagor(x, y - u * 0.35, 0.8);
+  // Ett hoppande utropstecken visar var man ska springa
+  const hopp = Math.abs(Math.sin(tid * 6)) * u * 0.18;
+  ritaEmoji("❗", x, y - u * (h.typ === "hund" ? 1.35 : 1.05) - hopp, u * 0.5);
 }
 
 function ritaBarnet() {
@@ -1291,20 +1489,22 @@ function ritaBarnet() {
   // Leksakerna man bär
   b.bar.forEach((bild, i) => ritaEmoji(bild, x, y - (1.3 + i * 0.32) * s - studs * s, s * 0.42));
 
-  // Ljudvågor när det låter mer än pappa hinner lugna sig
-  const styrka = Math.min(1, (bullerIn - lugnNu()) / 25);
-  if (lage === "spelar" && stordTid <= 0 && styrka > 0) {
-    ctx.strokeStyle = `rgba(255, 255, 255, ${0.35 + 0.55 * styrka})`;
-    ctx.lineWidth = Math.max(2, s * 0.05);
-    ctx.lineCap = "round";
-    const vy = y - s * 0.8 + sittY;
-    for (let i = 0; i < 2; i++) {
-      const rr = (0.38 + i * 0.16 + ((tid * 0.5) % 0.16)) * s;
-      for (const sida of [0, Math.PI]) {
-        ctx.beginPath();
-        ctx.arc(x, vy, rr, sida - 0.5, sida + 0.5);
-        ctx.stroke();
-      }
+  // Ljudvågor när barnet låter mer än pappa hinner lugna sig
+  if (lage === "spelar" && stordTid <= 0) ritaVagor(x, y - s * 0.8 + sittY, Math.min(1, (bullerBarn - lugnNu()) / 25));
+}
+
+// Ljudvågor på båda sidor om det som låter
+function ritaVagor(x, y, styrka) {
+  if (styrka <= 0) return;
+  ctx.strokeStyle = `rgba(255, 255, 255, ${0.35 + 0.55 * styrka})`;
+  ctx.lineWidth = Math.max(2, u * 0.05);
+  ctx.lineCap = "round";
+  for (let i = 0; i < 2; i++) {
+    const rr = (0.38 + i * 0.16 + ((tid * 0.5) % 0.16)) * u;
+    for (const sida of [0, Math.PI]) {
+      ctx.beginPath();
+      ctx.arc(x, y, rr, sida - 0.5, sida + 0.5);
+      ctx.stroke();
     }
   }
 }
@@ -1534,8 +1734,25 @@ function ritaPappan() {
     ctx.globalAlpha = 1;
   } else if (arg) {
     ritaEmoji("💢", cx + s * 0.4, cy - s * 1.35, s * 0.45);
-  } else if (tittar && Math.floor(tid * 4) % 2 === 0) {
-    ritaText("!", cx + s * 0.45, cy - s * 1.45, s * 0.55, "#ffdd33");
+  } else if (buller >= 35 && pratTid <= 0) {
+    // Tankebubbla med samma ansikte som på ljudmätaren
+    const bx = cx + s * 0.75;
+    const by = cy - s * 1.6;
+    const vicka = buller >= 70 ? Math.sin(tid * 14) * s * 0.03 : 0;
+    ctx.fillStyle = "#ffffff";
+    ctx.strokeStyle = "rgba(43, 29, 14, 0.6)";
+    ctx.lineWidth = 2;
+    for (const [px, py, r] of [[-0.42, 0.42, 0.07], [-0.28, 0.25, 0.1]]) {
+      ctx.beginPath();
+      ctx.arc(cx + s * 0.75 + px * s, cy - s * 1.6 + py * s, r * s, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+    }
+    ctx.beginPath();
+    ctx.arc(bx + vicka, by, s * 0.32, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+    ritaEmoji(pappaAnsikte(), bx + vicka, by, s * 0.42);
   }
 }
 
@@ -1593,36 +1810,117 @@ function ritaPanel() {
     ritaEmoji(i < livKvar ? "❤️" : "💔", hoger - i * storlek * 1.2, rad1, storlek * 0.85, "right");
   }
 
-  // Ljudmätaren: blir den full blir pappa störd
+  // Ljudmätaren. Pappas ansikte åker med mätaren. Når den 😡 längst till
+  // höger blir pappa störd.
   const rad2 = marginal.topp + 86;
   const ikon = storlek * 0.9;
-  const w = Math.min(bredd - marginal.vanster - marginal.hoger - 32 - ikon * 3, 520);
+  const w = Math.min(bredd - marginal.vanster - marginal.hoger - 32 - ikon * 3.8, 520);
   const x0 = bredd / 2 - w / 2;
-  const mh = Math.max(12, storlek * 0.45);
-  ctx.fillStyle = "rgba(90, 55, 25, 0.3)";
-  rundRekt(ctx, x0, rad2 - mh / 2, w, mh, mh / 2);
-  ctx.fill();
+  const mh = Math.max(14, storlek * 0.5);
+  const y0 = rad2 - mh / 2;
   const andel = begr(buller / 100, 0, 1);
-  if (andel > 0.01) {
-    let farg = "#5cc46a";
-    if (andel > 0.5) farg = "#ffc93c";
-    if (andel > 0.75) farg = "#ff5a4f";
-    if (andel > 0.85 && Math.floor(tid * 6) % 2 === 0) farg = "#ff9a8f";
-    ctx.fillStyle = farg;
-    rundRekt(ctx, x0, rad2 - mh / 2, Math.max(mh, w * andel), mh, mh / 2);
-    ctx.fill();
+  const spets = x0 + w * andel;
+
+  // Svaga färger i bakgrunden visar att det blir farligare åt höger
+  const zon = ctx.createLinearGradient(x0, 0, x0 + w, 0);
+  zon.addColorStop(0, "rgba(92, 196, 106, 0.35)");
+  zon.addColorStop(0.55, "rgba(255, 201, 60, 0.4)");
+  zon.addColorStop(1, "rgba(255, 90, 79, 0.5)");
+  ctx.fillStyle = zon;
+  rundRekt(ctx, x0, y0, w, mh, mh / 2);
+  ctx.fill();
+
+  ctx.save();
+  rundRekt(ctx, x0, y0, w, mh, mh / 2);
+  ctx.clip();
+  const fyll = ctx.createLinearGradient(x0, 0, x0 + w, 0);
+  fyll.addColorStop(0, "#5cc46a");
+  fyll.addColorStop(0.55, "#ffc93c");
+  fyll.addColorStop(1, "#ff5a4f");
+  ctx.fillStyle = fyll;
+  ctx.fillRect(x0, y0, w * andel, mh);
+
+  // Pilar som visar om det blir mer ljud (›››) eller om pappa lugnar sig (‹‹‹)
+  const okar = lage === "spelar" && stordTid <= 0 && bullerIn > lugnNu();
+  const minskar = !okar && lage === "spelar" && stordTid <= 0 && andel > 0.02;
+  if (okar || minskar) {
+    const slut = spets - ikon * 0.45;
+    const langd = mh * 2.6;
+    ctx.beginPath();
+    ctx.rect(x0, y0, Math.max(0, slut - x0), mh);
+    ctx.clip();
+    ctx.lineWidth = Math.max(2, mh * 0.16);
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    for (let i = 0; i < 3; i++) {
+      const fas = (tid * 1.6 + i / 3) % 1;
+      const px = okar ? slut - langd + fas * langd : slut - fas * langd;
+      const v = mh * 0.28 * (okar ? 1 : -1);
+      ctx.strokeStyle = `rgba(255, 255, 255, ${Math.sin(fas * Math.PI) * 0.95})`;
+      ctx.beginPath();
+      ctx.moveTo(px - v, y0 + mh * 0.22);
+      ctx.lineTo(px, rad2);
+      ctx.lineTo(px - v, y0 + mh * 0.78);
+      ctx.stroke();
+    }
   }
+  ctx.restore();
+
   ctx.strokeStyle = "#ffffff";
   ctx.lineWidth = 2.5;
-  rundRekt(ctx, x0, rad2 - mh / 2, w, mh, mh / 2);
+  rundRekt(ctx, x0, y0, w, mh, mh / 2);
   ctx.stroke();
-  ritaEmoji(ljudIkon(bullerIn), x0 - ikon * 0.75, rad2, ikon);
-  let ansikte = "😌";
-  if (sover) ansikte = "😴";
-  else if (stordTid > 0) ansikte = "😠";
-  else if (buller >= 70) ansikte = "😒";
-  else if (buller >= 35) ansikte = "🤨";
-  ritaEmoji(ansikte, x0 + w + ikon * 0.75, rad2, ikon);
+
+  // Till vänster: det som låter just nu. Till höger: arg pappa.
+  const kalla = bullerKalla();
+  const puls = kalla !== "🤫" && okar ? 1 + Math.abs(Math.sin(tid * 8)) * 0.15 : 1;
+  ctx.save();
+  ctx.translate(x0 - ikon * 1.0, rad2);
+  ctx.scale(puls, puls);
+  ritaEmoji(kalla, 0, 0, ikon);
+  ctx.restore();
+  ritaEmoji("😡", x0 + w + ikon * 0.85, rad2, ikon);
+  const fx = begr(spets, x0 + ikon * 0.45, x0 + w - ikon * 0.45);
+  ritaEmoji(pappaAnsikte(), fx, rad2, ikon * 1.1);
+
+  // Tips under mätaren
+  if (tipsTid > 0 && lage === "spelar") {
+    const ts = Math.max(14, storlek * 0.55);
+    ctx.font = `bold ${ts}px ${TYPSNITT}`;
+    const tw = Math.min(ctx.measureText(tips).width + ts * 1.4, bredd - 16);
+    const ty = Math.max(golv.y + ts * 0.9, rad2 + mh / 2 + ts * 1.1);
+    ctx.globalAlpha = Math.min(1, tipsTid * 2);
+    ctx.fillStyle = "rgba(40, 25, 15, 0.75)";
+    rundRekt(ctx, bredd / 2 - tw / 2, ty - ts * 0.85, tw, ts * 1.7, ts * 0.85);
+    ctx.fill();
+    ctx.fillStyle = "#ffffff";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(tips, bredd / 2, ty, tw - ts);
+    ctx.globalAlpha = 1;
+  }
+}
+
+// Pappas humör, samma ansikte som syns på mätaren och ovanför pappa
+function pappaAnsikte() {
+  if (sover) return "😴";
+  if (stordTid > 0 || buller >= 100) return "😠";
+  if (buller >= 70) return "😒";
+  if (buller >= 35) return "🤨";
+  return "😌";
+}
+
+// Det som låter mest just nu
+function bullerKalla() {
+  if (lage !== "spelar" || stordTid > 0) return "🤫";
+  const kallor = [
+    [paMattan() ? B.matta : 0, "🛋️"],
+    [barn.ror ? B.springa : 0, "👟"],
+    [aktivLek ? aktivLek.ljud : 0, aktivLek ? aktivLek.bild : ""],
+    [handelse ? handelseLjud() : 0, handelse ? handelse.bild : ""],
+  ];
+  kallor.sort((a, b) => b[0] - a[0]);
+  return kallor[0][0] > 0 ? kallor[0][1] : "🤫";
 }
 
 function ritaSkarmar() {
@@ -1691,6 +1989,7 @@ function rita() {
   for (const l of lekar) lista.push([l.y, () => ritaLek(l)]);
   for (const t of leksaker) lista.push([t.y, () => ritaLeksak(t)]);
   lista.push([hund.y, ritaHund]);
+  if (handelse) lista.push([handelse.y, ritaHandelse]);
   lista.push([barn.y + 0.01, ritaBarnet]);
   lista.push([matta.y + 0.5, ritaPappan]);
   lista.sort((a, b) => a[0] - b[0]);
