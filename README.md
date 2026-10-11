@@ -1,42 +1,77 @@
-# Vårt spel 🎮
+# Våra spel 🎮
 
-Ett litet spel som körs helt i webbläsaren. Inga servrar, inga databaser och
-inget att installera: bara tre filer.
+Små spel som körs helt i webbläsaren. Inga servrar, inga databaser och
+inget att installera. Startsidan är en meny där man väljer spel.
 
-| Fil          | Vad den gör                                         |
-|--------------|-----------------------------------------------------|
-| `index.html` | Sidan som öppnas. Laddar in de andra två filerna.   |
-| `style.css`  | Gör att spelet fyller skärmen och inte scrollar.    |
-| `game.js`    | Själva spelet. **Här ändrar man det mesta.**        |
+| Fil / mapp   | Vad det är                                                |
+|--------------|-----------------------------------------------------------|
+| `index.html` | Menyn man ser först.                                      |
+| `spel.css`   | Gemensam stil för spelen (fyller skärmen, hus-knappen).   |
+| `stjarnor/`  | Spelet "Fånga stjärnorna".                                |
+| `parkour/`   | Spelet "Parkourkatten".                                   |
 
-Spelet fungerar på iPad, telefon och dator. Med fingret styr man figuren,
-på datorn med musen eller piltangenterna.
+Varje spel är en egen mapp med en `index.html` och en `game.js`. Det mesta
+man vill ändra finns i `INSTALLNINGAR` högst upp i `game.js`. Spara filen
+och ladda om sidan, så syns ändringen.
 
-## Startspelet: "Fånga stjärnorna"
+Spelen fungerar på iPad, telefon och dator. Hus-knappen 🏠 uppe till vänster
+tar en tillbaka till menyn.
 
-Det som finns nu är ett startspel att leka med tills ni vet vad ni vill göra:
-fånga ⭐ 🍓 🍪, undvik 💣. Man har tre liv och rekordet sparas på enheten.
+## Fånga stjärnorna ⭐
 
-Allt ritas med emojis, så man behöver inga bildfiler. Ljuden skapas direkt i
-webbläsaren, så det behövs inga ljudfiler heller.
+Styr katten med fingret (eller musen/piltangenterna), fånga ⭐ 🍓 🍪 och
+undvik 💣. Man har tre liv.
 
-### Saker barnen kan ändra direkt
-
-Längst upp i `game.js` finns `INSTALLNINGAR`. Testa att:
+Testa att ändra i `stjarnor/game.js`:
 
 - byta `spelare: "🐱"` mot `"🐶"`, `"🦄"` eller `"🚀"`
 - lägga till fler saker i `braSaker`, till exempel `"🍕"` eller `"💎"`
 - byta `"💣"` mot `"👻"` eller `"🦈"`
 - göra spelet lättare eller svårare med `chansForDalig`, `liv` och `falltidStart`
-- byta färgerna på himlen (`himmelUppe`, `himmelNere`)
 
-Spara filen och ladda om sidan, så syns ändringen.
+## Parkourkatten 🐱
+
+Katten springer av sig själv genom staden.
+
+- **Tryck** för att hoppa. **Tryck igen i luften** för att göra en volt.
+- **⬇-knappen** gör en kullerbytta på gatan (bra för att komma under örnen
+  🦅), eller hoppar ner från ett tak.
+- Varje bit av staden har två vägar: uppe på taken eller nere på gatan. På
+  den ena står ofta ett ont djur 🐺🐍🐊🐗. Tar man fel väg blir katten skrämd
+  och lite mer tilltufsad: lurvig päls, vikt öra, plåster och hängande svans.
+- Blir katten skrämd 3 gånger förvandlas den till en **ond katt** 😈. Då blir
+  alla djur söta 🐱🐰🐥🐹🐶🦔, och nu är det katten som skrämmer dem. Det ger
+  mest poäng. Efter 45 sekunder som ond katt är spelet slut.
+
+Poäng får man för hopp, volter, kullerbyttor, att ta sig upp på tak,
+långhopp mellan tak och fiskar 🐟. Gör man trick tätt efter varandra får
+man combo (upp till x5), som gör poängen flera gånger större.
+
+Testa att ändra i `parkour/game.js`:
+
+- vilka djur som är onda och söta (`ondaDjur`, `sotaDjur`)
+- hur många gånger man kan bli skrämd (`skramdGanger`)
+- hur länge man är ond katt (`ondTid`)
+- hur fort katten springer (`fartStart`, `fartMax`)
+- hur mycket poäng varje trick ger (`poang`)
+- kattens färg (`kattFarg`, `ondKattFarg`)
+
+## Lägga till ett nytt spel
+
+1. Kopiera en av spelmapparna, till exempel `stjarnor/`, och ge den ett nytt namn.
+2. Ändra `<title>` i den nya mappens `index.html`.
+3. Lägg till ett nytt kort i menyn i `index.html` i roten (kopiera ett av
+   `<a class="kort ...">` och ändra länk, emoji och text).
 
 ## Köra spelet
 
 ### På datorn
 
-Dubbelklicka på `index.html`. Det räcker.
+Dubbelklicka på `stjarnor/index.html` eller `parkour/index.html`.
+
+Menyn länkar till mappar, och det fungerar bara när sidan ligger på en
+webbserver. Vill du testa menyn på datorn, kör `python3 -m http.server 8000`
+i projektmappen och öppna `http://localhost:8000`.
 
 ### På iPad eller telefon (lägg upp det på nätet gratis)
 
@@ -50,9 +85,6 @@ Det enklaste sättet är GitHub Pages:
    `https://svanburger.github.io/TestGame/`.
 
 Varje gång ni pushar till `main` uppdateras spelet där automatiskt.
-
-> Om repot är privat kan GitHub Pages kräva ett betalkonto. Annars kan man
-> göra repot publikt, eller dra in mappen på [Netlify Drop](https://app.netlify.com/drop).
 
 **Tips:** Öppna sidan i Safari på iPaden, tryck på dela-knappen och välj
 **Lägg till på hemskärmen**. Då får spelet en egen ikon och startar i
@@ -75,8 +107,8 @@ startar först när man tryckt på skärmen en gång (det kräver Safari).
 
 ## Idéer på vad spelet kan bli
 
-Ramen räcker för många sorters spel. Byt bara ut reglerna i `uppdatera()`
-och det som ritas i `rita()`:
+Båda spelen är byggda på samma sätt: reglerna finns i `uppdatera()` och
+det som syns på skärmen ritas i `rita()`. Några idéer på fler spel:
 
 - **Hoppspel:** figuren hoppar över hinder när man trycker
 - **Labyrint:** dra figuren genom en labyrint utan att nudda väggarna

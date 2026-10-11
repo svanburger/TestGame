@@ -2,19 +2,119 @@
 <html lang="sv">
 <head>
   <meta charset="utf-8">
-  <!-- Gör att spelet fyller skärmen på iPad/telefon och inte går att zooma -->
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
-  <!-- Gör att spelet startar i helskärm när man lagt det på hemskärmen -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Vårt spel">
+  <meta name="apple-mobile-web-app-title" content="Våra spel">
   <meta name="theme-color" content="#1b2a4a">
-  <title>Vårt spel</title>
-  <link rel="stylesheet" href="style.css">
+  <title>Våra spel</title>
+  <style>
+    /* Menyn: en rubrik och ett stort kort per spel. Lägg till fler kort längre ner. */
+    :root {
+      --himmel: #1b2a4a;
+      --himmel-nere: #3d5f94;
+      --text: #ffffff;
+      --text-svag: #d5def0;
+      --typsnitt: ui-rounded, "SF Pro Rounded", system-ui, -apple-system, "Segoe UI", sans-serif;
+    }
+
+    html {
+      min-height: 100%;
+      background: linear-gradient(var(--himmel), var(--himmel-nere)) fixed;
+      color: var(--text);
+      font-family: var(--typsnitt);
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      margin: 0;
+      padding-block: calc(env(safe-area-inset-top, 0px) + 32px) calc(env(safe-area-inset-bottom, 0px) + 32px);
+      padding-inline: max(20px, env(safe-area-inset-left, 0px)) max(20px, env(safe-area-inset-right, 0px));
+    }
+
+    main {
+      max-width: 900px;
+      margin: 0 auto;
+      display: grid;
+      gap: 28px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2.2rem, 7vw, 3.6rem);
+      text-align: center;
+      text-wrap: balance;
+    }
+
+    .spel {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 20px;
+    }
+
+    .kort {
+      display: grid;
+      justify-items: center;
+      gap: 8px;
+      padding: 28px 20px;
+      border-radius: 28px;
+      color: #2b1d0e;
+      text-decoration: none;
+      box-shadow: 0 8px 0 rgba(0, 0, 0, 0.25);
+      transition: transform 0.1s;
+      touch-action: manipulation;
+    }
+
+    .kort:active {
+      transform: translateY(4px);
+      box-shadow: 0 4px 0 rgba(0, 0, 0, 0.25);
+    }
+
+    .kort:focus-visible {
+      outline: 4px solid #ffffff;
+      outline-offset: 4px;
+    }
+
+    .kort-stjarnor { background: #ffd95e; }
+    .kort-parkour { background: #ffab6b; }
+
+    .ikon {
+      font-size: 5rem;
+      line-height: 1;
+    }
+
+    .namn {
+      font-size: 1.7rem;
+      font-weight: 800;
+    }
+
+    .beskrivning {
+      font-size: 1.05rem;
+      text-align: center;
+      max-width: 30ch;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .kort { transition: none; }
+    }
+  </style>
 </head>
 <body>
-  <canvas id="spel"></canvas>
-  <script src="game.js"></script>
+  <main>
+    <h1>Våra spel</h1>
+    <nav class="spel">
+      <a class="kort kort-stjarnor" href="stjarnor/">
+        <span class="ikon">⭐</span>
+        <span class="namn">Fånga stjärnorna</span>
+        <span class="beskrivning">Fånga det som faller och undvik bomberna.</span>
+      </a>
+      <a class="kort kort-parkour" href="parkour/">
+        <span class="ikon">🐱</span>
+        <span class="namn">Parkourkatten</span>
+        <span class="beskrivning">Hoppa, gör volter och akta dig för de onda djuren.</span>
+      </a>
+    </nav>
+  </main>
 </body>
 </html>
