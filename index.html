@@ -76,9 +76,10 @@
     }
 
     /* Bågen ritas fram, sedan hoppar bajskorven in och landar på bokstäverna */
+    /* 600 är lite längre än bågen, så att den är helt dold innan den ritas fram */
     .bage {
-      stroke-dasharray: 1;
-      stroke-dashoffset: 1;
+      stroke-dasharray: 600;
+      stroke-dashoffset: 600;
       animation: rita-bage 1.4s ease-in-out 0.2s forwards;
     }
 
@@ -208,7 +209,7 @@
         </defs>
 
         <!-- Den gyllene bågen över loggan -->
-        <path class="bage" pathLength="1" d="M 60 168 Q 300 -95 540 168" fill="none" stroke="url(#guld)" stroke-width="5" stroke-linecap="round"/>
+        <path class="bage" d="M 60 168 Q 300 -95 540 168" fill="none" stroke="url(#guld)" stroke-width="5" stroke-linecap="round"/>
         <path class="glitter" d="M 540 150 l 5 13 l 13 5 l -13 5 l -5 13 l -5 -13 l -13 -5 l 13 -5 z" fill="#fff6c2"/>
         <path class="glitter" style="animation-delay: 2.3s" d="M 120 92 l 3 8 l 8 3 l -8 3 l -3 8 l -3 -8 l -8 -3 l 8 -3 z" fill="#fff6c2"/>
         <path class="glitter" style="animation-delay: 2.9s" d="M 470 72 l 3 8 l 8 3 l -8 3 l -3 8 l -3 -8 l -8 -3 l 8 -3 z" fill="#fff6c2"/>
@@ -233,11 +234,11 @@
           <path d="M 291 114 q 9 9 18 0" fill="none" stroke="#4a2a12" stroke-width="3" stroke-linecap="round"/>
         </g>
 
-        <!-- Namnet -->
-        <text class="logga-text" x="300" y="200" text-anchor="middle" font-size="78" letter-spacing="2" fill="url(#guld)" stroke="#4a2a12" stroke-width="10">BAJSKORV</text>
-        <line x1="128" y1="236" x2="208" y2="236" stroke="url(#guld)" stroke-width="3" stroke-linecap="round"/>
-        <line x1="392" y1="236" x2="472" y2="236" stroke="url(#guld)" stroke-width="3" stroke-linecap="round"/>
-        <text class="logga-text" x="306" y="245" text-anchor="middle" font-size="26" letter-spacing="12" fill="#ffffff">STUDIOS</text>
+        <!-- Namnet. textLength gör att texten blir lika bred i alla webbläsare och typsnitt. -->
+        <text class="logga-text" x="300" y="200" text-anchor="middle" font-size="78" textLength="420" lengthAdjust="spacingAndGlyphs" fill="url(#guld)" stroke="#4a2a12" stroke-width="10">BAJSKORV</text>
+        <line x1="128" y1="236" x2="200" y2="236" stroke="#ffd23f" stroke-width="3" stroke-linecap="round"/>
+        <line x1="400" y1="236" x2="472" y2="236" stroke="#ffd23f" stroke-width="3" stroke-linecap="round"/>
+        <text class="logga-text" x="300" y="245" text-anchor="middle" font-size="24" textLength="170" lengthAdjust="spacing" fill="#ffffff">STUDIOS</text>
       </svg>
       <p class="presenterar">presenterar</p>
     </header>
