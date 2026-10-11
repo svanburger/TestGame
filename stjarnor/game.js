@@ -28,6 +28,7 @@ const INSTALLNINGAR = {
 
 const canvas = document.getElementById("spel");
 const ctx = canvas.getContext("2d");
+const hemKnapp = document.getElementById("hem");
 const TYPSNITT = 'system-ui, -apple-system, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif';
 
 let bredd = 0;
@@ -211,6 +212,8 @@ function ritaText(text, x, y, storlek, farg) {
 }
 
 function rita() {
+  hemKnapp.hidden = lage === "spelar"; // Hus-knappen syns bara när man inte spelar
+
   const himmel = ctx.createLinearGradient(0, 0, 0, hojd);
   himmel.addColorStop(0, INSTALLNINGAR.himmelUppe);
   himmel.addColorStop(1, INSTALLNINGAR.himmelNere);

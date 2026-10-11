@@ -26,3 +26,24 @@ canvas {
   display: block;
   touch-action: none;
 }
+
+/* Hus-knappen som tar en tillbaka till menyn */
+.hem {
+  position: fixed;
+  top: calc(env(safe-area-inset-top, 0px) + 12px);
+  left: calc(env(safe-area-inset-left, 0px) + 12px);
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
+  text-decoration: none;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.35);
+  touch-action: manipulation;
+}
+
+.hem[hidden] {
+  display: none;
+}
