@@ -77,6 +77,13 @@ let u = 0;       // Pixlar per enhet
 let markY = 0;   // Var gatan är på skärmen, i pixlar
 let marginal = { topp: 0, vanster: 0, hoger: 0, botten: 0 };
 
+// Hur skarpt spelet ritas. 2 är skarpast på iPad. Hinner enheten inte med
+// sänks det av sig självt, så att spelet flyter i stället för att hacka.
+let pixelSkala = Math.min(window.devicePixelRatio || 1, 2);
+let bildtider = [];
+const emojiMinne = new Map(); // Färdigritade emojis
+let himmelNyckel = "";        // Vilken himmel som visas just nu
+
 let lage = "start"; // "start", "spelar" eller "slut"
 let poang = 0;
 let rekord = lasRekord();
@@ -134,16 +141,30 @@ function anpassaStorlek() {
     hoger: lasMarginal("--sakert-hoger"),
     botten: lasMarginal("--sakert-botten"),
   };
-  const dpr = window.devicePixelRatio || 1;
   bredd = window.innerWidth;
   hojd = window.innerHeight;
-  canvas.width = Math.round(bredd * dpr);
-  canvas.height = Math.round(hojd * dpr);
+  canvas.width = Math.round(bredd * pixelSkala);
+  canvas.height = Math.round(hojd * pixelSkala);
   canvas.style.width = bredd + "px";
   canvas.style.height = hojd + "px";
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.setTransform(pixelSkala, 0, 0, pixelSkala, 0, 0);
   u = Math.min(hojd / 11, bredd / 14);
   markY = hojd - marginal.botten - u * 1.2;
+  emojiMinne.clear();
+  himmelNyckel = "";
+}
+
+// Mäter hur snabbt bilderna ritas. Går det för långsamt ritar vi med färre pixlar.
+function kollaFart(dt) {
+  if (lage !== "spelar" || pixelSkala <= 1) return;
+  bildtider.push(dt);
+  if (bildtider.length < 60) return;
+  const snitt = bildtider.reduce((summa, t) => summa + t, 0) / bildtider.length;
+  bildtider = [];
+  if (snitt > 0.024) {
+    pixelSkala = Math.max(1, pixelSkala - 0.5);
+    anpassaStorlek();
+  }
 }
 
 window.addEventListener("resize", anpassaStorlek);
@@ -654,12 +675,34 @@ function ritaText(text, x, y, storlek, farg = "#ffffff", just = "center") {
   ctx.fillText(text, x, y);
 }
 
+// Att rita emojis som text är långsamt på iPad. Därför ritas varje emoji
+// en gång på en egen liten bild (emojiMinne), som sedan återanvänds.
+
+function emojiBild(bild, storlek) {
+  const nyckel = bild + "|" + Math.round(storlek * pixelSkala);
+  let liten = emojiMinne.get(nyckel);
+  if (!liten) {
+    const sida = Math.ceil(storlek * 1.5 * pixelSkala);
+    liten = document.createElement("canvas");
+    liten.width = sida;
+    liten.height = sida;
+    const c = liten.getContext("2d");
+    c.font = `${storlek * pixelSkala}px ${TYPSNITT}`;
+    c.textAlign = "center";
+    c.textBaseline = "middle";
+    c.fillText(bild, sida / 2, sida / 2);
+    emojiMinne.set(nyckel, liten);
+  }
+  return liten;
+}
+
 function ritaEmoji(bild, x, y, storlek, just = "center") {
-  ctx.font = `${storlek}px ${TYPSNITT}`;
-  ctx.textAlign = just;
-  ctx.textBaseline = "middle";
-  ctx.fillStyle = "#000000";
-  ctx.fillText(bild, x, y);
+  const liten = emojiBild(bild, storlek);
+  const sida = liten.width / pixelSkala;
+  let vanster = x - sida / 2;
+  if (just === "left") vanster = x - (sida - storlek) / 2;
+  if (just === "right") vanster = x - storlek - (sida - storlek) / 2;
+  ctx.drawImage(liten, vanster, y - sida / 2, sida, sida);
 }
 
 function blanda(a, b, t) {
@@ -669,13 +712,22 @@ function blanda(a, b, t) {
   return `rgb(${kanal(16)}, ${kanal(8)}, ${kanal(0)})`;
 }
 
+// Himlen är en bakgrund bakom spelet (CSS) i stället för att målas om varje
+// bild. Det sparar mycket arbete, och är det som gör att det inte hackar.
+
+function uppdateraHimmel() {
+  const ond = katt.ond;
+  const nere = Math.round((markY / hojd) * 100) + "%";
+  const nyckel = ond + nere;
+  if (nyckel === himmelNyckel) return;
+  himmelNyckel = nyckel;
+  canvas.style.background = ond
+    ? `linear-gradient(#2a1240, #c2415b ${nere})`
+    : `linear-gradient(#7ec8f0, #fde2b8 ${nere})`;
+}
+
 function ritaHimmel() {
   const ond = katt.ond;
-  const himmel = ctx.createLinearGradient(0, 0, 0, markY);
-  himmel.addColorStop(0, ond ? "#2a1240" : "#7ec8f0");
-  himmel.addColorStop(1, ond ? "#c2415b" : "#fde2b8");
-  ctx.fillStyle = himmel;
-  ctx.fillRect(-u, -u, bredd + 2 * u, hojd + 2 * u);
 
   // Sol eller blodröd måne
   ctx.fillStyle = ond ? "#ff5a5a" : "#fff2a8";
@@ -1158,6 +1210,8 @@ function rita() {
   const visaHem = lage !== "paus";
   if (hemKnapp.hidden === visaHem) hemKnapp.hidden = !visaHem;
 
+  uppdateraHimmel();
+  ctx.clearRect(0, 0, bredd, hojd);
   ctx.save();
   if (skakning > 0) ctx.translate((Math.random() - 0.5) * u * 0.3, (Math.random() - 0.5) * u * 0.3);
   ritaHimmel();
@@ -1180,6 +1234,7 @@ let forraTiden = performance.now();
 function loop(nu) {
   const dt = Math.min(0.05, (nu - forraTiden) / 1000);
   forraTiden = nu;
+  kollaFart(dt);
   uppdatera(dt);
   rita();
   schemalaggMusik();
