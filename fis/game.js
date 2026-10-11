@@ -2227,7 +2227,13 @@ function startaLjud() {
     if (!ljudmotor) {
       ljudmotor = new (window.AudioContext || window.webkitAudioContext)();
       huvudvolym = ljudmotor.createGain();
-      huvudvolym.connect(ljudmotor.destination);
+      // Dämpar ljudet om många ljud låter samtidigt, så att det inte knastrar
+      const dampare = ljudmotor.createDynamicsCompressor();
+      dampare.threshold.value = -10;
+      dampare.knee.value = 6;
+      dampare.ratio.value = 8;
+      huvudvolym.connect(dampare);
+      dampare.connect(ljudmotor.destination);
       brusBuffer = skapaBrus();
       appladBuffer = skapaApplad();
       // Sorlet när många pratar på kalaset
@@ -2395,6 +2401,7 @@ function fisLjud(storlek, sort, dold) {
       fladder = 14 + Math.random() * 6;
       djup = 0.6;
       pulsera = true;
+      vol *= 0.55; // Hackandet lägger till nästan lika mycket till, annars knastrar det
     } else if (sort === "mullr") {
       f = 55;
       slutF = 40;
