@@ -29,6 +29,8 @@ const INSTALLNINGAR = {
 const canvas = document.getElementById("spel");
 const ctx = canvas.getContext("2d");
 const hemKnapp = document.getElementById("hem");
+const pausKnapp = document.getElementById("paus");
+const pausmeny = document.getElementById("pausmeny");
 const TYPSNITT = 'system-ui, -apple-system, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif';
 
 let bredd = 0;
@@ -98,7 +100,11 @@ canvas.addEventListener("pointermove", (e) => {
 const nedtryckt = {};
 window.addEventListener("keydown", (e) => {
   nedtryckt[e.key] = true;
-  if ((e.key === " " || e.key === "Enter") && lage !== "spelar") {
+  if (e.key === "p" || e.key === "Escape") {
+    if (lage === "spelar") pausa();
+    else if (lage === "paus") fortsatt();
+  }
+  if ((e.key === " " || e.key === "Enter") && (lage === "start" || lage === "slut")) {
     startaLjud();
     startaSpel();
   }
@@ -107,6 +113,33 @@ window.addEventListener("keyup", (e) => { nedtryckt[e.key] = false; });
 
 // Stoppa nyp-zoom i Safari på iPad/iPhone
 document.addEventListener("gesturestart", (e) => e.preventDefault());
+
+// ---------- Paus ----------
+
+function pausa() {
+  if (lage !== "spelar") return;
+  lage = "paus";
+  pausmeny.hidden = false;
+  document.getElementById("fortsatt").focus();
+}
+
+function fortsatt() {
+  if (lage !== "paus") return;
+  lage = "spelar";
+  pausmeny.hidden = true;
+}
+
+pausKnapp.addEventListener("click", pausa);
+document.getElementById("fortsatt").addEventListener("click", fortsatt);
+document.getElementById("borjaOm").addEventListener("click", () => {
+  pausmeny.hidden = true;
+  startaSpel();
+});
+
+// Pausa av sig själv om man byter app eller flik
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) pausa();
+});
 
 // ---------- Spelets regler ----------
 
@@ -139,6 +172,8 @@ function skapaSak() {
 }
 
 function uppdatera(dt) {
+  if (lage === "paus") return; // Allt står still under pausen
+
   // Effekter flyger upp och tonar bort i alla lägen
   for (const ef of effekter) {
     ef.y -= enhet * 2 * dt;
@@ -203,16 +238,18 @@ function slutaSpel() {
 
 // ---------- Rita ----------
 
-function ritaText(text, x, y, storlek, farg) {
+function ritaText(text, x, y, storlek, farg, just = "center") {
   ctx.font = `bold ${storlek}px ${TYPSNITT}`;
-  ctx.textAlign = "center";
+  ctx.textAlign = just;
   ctx.textBaseline = "middle";
   ctx.fillStyle = farg || INSTALLNINGAR.textfarg;
   ctx.fillText(text, x, y);
 }
 
 function rita() {
-  hemKnapp.hidden = lage === "spelar"; // Hus-knappen syns bara när man inte spelar
+  // Pausknappen syns bara när man spelar. Under pausen finns allt i pausmenyn.
+  pausKnapp.hidden = lage !== "spelar";
+  hemKnapp.hidden = lage === "paus";
 
   const himmel = ctx.createLinearGradient(0, 0, 0, hojd);
   himmel.addColorStop(0, INSTALLNINGAR.himmelUppe);
@@ -236,9 +273,9 @@ function rita() {
   }
   ctx.globalAlpha = 1;
 
-  const topp = marginal.topp + enhet * 0.8;
-  if (lage === "spelar") {
-    ritaText("⭐ " + poang, marginal.vanster + enhet * 1.5, topp, enhet * 0.6);
+  const topp = marginal.topp + Math.max(enhet * 0.8, 40);
+  if (lage === "spelar" || lage === "paus") {
+    ritaText("⭐ " + poang, marginal.vanster + 150, topp, enhet * 0.6, undefined, "left"); // Till höger om knapparna
     ritaText("❤️".repeat(Math.max(0, liv)), bredd - marginal.hoger - enhet * 1.8, topp, enhet * 0.5);
   }
 
