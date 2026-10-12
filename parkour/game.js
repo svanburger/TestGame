@@ -1192,14 +1192,14 @@ function ritaSkarmar() {
     rad(t("Akta dig för de onda djuren!", "Watch out for the evil animals!"), ts * 0.7, "#ffb3b3");
     y += ts * 0.4;
     rad(t("Tryck för att börja", "Tap to start"), ts * 0.85, "#ffffff");
-    if (rekord > 0) rad(t("Rekord: ", "Best: ") + rekord, ts * 0.6, "#d5def0");
+    if (rekord > 0) rad(t("Rekord: ", "High score: ") + rekord, ts * 0.6, "#d5def0");
     if (hojd > bredd) rad(t("Tips: vänd skärmen på bredden", "Tip: turn the screen sideways"), ts * 0.55, "#d5def0");
   }
 
   if (lage === "slut") {
     rad(t("Slut!", "Game over!"), ts * 1.4, "#ffd27a");
     rad(poang + t(" poäng", poang === 1 ? " point" : " points"), ts * 1.0);
-    rad(poang > 0 && poang === rekord ? t("🏆 Nytt rekord! 🏆", "🏆 New record! 🏆") : t("Rekord: ", "Best: ") + rekord, ts * 0.7);
+    rad(poang > 0 && poang === rekord ? t("🏆 Nytt rekord! 🏆", "🏆 New high score! 🏆") : t("Rekord: ", "High score: ") + rekord, ts * 0.7);
     rad(t(`${antalTrick} trick · ${antalSkramda} skrämda djur`, `${antalTrick} ${antalTrick === 1 ? "trick" : "tricks"} · ${antalSkramda} scared ${antalSkramda === 1 ? "animal" : "animals"}`), ts * 0.6, "#d5def0");
     y += ts * 0.4;
     if (tidSedanSlut > 1) rad(t("Tryck för att spela igen", "Tap to play again"), ts * 0.8);

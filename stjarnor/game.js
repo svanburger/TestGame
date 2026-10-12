@@ -286,7 +286,7 @@ function rita() {
     ritaText(t("Fånga stjärnorna!", "Catch the stars!"), bredd / 2, hojd * 0.35, enhet * 0.9);
     ritaText(t("Undvik 💣", "Dodge the 💣"), bredd / 2, hojd * 0.35 + enhet * 1.2, enhet * 0.55);
     ritaText(t("Tryck för att börja", "Tap to start"), bredd / 2, hojd * 0.55, enhet * 0.55);
-    if (rekord > 0) ritaText(t("Rekord: ", "Best: ") + rekord, bredd / 2, hojd * 0.55 + enhet, enhet * 0.45);
+    if (rekord > 0) ritaText(t("Rekord: ", "High score: ") + rekord, bredd / 2, hojd * 0.55 + enhet, enhet * 0.45);
   }
 
   if (lage === "slut") {
@@ -295,7 +295,7 @@ function rita() {
     ritaText(t("Slut!", "Game over!"), bredd / 2, hojd * 0.3, enhet * 1.2);
     ritaText(t("Du fick " + poang + " poäng", "You got " + poang + (poang === 1 ? " point" : " points")), bredd / 2, hojd * 0.3 + enhet * 1.4, enhet * 0.6);
     const nyttRekord = poang > 0 && poang === rekord;
-    ritaText(nyttRekord ? t("🏆 Nytt rekord! 🏆", "🏆 New record! 🏆") : t("Rekord: ", "Best: ") + rekord, bredd / 2, hojd * 0.3 + enhet * 2.3, enhet * 0.5);
+    ritaText(nyttRekord ? t("🏆 Nytt rekord! 🏆", "🏆 New high score! 🏆") : t("Rekord: ", "High score: ") + rekord, bredd / 2, hojd * 0.3 + enhet * 2.3, enhet * 0.5);
     if (tidSedanSlut > 0.8) ritaText(t("Tryck för att spela igen", "Tap to play again"), bredd / 2, hojd * 0.65, enhet * 0.55);
   }
 }
