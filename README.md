@@ -7,6 +7,7 @@ inget att installera. Startsidan är en meny där man väljer spel.
 |--------------|-----------------------------------------------------------|
 | `index.html` | Menyn man ser först, med Bajskorv Studios-loggan.         |
 | `spel.css`   | Gemensam stil för spelen (fyller skärmen, hus-knappen).   |
+| `sprak.js`   | Väljer svenska eller engelska och översätter texterna.    |
 | `stjarnor/`  | Spelet "Fånga stjärnorna".                                |
 | `parkour/`   | Spelet "Parkourkatten".                                   |
 | `pappa/`     | Spelet "Låt pappa vila".                                  |
@@ -21,6 +22,31 @@ Spelen fungerar på iPad, telefon och dator. Uppe till vänster finns två
 knappar: 🏠 tar en tillbaka till menyn och ⏸ pausar. I pausmenyn kan man
 fortsätta, börja om eller gå till menyn. På datorn pausar man med P eller
 Esc. Spelen pausar också av sig själva om man byter app.
+
+## Svenska och engelska 🇸🇪🇬🇧
+
+Alla spel finns på svenska och engelska. Språket väljs av sig självt:
+
+- **Svenska** om webbläsaren är inställd på svenska, eller om enheten står
+  på svensk tid (då är man nog i Sverige).
+- **Engelska** annars.
+
+Längst ner i menyn finns en knapp för att byta språk. Valet sparas på
+enheten och gäller i alla spel.
+
+När man skriver en ny text i ett spel skriver man den på båda språken:
+
+```js
+ritaText(t("Tryck för att börja", "Tap to start"), x, y, storlek);
+```
+
+I HTML skriver man svenskan som vanligt och engelskan i `data-en`:
+
+```html
+<button data-en="Continue">Fortsätt</button>
+```
+
+Varje spel laddar `sprak.js` före sin `game.js`.
 
 ## Fånga stjärnorna ⭐
 
@@ -246,7 +272,8 @@ Testa att ändra i `fis/game.js`:
 1. Kopiera en av spelmapparna, till exempel `stjarnor/`, och ge den ett nytt namn.
 2. Ändra `<title>` i den nya mappens `index.html`.
 3. Lägg till ett nytt kort i menyn i `index.html` i roten (kopiera ett av
-   `<a class="kort ...">` och ändra länk, emoji och text).
+   `<a class="kort ...">` och ändra länk, emoji och text, även den
+   engelska i `data-en`).
 
 ## Köra spelet
 

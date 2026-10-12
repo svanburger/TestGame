@@ -11,6 +11,9 @@
 //
 //  Plocka godsaker på vägen. Ju ovanligare godsak, desto mer poäng.
 //
+//  Texter skrivs som t("svenska", "English"), så finns spelet på båda
+//  språken. Se sprak.js.
+//
 //  Börja med att ändra i INSTALLNINGAR här nedanför.
 // =====================================================================
 
@@ -238,7 +241,7 @@ function fortsatt() {
 }
 
 function visaMusikKnapp() {
-  musikKnapp.textContent = musikPa ? "♪ Musik: på" : "♪ Musik: av";
+  musikKnapp.textContent = musikPa ? t("♪ Musik: på", "♪ Music: on") : t("♪ Musik: av", "♪ Music: off");
 }
 
 pausKnapp.addEventListener("click", pausa);
@@ -275,7 +278,7 @@ function hoppa() {
     k.hoppAnvanda = 2;
     k.voltar = true;
     k.vinkel = 0;
-    ge("Volt!", P.volt, true);
+    ge(t("Volt!", "Flip!"), P.volt, true);
     spelaTon(500, 1300, 0.25, "triangle", 0.12);
   }
 }
@@ -292,7 +295,7 @@ function ner() {
   } else if (k.yta) {
     if (k.rull <= 0) {
       k.rull = 0.6;
-      ge("Kullerbytta!", P.kullerbytta, true);
+      ge(t("Kullerbytta!", "Roll!"), P.kullerbytta, true);
       spelaTon(300, 150, 0.2, "triangle", 0.1);
     }
   } else {
@@ -479,8 +482,8 @@ function landa(yta) {
   k.voltar = false;
   k.vinkel = 0;
   if (!yta.mark && fran !== yta) {
-    if (fran.mark || fran.h < yta.h - 0.1) ge("Upp på taket!", P.uppPaTak, true);
-    else ge("Långhopp!", P.langhopp, true);
+    if (fran.mark || fran.h < yta.h - 0.1) ge(t("Upp på taket!", "Up on the roof!"), P.uppPaTak, true);
+    else ge(t("Långhopp!", "Long jump!"), P.langhopp, true);
   }
 }
 
@@ -495,7 +498,7 @@ function blirSkramd(a) {
   k.rull = 0;
   combo = 0;
   comboTid = 0;
-  texter.push({ x: a.x, h: a.h + 1.5, text: "BU!", kvar: 1, stor: true, farg: "#ff6b6b" });
+  texter.push({ x: a.x, h: a.h + 1.5, text: t("BU!", "BOO!"), kvar: 1, stor: true, farg: "#ff6b6b" });
   spelaTon(500, 120, 0.4, "sawtooth", 0.12);
   if (navigator.vibrate) navigator.vibrate(200);
   skakning = 0.3;
@@ -525,7 +528,7 @@ function skrammaDjur(a) {
   a.vx = fart + 3;
   a.vy = 6;
   antalSkramda += 1;
-  ge("BUU!", P.skramma, true, a.x, a.h + 1.6);
+  ge(t("BUU!", "BOOO!"), P.skramma, true, a.x, a.h + 1.6);
   spelaTon(160, 60, 0.35, "sawtooth", 0.15);
   skakning = 0.15;
 }
@@ -1158,15 +1161,15 @@ function ritaPanel() {
 }
 
 function ritaSkarmar() {
-  const t = Math.min(bredd, hojd) / 14; // Textstorlek
+  const ts = Math.min(bredd, hojd) / 14; // Textstorlek
   const mitt = bredd / 2;
 
   if (forvandlingVisas > 0 && lage === "spelar") {
     ctx.globalAlpha = Math.min(1, forvandlingVisas);
     ctx.fillStyle = "rgba(120, 20, 160, 0.35)";
     ctx.fillRect(0, 0, bredd, hojd);
-    ritaText("Du blev en ond katt! 😈", mitt, hojd * 0.32, t * 1.1, "#ffffff");
-    ritaText("Skräm de söta djuren!", mitt, hojd * 0.32 + t * 1.4, t * 0.8, "#ffd6ff");
+    ritaText(t("Du blev en ond katt! 😈", "You turned into an evil cat! 😈"), mitt, hojd * 0.32, ts * 1.1, "#ffffff");
+    ritaText(t("Skräm de söta djuren!", "Scare the cute animals!"), mitt, hojd * 0.32 + ts * 1.4, ts * 0.8, "#ffd6ff");
     ctx.globalAlpha = 1;
   }
 
@@ -1174,32 +1177,32 @@ function ritaSkarmar() {
 
   ctx.fillStyle = "rgba(15, 10, 35, 0.45)";
   ctx.fillRect(0, 0, bredd, hojd);
-  let y = marginal.topp + Math.max(t * 1.6, hojd * 0.14);
+  let y = marginal.topp + Math.max(ts * 1.6, hojd * 0.14);
   const rad = (text, storlek, farg) => {
     ritaText(text, mitt, y, storlek, farg);
     y += storlek * 1.45;
   };
 
   if (lage === "start") {
-    rad("Parkourkatten", t * 1.4, "#ffd27a");
-    y += t * 0.3;
-    rad("Tryck = hoppa", t * 0.7);
-    rad("Tryck igen i luften = volt", t * 0.7);
-    rad("⬇ = kullerbytta / hoppa ner", t * 0.7);
-    rad("Akta dig för de onda djuren!", t * 0.7, "#ffb3b3");
-    y += t * 0.4;
-    rad("Tryck för att börja", t * 0.85, "#ffffff");
-    if (rekord > 0) rad("Rekord: " + rekord, t * 0.6, "#d5def0");
-    if (hojd > bredd) rad("Tips: vänd skärmen på bredden", t * 0.55, "#d5def0");
+    rad(t("Parkourkatten", "Parkour Cat"), ts * 1.4, "#ffd27a");
+    y += ts * 0.3;
+    rad(t("Tryck = hoppa", "Tap = jump"), ts * 0.7);
+    rad(t("Tryck igen i luften = volt", "Tap again in the air = flip"), ts * 0.7);
+    rad(t("⬇ = kullerbytta / hoppa ner", "⬇ = roll / jump down"), ts * 0.7);
+    rad(t("Akta dig för de onda djuren!", "Watch out for the evil animals!"), ts * 0.7, "#ffb3b3");
+    y += ts * 0.4;
+    rad(t("Tryck för att börja", "Tap to start"), ts * 0.85, "#ffffff");
+    if (rekord > 0) rad(t("Rekord: ", "Best: ") + rekord, ts * 0.6, "#d5def0");
+    if (hojd > bredd) rad(t("Tips: vänd skärmen på bredden", "Tip: turn the screen sideways"), ts * 0.55, "#d5def0");
   }
 
   if (lage === "slut") {
-    rad("Slut!", t * 1.4, "#ffd27a");
-    rad(poang + " poäng", t * 1.0);
-    rad(poang > 0 && poang === rekord ? "🏆 Nytt rekord! 🏆" : "Rekord: " + rekord, t * 0.7);
-    rad(`${antalTrick} trick · ${antalSkramda} skrämda djur`, t * 0.6, "#d5def0");
-    y += t * 0.4;
-    if (tidSedanSlut > 1) rad("Tryck för att spela igen", t * 0.8);
+    rad(t("Slut!", "Game over!"), ts * 1.4, "#ffd27a");
+    rad(poang + t(" poäng", poang === 1 ? " point" : " points"), ts * 1.0);
+    rad(poang > 0 && poang === rekord ? t("🏆 Nytt rekord! 🏆", "🏆 New record! 🏆") : t("Rekord: ", "Best: ") + rekord, ts * 0.7);
+    rad(t(`${antalTrick} trick · ${antalSkramda} skrämda djur`, `${antalTrick} ${antalTrick === 1 ? "trick" : "tricks"} · ${antalSkramda} scared ${antalSkramda === 1 ? "animal" : "animals"}`), ts * 0.6, "#d5def0");
+    y += ts * 0.4;
+    if (tidSedanSlut > 1) rad(t("Tryck för att spela igen", "Tap to play again"), ts * 0.8);
   }
 }
 
