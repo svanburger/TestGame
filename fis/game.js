@@ -13,6 +13,10 @@
 //  underbyxor åt. När alla underbyxor är slut är spelet slut.
 //
 //  Börja med att ändra i INSTALLNINGAR här nedanför.
+//
+//  All text finns på svenska och engelska. Den skrivs så här:
+//    t("svenska", "English")
+//  (Döp därför aldrig en egen variabel till bara t.)
 // =====================================================================
 
 const INSTALLNINGAR = {
@@ -45,51 +49,51 @@ const INSTALLNINGAR = {
   // Fisarnas namn. "fran" är minsta tryck för att fisen ska få det namnet.
   // "ljud" är hur den låter: "pip", "brrt", "ballong", "trumpet", "motor" eller "mullr".
   fisar: [
-    { fran: 0, namn: "Pipet", ljud: "pip" },
-    { fran: 0, namn: "Smygprutten", ljud: "brrt" },
-    { fran: 25, namn: "Pruttelutten", ljud: "brrt" },
-    { fran: 25, namn: "Ballongen", ljud: "ballong" },
-    { fran: 50, namn: "Trumpeten", ljud: "trumpet" },
-    { fran: 50, namn: "Motorcykeln", ljud: "motor" },
-    { fran: 75, namn: "Åskan", ljud: "mullr" },
-    { fran: 75, namn: "Mistluren", ljud: "trumpet" },
-    { fran: 75, namn: "Tubakonserten", ljud: "motor" },
+    { fran: 0, namn: t("Pipet", "The Squeaker"), ljud: "pip" },
+    { fran: 0, namn: t("Smygprutten", "The Sneaky Toot"), ljud: "brrt" },
+    { fran: 25, namn: t("Pruttelutten", "The Tootle-Toot"), ljud: "brrt" },
+    { fran: 25, namn: t("Ballongen", "The Balloon"), ljud: "ballong" },
+    { fran: 50, namn: t("Trumpeten", "The Trumpet"), ljud: "trumpet" },
+    { fran: 50, namn: t("Motorcykeln", "The Motorbike"), ljud: "motor" },
+    { fran: 75, namn: t("Åskan", "The Thunder"), ljud: "mullr" },
+    { fran: 75, namn: t("Mistluren", "The Foghorn"), ljud: "trumpet" },
+    { fran: 75, namn: t("Tubakonserten", "The Tuba Concert"), ljud: "motor" },
   ],
 
   // Visas när man byter bana och på startskärmen
   tips: [
-    "Tips: Lita aldrig på en fis efter 40.",
-    "Tips: Den som känner lukten först har själv gjort det.",
-    "Tips: Skyll på hunden. Hunden kan inte säga emot.",
-    "Tips: En tyst fis är inte alltid en snäll fis.",
-    "Tips: Hissmusik finns av en anledning.",
-    "Tips: Mormor hör ändå inte så bra.",
-    "Tips: Svettas pappa? Då är det dags att släppa.",
-    "Tips: Säger magen blubb är det bråttom.",
-    "Visste du att en människa fiser 10–20 gånger om dagen? Pappa lite oftare.",
-    "Bönor är nyttiga. Ju mer man äter, desto mer…",
+    t("Tips: Lita aldrig på en fis efter 40.", "Tip: Never trust a fart after 40."),
+    t("Tips: Den som känner lukten först har själv gjort det.", "Tip: Whoever smelt it dealt it."),
+    t("Tips: Skyll på hunden. Hunden kan inte säga emot.", "Tip: Blame the dog. The dog can't argue back."),
+    t("Tips: En tyst fis är inte alltid en snäll fis.", "Tip: A quiet fart isn't always a nice fart."),
+    t("Tips: Hissmusik finns av en anledning.", "Tip: Elevator music exists for a reason."),
+    t("Tips: Mormor hör ändå inte så bra.", "Tip: Grandma can't hear very well anyway."),
+    t("Tips: Svettas pappa? Då är det dags att släppa.", "Tip: Is Dad sweating? Time to let go."),
+    t("Tips: Säger magen blubb är det bråttom.", "Tip: If the tummy says blub, hurry up!"),
+    t("Visste du att en människa fiser 10–20 gånger om dagen? Pappa lite oftare.", "Did you know people fart 10–20 times a day? Dad a bit more."),
+    t("Bönor är nyttiga. Ju mer man äter, desto mer…", "Beans are good for you. The more you eat, the more you…"),
   ],
 
   // Visas när pappa bajsar på sig
   olyckor: [
-    "Ett nytt kapitel börjar.",
-    "Ibland går det inte som man tänkt.",
-    "Det här stannar mellan oss.",
-    "Andas lugnt. Det har hänt de bästa.",
-    "Vi pratar inte mer om det här.",
-    "Det där var ingen fis.",
+    t("Ett nytt kapitel börjar.", "A new chapter begins."),
+    t("Ibland går det inte som man tänkt.", "Sometimes things don't go as planned."),
+    t("Det här stannar mellan oss.", "This stays between us."),
+    t("Andas lugnt. Det har hänt de bästa.", "Breathe. It happens to the best of us."),
+    t("Vi pratar inte mer om det här.", "We will never speak of this again."),
+    t("Det där var ingen fis.", "That was not a fart."),
   ],
 
   // Det folk säger när de känner lukten
-  luktar: ["Vad luktar det?", "Fy!", "Någon har ätit ägg.", "Usch, vad är det som luktar?"],
+  luktar: [t("Vad luktar det?", "What's that smell?"), t("Fy!", "Ew!"), t("Någon har ätit ägg.", "Someone ate eggs."), t("Usch, vad är det som luktar?", "Yuck, what is that smell?")],
 
   // Titeln man får när spelet är slut, efter hur många poäng man fick
   titlar: [
-    { poang: 0, namn: "Pruttpraktikant" },
-    { poang: 600, namn: "Gasexpert" },
-    { poang: 1500, namn: "Ventilansvarig" },
-    { poang: 3000, namn: "Fismästare" },
-    { poang: 5000, namn: "Klimatbov" },
+    { poang: 0, namn: t("Pruttpraktikant", "Toot Trainee") },
+    { poang: 600, namn: t("Gasexpert", "Gas Expert") },
+    { poang: 1500, namn: t("Ventilansvarig", "Chief Valve Officer") },
+    { poang: 3000, namn: t("Fismästare", "Fart Master") },
+    { poang: 5000, namn: t("Klimatbov", "Climate Villain") },
   ],
 
   // ---------------------------------------------------------------
@@ -112,38 +116,38 @@ const INSTALLNINGAR = {
   // ---------------------------------------------------------------
   banor: [
     {
-      namn: "Hissen",
+      namn: t("Hissen", "The Elevator"),
       ikon: "🛗",
       rum: "hiss",
-      tips: "Hissmusiken döljer små fisar. Vänta in plinget!",
+      tips: t("Hissmusiken döljer små fisar. Vänta in plinget!", "Elevator music hides small farts. Wait for the ding!"),
       hund: { bild: "🐕", namn: "Fido", pos: 1.15 },
       folk: [
         { pos: -3.3, troja: "#27ae60", har: "#e0b34a" },
         { pos: -1.9, troja: "#34495e", har: "#2c2c2c" },
         { pos: 2.2, troja: "#8e44ad", har: "#b5462f" },
       ],
-      horde: ["Vem var det?", "Öh…", "Nu tar jag trappan.", "Någon har ätit bönor."],
+      horde: [t("Vem var det?", "Who did that?"), t("Öh…", "Uh…"), t("Nu tar jag trappan.", "I'm taking the stairs."), t("Någon har ätit bönor.", "Someone ate beans.")],
       tidslinje: [
-        { tid: 3.5, niva: 28, ikon: "🎵", musik: "hiss", text: "Släpp fisen i det blå, så hör ingen!" },
+        { tid: 3.5, niva: 28, ikon: "🎵", musik: "hiss", text: t("Släpp fisen i det blå, så hör ingen!", "Let it go in the blue and nobody hears!") },
         { tid: 0.9, niva: 80, ikon: "🔔", ljud: "pling", musik: "hiss" },
         { tid: 3.5, niva: 28, ikon: "🎵", musik: "hiss" },
-        { tid: 1.4, niva: 58, ikon: "🤧", ljud: "hosta", musik: "hiss", text: "Någon hostar." },
+        { tid: 1.4, niva: 58, ikon: "🤧", ljud: "hosta", musik: "hiss", text: t("Någon hostar.", "Someone coughs.") },
         { tid: 3, niva: 28, ikon: "🎵", musik: "hiss" },
-        { tid: 2.5, niva: 62, ikon: "🚪", ljud: "dorrar", musik: "hiss", text: "Dörrarna öppnas…" },
-        { tid: 4.5, niva: 5, ikon: "🤫", ansikte: "😐", text: "Oj! Musiken tystnade…" },
+        { tid: 2.5, niva: 62, ikon: "🚪", ljud: "dorrar", musik: "hiss", text: t("Dörrarna öppnas…", "The doors open…") },
+        { tid: 4.5, niva: 5, ikon: "🤫", ansikte: "😐", text: t("Oj! Musiken tystnade…", "Uh-oh! The music stopped…") },
         { tid: 3, niva: 28, ikon: "🎵", musik: "hiss" },
         { tid: 0.9, niva: 80, ikon: "🔔", ljud: "pling", musik: "hiss" },
         { tid: 3, niva: 28, ikon: "🎵", musik: "hiss" },
-        { tid: 1.2, niva: 85, ikon: "🤧", ljud: "nys", musik: "hiss", text: "ATJO!" },
+        { tid: 1.2, niva: 85, ikon: "🤧", ljud: "nys", musik: "hiss", text: t("ATJO!", "ACHOO!") },
         { tid: 4, niva: 28, ikon: "🎵", musik: "hiss" },
-        { tid: 1.5, niva: 82, ikon: "🔔", ljud: "pling", text: "Framme!" },
+        { tid: 1.5, niva: 82, ikon: "🔔", ljud: "pling", text: t("Framme!", "We're here!") },
       ],
     },
     {
-      namn: "Biblioteket",
+      namn: t("Biblioteket", "The Library"),
       ikon: "📚",
       rum: "bibliotek",
-      tips: "Här är det tyst. Väldigt tyst.",
+      tips: t("Här är det tyst. Väldigt tyst.", "It's quiet here. Very quiet."),
       hund: { bild: "🦮", namn: "Sixten", pos: 1.15 },
       folk: [
         { pos: -3.3, troja: "#7f8c8d", har: "#cfcfcf", ansikte: "😐" },
@@ -151,28 +155,28 @@ const INSTALLNINGAR = {
         { pos: 2.2, troja: "#2c3e50", har: "#8a6a4a" },
         { pos: 3.5, troja: "#ff7a59", har: "#e0b34a", liten: true },
       ],
-      horde: ["SCHHH!", "Vad var det där?!", "Det här är ett bibliotek!"],
+      horde: [t("SCHHH!", "SHHH!"), t("Vad var det där?!", "What was that?!"), t("Det här är ett bibliotek!", "This is a library!")],
       tidslinje: [
-        { tid: 4, niva: 4, ikon: "🤫", text: "Schhh… här måste man vara tyst." },
-        { tid: 4, niva: 60, ikon: "📚", ljud: "stampel", puls: [0.3, 0.5], text: "Bibliotekarien stämplar böcker." },
+        { tid: 4, niva: 4, ikon: "🤫", text: t("Schhh… här måste man vara tyst.", "Shhh… you have to be quiet here.") },
+        { tid: 4, niva: 60, ikon: "📚", ljud: "stampel", puls: [0.3, 0.5], text: t("Bibliotekarien stämplar böcker.", "The librarian stamps books.") },
         { tid: 3, niva: 4, ikon: "🤫" },
-        { tid: 3, niva: 50, ikon: "🛒", ljud: "vagn", text: "Bokvagnen gnisslar." },
+        { tid: 3, niva: 50, ikon: "🛒", ljud: "vagn", text: t("Bokvagnen gnisslar.", "The book cart squeaks.") },
         { tid: 3, niva: 4, ikon: "🤫" },
-        { tid: 2, niva: 82, ikon: "👶", ljud: "bebis", text: "En bebis skriker!" },
-        { tid: 1.2, niva: 45, ikon: "🤫", ljud: "schh", text: "SCHHH!" },
+        { tid: 2, niva: 82, ikon: "👶", ljud: "bebis", text: t("En bebis skriker!", "A baby is screaming!") },
+        { tid: 1.2, niva: 45, ikon: "🤫", ljud: "schh", text: t("SCHHH!", "SHHH!") },
         { tid: 4, niva: 4, ikon: "🤫" },
-        { tid: 3, niva: 52, ikon: "🖨️", ljud: "skrivare", text: "Skrivaren skriver ut." },
+        { tid: 3, niva: 52, ikon: "🖨️", ljud: "skrivare", text: t("Skrivaren skriver ut.", "The printer is printing.") },
         { tid: 3, niva: 4, ikon: "🤫" },
-        { tid: 0.7, niva: 88, ikon: "📕", ljud: "bok", text: "BOM! Någon tappade en tjock bok." },
+        { tid: 0.7, niva: 88, ikon: "📕", ljud: "bok", text: t("BOM! Någon tappade en tjock bok.", "BOOM! Someone dropped a big book.") },
         { tid: 3.5, niva: 4, ikon: "🤫" },
         { tid: 4, niva: 60, ikon: "📚", ljud: "stampel", puls: [0.3, 0.5] },
       ],
     },
     {
-      namn: "Mormor fyller 80",
+      namn: t("Mormor fyller 80", "Grandma Turns 80"),
       ikon: "🎂",
       rum: "kalas",
-      tips: "Vänta in sången. Då är det fritt fram!",
+      tips: t("Vänta in sången. Då är det fritt fram!", "Wait for the song. Then go for it!"),
       hund: { bild: "🐕", namn: "Ludde", pos: 1.15 },
       folk: [
         { pos: -3.5, troja: "#16a085", har: "#3b2a1a", hatt: "fest" },
@@ -180,25 +184,25 @@ const INSTALLNINGAR = {
         { pos: 2.2, troja: "#f1c40f", har: "#5a3a22", liten: true, hatt: "fest" },
         { pos: 3.5, troja: "#e84393", har: "#2c2c2c", hatt: "fest" },
       ],
-      horde: ["Vem var det?", "Men pappa!", "Usch!", "Inte på kalaset!"],
+      horde: [t("Vem var det?", "Who did that?"), t("Men pappa!", "Oh, Dad!"), t("Usch!", "Yuck!"), t("Inte på kalaset!", "Not at the party!")],
       tidslinje: [
-        { tid: 5, niva: 32, ikon: "🗣️", sorl: 1, text: "Alla pratar i munnen på varandra." },
-        { tid: 1.5, niva: 40, ikon: "🥂", ljud: "klirr", text: "Pling pling! Morbror ska hålla tal." },
-        { tid: 6, niva: 10, ikon: "🎤", ljud: "tal", text: "Mormor, du är som en fin ost. Bättre med åren!" },
+        { tid: 5, niva: 32, ikon: "🗣️", sorl: 1, text: t("Alla pratar i munnen på varandra.", "Everyone is talking at once.") },
+        { tid: 1.5, niva: 40, ikon: "🥂", ljud: "klirr", text: t("Pling pling! Morbror ska hålla tal.", "Ding ding! Uncle is giving a speech.") },
+        { tid: 6, niva: 10, ikon: "🎤", ljud: "tal", text: t("Mormor, du är som en fin ost. Bättre med åren!", "Grandma, you're like a fine cheese. Better with age!") },
         { tid: 3, niva: 85, ikon: "👏", ljud: "applad", ansikte: "😃" },
         { tid: 4, niva: 32, ikon: "🗣️", sorl: 1 },
-        { tid: 12, niva: 88, ikon: "🎶", musik: "sang", ansikte: "😄", text: "Alla sjunger för mormor! Fritt fram!" },
-        { tid: 2.4, niva: 90, ikon: "🎉", ljud: "hurra", puls: [0.35, 0.25], pulsNiva: 20, ansikte: "😄", text: "Hurra! Hurra! Hurra!" },
-        { tid: 3.5, niva: 6, ikon: "🕯️", ansikte: "😐", text: "Schh… mormor ska blåsa ut ljusen." },
+        { tid: 12, niva: 88, ikon: "🎶", musik: "sang", ansikte: "😄", text: t("Alla sjunger för mormor! Fritt fram!", "Everyone sings for Grandma! Go for it!") },
+        { tid: 2.4, niva: 90, ikon: "🎉", ljud: "hurra", puls: [0.35, 0.25], pulsNiva: 20, ansikte: "😄", text: t("Hurra! Hurra! Hurra!", "Hip hip hooray!") },
+        { tid: 3.5, niva: 6, ikon: "🕯️", ansikte: "😐", text: t("Schh… mormor ska blåsa ut ljusen.", "Shhh… Grandma is blowing out the candles.") },
         { tid: 2.5, niva: 85, ikon: "👏", ljud: "applad", ansikte: "😃" },
         { tid: 4, niva: 32, ikon: "🗣️", sorl: 1 },
       ],
     },
     {
-      namn: "Bröllopet",
+      namn: t("Bröllopet", "The Wedding"),
       ikon: "💒",
       rum: "kyrka",
-      tips: "Orgeln är din bästa vän.",
+      tips: t("Orgeln är din bästa vän.", "The organ is your best friend."),
       hund: null, // Ingen hund i kyrkan...
       folk: [
         { pos: -3.4, troja: "#2c3e50", har: "#2c2c2c" },
@@ -206,18 +210,18 @@ const INSTALLNINGAR = {
         { pos: 1.9, troja: "#34495e", har: "#8a6a4a" },
         { pos: 3.4, troja: "#f39c12", har: "#e8e8e8", hatt: "dam" },
       ],
-      horde: ["Det här är en kyrka!", "Åh nej…", "Var det orgeln?", "Inte nu!"],
+      horde: [t("Det här är en kyrka!", "This is a church!"), t("Åh nej…", "Oh no…"), t("Var det orgeln?", "Was that the organ?"), t("Inte nu!", "Not now!")],
       tidslinje: [
-        { tid: 9, niva: 72, ikon: "🎹", musik: "brud", ansikte: "🥲", text: "Här kommer bruden! Orgeln spelar." },
-        { tid: 5, niva: 16, ikon: "🗣️", ljud: "tal", text: "Vi är samlade här i dag…" },
-        { tid: 5, niva: 3, ikon: "🤫", ansikte: "😐", text: "Om någon har något att invända, tala nu…" },
-        { tid: 2, niva: 16, ikon: "🗣️", text: "…eller tig för alltid." },
-        { tid: 1.5, niva: 30, ikon: "💍", text: "JA!" },
-        { tid: 4, niva: 86, ikon: "👏", ljud: "applad", ansikte: "😃", text: "Ni får kyssa varandra!" },
+        { tid: 9, niva: 72, ikon: "🎹", musik: "brud", ansikte: "🥲", text: t("Här kommer bruden! Orgeln spelar.", "Here comes the bride! The organ plays.") },
+        { tid: 5, niva: 16, ikon: "🗣️", ljud: "tal", text: t("Vi är samlade här i dag…", "We are gathered here today…") },
+        { tid: 5, niva: 3, ikon: "🤫", ansikte: "😐", text: t("Om någon har något att invända, tala nu…", "If anyone objects, speak now…") },
+        { tid: 2, niva: 16, ikon: "🗣️", text: t("…eller tig för alltid.", "…or forever hold your peace.") },
+        { tid: 1.5, niva: 30, ikon: "💍", text: t("JA!", "I DO!") },
+        { tid: 4, niva: 86, ikon: "👏", ljud: "applad", ansikte: "😃", text: t("Ni får kyssa varandra!", "You may now kiss!") },
         { tid: 3, niva: 14, ikon: "🗣️" },
-        { tid: 1.3, niva: 72, ikon: "🤧", ljud: "snyt", text: "Moster snyter sig. Högt." },
+        { tid: 1.3, niva: 72, ikon: "🤧", ljud: "snyt", text: t("Moster snyter sig. Högt.", "Auntie blows her nose. Loudly.") },
         { tid: 3, niva: 14, ikon: "🗣️" },
-        { tid: 9, niva: 84, ikon: "🎺", musik: "marsch", ansikte: "😃", text: "Bröllopsmarschen! Ut ur kyrkan!" },
+        { tid: 9, niva: 84, ikon: "🎺", musik: "marsch", ansikte: "😃", text: t("Bröllopsmarschen! Ut ur kyrkan!", "The wedding march! Out of the church!") },
       ],
     },
   ],
@@ -345,9 +349,14 @@ function rundRekt(c, x, y, w, h, r) {
   c.closePath();
 }
 
-// 1.5 blir "1,5"
+// 1.5 blir "1,5" på svenska och "1.5" på engelska
 function tal(v) {
-  return String(v).replace(".", ",");
+  return t(String(v).replace(".", ","), String(v));
+}
+
+// Engelska: 1 fart, 2 farts
+function antal(n, ett, flera) {
+  return n + " " + (n === 1 ? ett : flera);
 }
 
 function bana() {
@@ -525,7 +534,7 @@ function fortsatt() {
 }
 
 function visaMusikKnapp() {
-  musikKnapp.textContent = musikPa ? "♪ Musik: på" : "♪ Musik: av";
+  musikKnapp.textContent = musikPa ? t("♪ Musik: på", "♪ Music: on") : t("♪ Musik: av", "♪ Music: off");
 }
 
 pausKnapp.addEventListener("click", pausa);
@@ -675,7 +684,22 @@ function ge(mangd) {
   banPoang += mangd;
 }
 
+function textHojd(stor) {
+  return u * (stor ? 0.42 : 0.32) * 1.3;
+}
+
 function flyg(text, x, y, farg = "#ffffff", stor = false) {
+  // Flyger det redan texter på samma ställe flyttas de upp, så att de inte hamnar på varandra
+  const nyHalv = textHojd(stor) / 2;
+  let tak = y - nyHalv;
+  const ivagen = texter
+    .filter((tx) => Math.abs(tx.x - x) < u * 3 && tx.y - textHojd(tx.stor) / 2 < y + nyHalv)
+    .sort((a, b) => b.y - a.y);
+  for (const tx of ivagen) {
+    const halv = textHojd(tx.stor) / 2;
+    if (tx.y + halv > tak) tx.y = tak - halv;
+    tak = tx.y - halv;
+  }
   texter.push({ text, x, y, farg, stor, kvar: 1.7 });
 }
 
@@ -716,28 +740,28 @@ function slappFis() {
   if (!krystar) return;
   krystar = false;
   krystPekare = null;
-  const t = tryck;
+  const kraft = tryck;
   tryck = 0;
   steg = 0;
   vila = S.vilaEfterFis;
-  if (t < S.minstaFis) {
-    if (t > 2) flyg("…inget kom", mittX, golvY - u * 4.6);
+  if (kraft < S.minstaFis) {
+    if (kraft > 2) flyg(t("…inget kom", "…nothing came out"), mittX, golvY - u * 4.6);
     return;
   }
 
   fisNr += 1;
-  const typ = valjFis(t);
-  const hords = t > omgivning + 2;
-  const nara = t >= grans - S.bromsspar;
+  const typ = valjFis(kraft);
+  const hords = kraft > omgivning + 2;
+  const nara = kraft >= grans - S.bromsspar;
   let ganger = 1;
   if (!hords) ganger *= S.poang.ingenHorde;
   if (nara) ganger *= S.poang.bromsspar;
-  const p = Math.max(1, Math.round((t * t) / 100 * ganger));
+  const p = Math.max(1, Math.round((kraft * kraft) / 100 * ganger));
   ge(p);
   antalFisar += 1;
   banFisar += 1;
-  if (t > storstaTryck) {
-    storstaTryck = t;
+  if (kraft > storstaTryck) {
+    storstaTryck = kraft;
     storstaFis = typ.namn;
   }
 
@@ -745,23 +769,23 @@ function slappFis() {
   flyg(`${typ.namn} +${p}`, mittX, y, "#ffffff", true);
   y += u * 0.5;
   if (hords) {
-    flyg("Det hördes! 😳", mittX, y, "#ffb3b3");
+    flyg(t("Det hördes! 😳", "They heard it! 😳"), mittX, y, "#ffb3b3");
     folkHorde(p);
   } else {
     antalSmyg += 1;
     banSmyg += 1;
-    flyg(`Ingen hörde! ×${tal(S.poang.ingenHorde)}`, mittX, y, "#9dffb0");
+    flyg(t(`Ingen hörde! ×${tal(S.poang.ingenHorde)}`, `Nobody heard! ×${tal(S.poang.ingenHorde)}`), mittX, y, "#9dffb0");
     lattnadTid = 0.9;
     effekt("smyg");
   }
   y += u * 0.45;
   if (nara) {
-    flyg(`Bromsspår! ×${tal(S.poang.bromsspar)}`, mittX, y, "#e8a868");
+    flyg(t(`Bromsspår! ×${tal(S.poang.bromsspar)}`, `Skid marks! ×${tal(S.poang.bromsspar)}`), mittX, y, "#e8a868");
     bromsspar();
   }
 
-  fisLjud(t, typ.ljud, !hords);
-  puffa(t, fisNr);
+  fisLjud(kraft, typ.ljud, !hords);
+  puffa(kraft, fisNr);
   nyGrans();
 }
 
@@ -792,7 +816,7 @@ function folkHorde(p) {
   for (const q of folk) {
     if (q.dov) {
       // Mormor hör inte så bra
-      if (q === pratare || Math.random() < 0.5) sag(q, "Vad sa du?");
+      if (q === pratare || Math.random() < 0.5) sag(q, t("Vad sa du?", "Say what?"));
       continue;
     }
     reagera(q, slumpa(["😳", "🤨", "😮"]), 2.4);
@@ -812,7 +836,7 @@ function olycka() {
   const i = underbyxor.findIndex((s) => s < 2);
   if (i >= 0) underbyxor[i] = 2;
   for (const q of folk) reagera(q, slumpa(["😱", "🤢", "😳"]), OLYCKA_TID);
-  sag(slumpa(folk), "Oj.", 2);
+  sag(slumpa(folk), t("Oj.", "Oops."), 2);
   fisNr += 1;
   puffa(30, fisNr);
   effekt("olycka");
@@ -823,9 +847,9 @@ function bromsspar() {
   const i = underbyxor.findIndex((s) => s < 2);
   if (i < 0) return;
   underbyxor[i] += 1;
-  if (underbyxor[i] === 2) visaTips("Dags att byta underbyxor!", 2.5);
+  if (underbyxor[i] === 2) visaTips(t("Dags att byta underbyxor!", "Time for clean underpants!"), 2.5);
   if (kvarUnderbyxor() === 0) {
-    olyckaText = "Det blev ett bromsspår för mycket.";
+    olyckaText = t("Det blev ett bromsspår för mycket.", "One skid mark too many.");
     slutOm = 2;
   }
 }
@@ -833,11 +857,11 @@ function bromsspar() {
 function skyllPaHunden() {
   if (fas !== "bana" || olyckaTid > 0 || slutOm > 0) return;
   if (hundFonster <= 0) {
-    visaTips("Skyll på hunden när någon har hört en fis!", 2);
+    visaTips(t("Skyll på hunden när någon har hört en fis!", "Blame the dog when someone hears a fart!"), 2);
     return;
   }
   if (hundKvar <= 0) {
-    visaTips("Ingen tror på det längre…", 2);
+    visaTips(t("Ingen tror på det längre…", "Nobody believes that anymore…"), 2);
     return;
   }
   hundFonster = 0;
@@ -848,11 +872,11 @@ function skyllPaHunden() {
     const minus = Math.min(poang, hordaPoang);
     poang -= minus;
     banPoang -= minus;
-    pappaSager("Fy, hunden!");
+    pappaSager(t("Fy, hunden!", "Bad dog!"));
     const q = slumpa(folk);
-    sag(q, "Vilken hund?", 2.5);
+    sag(q, t("Vilken hund?", "What dog?"), 2.5);
     for (const r of folk) reagera(r, "🤨", 2.5);
-    flyg(`Det finns ingen hund här! −${minus}`, mittX, golvY - u * 5.1, "#ffb3b3", true);
+    flyg(t(`Det finns ingen hund här! −${minus}`, `There is no dog here! −${minus}`), mittX, golvY - u * 5.1, "#ffb3b3", true);
     rodnadTid = 3;
     effekt("syrsor");
     return;
@@ -860,18 +884,18 @@ function skyllPaHunden() {
 
   const extra = Math.round(hordaPoang * (S.poang.hunden - 1));
   ge(extra);
-  pappaSager(`Fy, ${hund.namn}!`);
+  pappaSager(t(`Fy, ${hund.namn}!`, `Bad ${hund.namn}!`));
   hund.argTid = 2.5;
   for (const r of folk) {
     if (!r.dov) reagera(r, "😒", 2.2);
   }
-  flyg(`Hunden fick skulden! +${extra}`, mittX, golvY - u * 5.1, "#ffe14d", true);
+  flyg(t(`Hunden fick skulden! +${extra}`, `The dog got the blame! +${extra}`), mittX, golvY - u * 5.1, "#ffe14d", true);
   rodnadTid = 0;
   effekt("voff");
 }
 
 function luktKommentar() {
-  if (hund && Math.random() < 0.4) return `Har ${hund.namn} ätit något konstigt?`;
+  if (hund && Math.random() < 0.4) return t(`Har ${hund.namn} ätit något konstigt?`, `${hund.namn}, what did you eat?`);
   return slumpa(S.luktar);
 }
 
@@ -1000,12 +1024,12 @@ function uppdatera(dt) {
     if (nytt > steg) {
       if (nytt === 1) {
         effekt("kurr");
-        flyg("*kurr*", mittX + u * 0.9, golvY - u * 2.1, "#ffffff");
+        flyg(t("*kurr*", "*grumble*"), mittX + u * 0.9, golvY - u * 2.1, "#ffffff");
       }
       if (nytt === 3) {
         effekt("blubb");
         blubbTid = 0.55;
-        flyg("*blubb*", mittX - u * 0.9, golvY - u * 1.5, "#e8a868");
+        flyg(t("*blubb*", "*blub*"), mittX - u * 0.9, golvY - u * 1.5, "#e8a868");
       }
       steg = nytt;
     }
@@ -1247,7 +1271,7 @@ function ritaBibliotek(c) {
     c.font = `bold ${u * 0.34}px ${TYPSNITT}`;
     c.textAlign = "center";
     c.textBaseline = "middle";
-    c.fillText("TYST, TACK", mittX + u * 0.2, sy);
+    c.fillText(t("TYST, TACK", "BE QUIET"), mittX + u * 0.2, sy);
   }
 
   golvplankor(c, "#b8895a", "rgba(90, 50, 20, 0.25)");
@@ -1300,7 +1324,7 @@ function ritaKalas(c) {
     c.font = `bold ${u * 0.36}px ${TYPSNITT}`;
     c.textAlign = "center";
     c.textBaseline = "middle";
-    c.fillText("GRATTIS MORMOR 80 ÅR!", mittX, sy, w - u * 0.4);
+    c.fillText(t("GRATTIS MORMOR 80 ÅR!", "HAPPY 80TH, GRANDMA!"), mittX, sy, w - u * 0.4);
   }
 
   // Bord med tårta
@@ -2055,7 +2079,7 @@ function ritaHundKnapp() {
   if (aktiv) {
     const ts = Math.max(14, k.r * 0.38);
     ctx.font = `bold ${ts}px ${TYPSNITT}`;
-    const text = "Skyll på hunden!";
+    const text = t("Skyll på hunden!", "Blame the dog!");
     const tw = ctx.measureText(text).width + ts * 1.2;
     const tx = Math.min(k.x, bredd - marginal.hoger - tw / 2 - 8);
     const ty = k.y - k.r - ts * 1.1;
@@ -2098,20 +2122,20 @@ function ritaRutor() {
   if (lage !== "spelar" && lage !== "paus") return;
   const b = bana();
   if (fas === "intro") {
-    const rader = [[`Dag ${dag}`, 0.6, "#ffd27a"], [`${b.ikon} ${b.namn}`, 1.2], [b.tips, 0.6]];
-    if (dag === 1 && banNr === 0) rader.push(["Håll fingret = krysta · Släpp = fisa", 0.55, "#9dffb0"]);
-    if (dag > 1 && banNr === 0) rader.push(["Allt går lite fortare nu…", 0.55, "#ffb3b3"]);
+    const rader = [[t(`Dag ${dag}`, `Day ${dag}`), 0.6, "#ffd27a"], [`${b.ikon} ${b.namn}`, 1.2], [b.tips, 0.6]];
+    if (dag === 1 && banNr === 0) rader.push([t("Håll fingret = krysta · Släpp = fisa", "Hold = push · Let go = fart"), 0.55, "#9dffb0"]);
+    if (dag > 1 && banNr === 0) rader.push([t("Allt går lite fortare nu…", "Everything is a bit faster now…"), 0.55, "#ffb3b3"]);
     rader.push([introTips, 0.45, "#d5def0"]);
-    if (fasTid > 0.6) rader.push(["Tryck för att börja", 0.6]);
+    if (fasTid > 0.6) rader.push([t("Tryck för att börja", "Tap to start"), 0.6]);
     ritaRuta(rader, hojd * 0.45);
   } else if (fas === "klar") {
     const sista = banNr === S.banor.length - 1;
     const nasta = S.banor[sista ? 0 : banNr + 1];
     ritaRuta([
-      [`${b.ikon} ${b.namn} – klart!`, 1.0, "#ffd27a"],
-      [`+${banPoang} poäng`, 0.9],
-      [`${banFisar} fisar · ${banSmyg} hördes inte`, 0.55, "#d5def0"],
-      [sista ? "Dagen är slut. I morgon blir det svårare!" : `Nästa: ${nasta.ikon} ${nasta.namn}`, 0.55, "#9dffb0"],
+      [t(`${b.ikon} ${b.namn} – klart!`, `${b.ikon} ${b.namn} – done!`), 1.0, "#ffd27a"],
+      [t(`+${banPoang} poäng`, `+${antal(banPoang, "point", "points")}`), 0.9],
+      [t(`${banFisar} fisar · ${banSmyg} hördes inte`, `${antal(banFisar, "fart", "farts")} · ${banSmyg} unheard`), 0.55, "#d5def0"],
+      [sista ? t("Dagen är slut. I morgon blir det svårare!", "That's the day! Tomorrow gets harder!") : t(`Nästa: ${nasta.ikon} ${nasta.namn}`, `Next: ${nasta.ikon} ${nasta.namn}`), 0.55, "#9dffb0"],
     ], hojd * 0.45);
   } else if (olyckaTid > 0 && olyckaTid < OLYCKA_TID - 0.4) {
     ritaRuta([[olyckaText, 0.75], ["−1 🩲", 0.75, "#ffb3b3"]], hojd * 0.3, 0.7);
@@ -2126,11 +2150,11 @@ function titel(p) {
 
 function ritaSkarmar() {
   if (lage !== "start" && lage !== "slut") return;
-  const t = Math.min(bredd, hojd) / 14; // Textstorlek
+  const ts = Math.min(bredd, hojd) / 14; // Textstorlek
   const mitt = bredd / 2;
   ctx.fillStyle = "rgba(25, 15, 40, 0.6)";
   ctx.fillRect(0, 0, bredd, hojd);
-  let y = marginal.topp + Math.max(t * 1.6, hojd * 0.1);
+  let y = marginal.topp + Math.max(ts * 1.6, hojd * 0.1);
   const rad = (text, storlek, farg) => {
     // Krymper texten om den inte får plats på skärmen
     ctx.font = `bold ${storlek}px ${TYPSNITT}`;
@@ -2140,29 +2164,29 @@ function ritaSkarmar() {
   };
 
   if (lage === "start") {
-    rad("Lagom tryck", t * 1.4, "#ffd27a");
-    y += t * 0.3;
-    rad("Håll fingret på skärmen för att krysta", t * 0.65);
-    rad("Släpp för att fisa – större fis, mer poäng", t * 0.65);
-    rad("Fisa när det låter mycket, så hör ingen", t * 0.65);
-    rad("Men tryck inte för hårt… 💩", t * 0.65, "#ffb3b3");
-    y += t * 0.4;
-    rad("Tryck för att börja", t * 0.85);
-    if (rekord > 0) rad("Rekord: " + rekord, t * 0.6, "#d5def0");
-    y += t * 0.3;
-    rad(startTips, t * 0.5, "#d5def0");
+    rad(t("Lagom tryck", "Just the Right Push"), ts * 1.4, "#ffd27a");
+    y += ts * 0.3;
+    rad(t("Håll fingret på skärmen för att krysta", "Hold your finger on the screen to push"), ts * 0.65);
+    rad(t("Släpp för att fisa – större fis, mer poäng", "Let go to fart – bigger fart, more points"), ts * 0.65);
+    rad(t("Fisa när det låter mycket, så hör ingen", "Fart when it's noisy, so nobody hears"), ts * 0.65);
+    rad(t("Men tryck inte för hårt… 💩", "But don't push too hard… 💩"), ts * 0.65, "#ffb3b3");
+    y += ts * 0.4;
+    rad(t("Tryck för att börja", "Tap to start"), ts * 0.85);
+    if (rekord > 0) rad(t("Rekord: ", "High score: ") + rekord, ts * 0.6, "#d5def0");
+    y += ts * 0.3;
+    rad(startTips, ts * 0.5, "#d5def0");
   }
 
   if (lage === "slut") {
-    rad("Slut på rena underbyxor!", t * 1.1, "#ffd27a");
-    if (olyckaText) rad(olyckaText, t * 0.6, "#d5def0");
-    rad(poang + " poäng", t * 1.0);
-    rad(poang > 0 && poang === rekord ? "🏆 Nytt rekord! 🏆" : "Rekord: " + rekord, t * 0.7);
-    rad("Du är nu: " + titel(poang), t * 0.75, "#9dffb0");
-    rad(`Dag ${dag} · ${antalFisar} fisar · ${antalSmyg} hördes inte`, t * 0.55, "#d5def0");
-    if (storstaFis) rad(`Största fisen: ${storstaFis}`, t * 0.55, "#d5def0");
-    y += t * 0.4;
-    if (tidSedanSlut > 1) rad("Tryck för att spela igen", t * 0.8);
+    rad(t("Slut på rena underbyxor!", "Out of clean underpants!"), ts * 1.1, "#ffd27a");
+    if (olyckaText) rad(olyckaText, ts * 0.6, "#d5def0");
+    rad(t(poang + " poäng", antal(poang, "point", "points")), ts * 1.0);
+    rad(poang > 0 && poang === rekord ? t("🏆 Nytt rekord! 🏆", "🏆 New high score! 🏆") : t("Rekord: ", "High score: ") + rekord, ts * 0.7);
+    rad(t("Du är nu: ", "You are now: ") + titel(poang), ts * 0.75, "#9dffb0");
+    rad(t(`Dag ${dag} · ${antalFisar} fisar · ${antalSmyg} hördes inte`, `Day ${dag} · ${antal(antalFisar, "fart", "farts")} · ${antalSmyg} unheard`), ts * 0.55, "#d5def0");
+    if (storstaFis) rad(t(`Största fisen: ${storstaFis}`, `Biggest fart: ${storstaFis}`), ts * 0.55, "#d5def0");
+    y += ts * 0.4;
+    if (tidSedanSlut > 1) rad(t("Tryck för att spela igen", "Tap to play again"), ts * 0.8);
   }
 }
 

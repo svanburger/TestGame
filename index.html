@@ -8,7 +8,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Bajskorv Studios">
   <meta name="theme-color" content="#1b2a4a">
-  <title>Bajskorv Studios – Våra spel</title>
+  <title data-en="Bajskorv Studios – Our Games">Bajskorv Studios – Våra spel</title>
   <style>
     /* Menyn: en rubrik och ett stort kort per spel. Lägg till fler kort längre ner. */
     :root {
@@ -182,6 +182,30 @@
       max-width: 30ch;
     }
 
+    /* Knappen för att byta språk, längst ner */
+    .sprakval {
+      display: flex;
+      justify-content: center;
+    }
+
+    .sprakknapp {
+      padding: 10px 18px;
+      border: 2px solid rgba(255, 255, 255, 0.5);
+      border-radius: 999px;
+      font: inherit;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text);
+      background: rgba(0, 0, 0, 0.25);
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+
+    .sprakknapp:focus-visible {
+      outline: 4px solid #ffffff;
+      outline-offset: 4px;
+    }
+
     @media (prefers-reduced-motion: reduce) {
       .kort { transition: none; }
       .bage { animation: none; stroke-dashoffset: 0; }
@@ -244,36 +268,46 @@
         <line x1="400" y1="236" x2="472" y2="236" stroke="#ffd23f" stroke-width="3" stroke-linecap="round"/>
         <text class="logga-text" x="300" y="245" text-anchor="middle" font-size="24" textLength="170" lengthAdjust="spacing" fill="#ffffff">STUDIOS</text>
       </svg>
-      <p class="presenterar">presenterar</p>
+      <p class="presenterar" data-en="presents">presenterar</p>
     </header>
-    <h1>Våra spel</h1>
+    <h1 data-en="Our games">Våra spel</h1>
     <nav class="spel">
       <a class="kort kort-stjarnor" href="stjarnor/">
         <span class="ikon">⭐</span>
-        <span class="namn">Fånga stjärnorna</span>
-        <span class="beskrivning">Fånga det som faller och undvik bomberna.</span>
+        <span class="namn" data-en="Catch the Stars">Fånga stjärnorna</span>
+        <span class="beskrivning" data-en="Catch what falls and dodge the bombs.">Fånga det som faller och undvik bomberna.</span>
       </a>
       <a class="kort kort-parkour" href="parkour/">
         <span class="ikon">🐱</span>
-        <span class="namn">Parkourkatten</span>
-        <span class="beskrivning">Hoppa, gör volter och akta dig för de onda djuren.</span>
+        <span class="namn" data-en="Parkour Cat">Parkourkatten</span>
+        <span class="beskrivning" data-en="Jump, do flips and watch out for the evil animals.">Hoppa, gör volter och akta dig för de onda djuren.</span>
       </a>
       <a class="kort kort-pappa" href="pappa/">
         <span class="ikon">🛋️</span>
-        <span class="namn">Låt pappa vila</span>
-        <span class="beskrivning">Lek och städa – men tyst, så att pappa får vila.</span>
+        <span class="namn" data-en="Let Dad Rest">Låt pappa vila</span>
+        <span class="beskrivning" data-en="Play and tidy up – but quietly, so Dad can rest.">Lek och städa – men tyst, så att pappa får vila.</span>
       </a>
       <a class="kort kort-hund" href="hund/">
         <span class="ikon">🐕</span>
-        <span class="namn">Hundpromenaden</span>
-        <span class="beskrivning">Gå ut med hunden, plocka upp bajset och försök ta dig hem.</span>
+        <span class="namn" data-en="Dog Walk">Hundpromenaden</span>
+        <span class="beskrivning" data-en="Walk the dog, pick up the poop and try to get home.">Gå ut med hunden, plocka upp bajset och försök ta dig hem.</span>
       </a>
       <a class="kort kort-fis" href="fis/">
         <span class="ikon">💨</span>
-        <span class="namn">Lagom tryck</span>
-        <span class="beskrivning">Fisa så mycket du kan – men tryck inte för hårt!</span>
+        <span class="namn" data-en="Just the Right Push">Lagom tryck</span>
+        <span class="beskrivning" data-en="Fart as much as you can – but don't push too hard!">Fisa så mycket du kan – men tryck inte för hårt!</span>
       </a>
     </nav>
+    <footer class="sprakval">
+      <button id="sprakKnapp" class="sprakknapp" type="button"></button>
+    </footer>
   </main>
+  <script src="sprak.js"></script>
+  <script>
+    // Knappen byter till det andra språket
+    const sprakKnapp = document.getElementById("sprakKnapp");
+    sprakKnapp.textContent = SPRAK === "sv" ? "🇬🇧 English" : "🇸🇪 Svenska";
+    sprakKnapp.addEventListener("click", () => bytSprak(SPRAK === "sv" ? "en" : "sv"));
+  </script>
 </body>
 </html>

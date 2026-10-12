@@ -13,6 +13,9 @@
 //  är promenaden slut.
 //
 //  Börja med att ändra i INSTALLNINGAR här nedanför.
+//
+//  Texterna finns på svenska och engelska och skrivs så här:
+//  t("svenska", "English"). Ändrar du en text, ändra gärna båda!
 // =====================================================================
 
 const INSTALLNINGAR = {
@@ -68,50 +71,50 @@ const INSTALLNINGAR = {
   andraHundar: ["🐩", "🐕‍🦺", "🦮"],
 
   banor: [
-    { namn: "Kvarteret", langd: 170 },
-    { namn: "Parken", langd: 190 },
+    { namn: t("Kvarteret", "Our Street"), langd: 170 },
+    { namn: t("Parken", "The Park"), langd: 190 },
   ],
 
   // Det folk säger. Lägg gärna till saker era egna grannar säger!
   pratbubblor: {
-    hundagare: ["Han är snäll, han vill bara hälsa!", "Han har aldrig gjort så förut."],
-    influencer: ["Säg hej till följarna, Coco!", "Glöm inte att gilla!"],
-    mute: ["…nej, jag är på mute.", "Hörs jag nu?", "HÖRS JAG NU?"],
-    joggare: ["Morsning!", "Halvmara i maj!", "…halv… mara… i… maj…"], // Han springer förbi tre gånger
-    gubbe: ["Jag har bott här i 34 år."],
-    pappa: ["Bara fem minuter till…"],
-    tradgubbe: ["Jag tar dem på vägen tillbaka."],
-    granne: ["Vi VET vem du är."],      // Om man lämnar ett bajs
-    blot: ["Tack. Så. Mycket."],         // Om en blöt hund skakar sig bredvid en
+    hundagare: [t("Han är snäll, han vill bara hälsa!", "He's friendly, he just wants to say hi!"), t("Han har aldrig gjort så förut.", "He's never done that before.")],
+    influencer: [t("Säg hej till följarna, Coco!", "Say hi to my followers, Coco!"), t("Glöm inte att gilla!", "Don't forget to like!")],
+    mute: [t("…nej, jag är på mute.", "…no, I'm on mute."), t("Hörs jag nu?", "Can you hear me now?"), t("HÖRS JAG NU?", "CAN YOU HEAR ME NOW?")],
+    joggare: [t("Morsning!", "Morning!"), t("Halvmara i maj!", "Half marathon in May!"), t("…halv… mara… i… maj…", "…half… mara… thon… in… May…")], // Han springer förbi tre gånger
+    gubbe: [t("Jag har bott här i 34 år.", "I've lived here for 34 years.")],
+    pappa: [t("Bara fem minuter till…", "Just five more minutes…")],
+    tradgubbe: [t("Jag tar dem på vägen tillbaka.", "I'll grab them on the way back.")],
+    granne: [t("Vi VET vem du är.", "We KNOW who you are.")],      // Om man lämnar ett bajs
+    blot: [t("Tack. Så. Mycket.", "Thanks. So. Much.")],         // Om en blöt hund skakar sig bredvid en
   },
 
   // Lappar som sitter på lyktstolparna i kvarteret
   lappar: [
-    "Till den som INTE plockar upp efter sin hund. Vi VET vem du är. /Brf Solgläntan",
-    "Bortsprungen katt. Svarar på namnet Måns. Svarar egentligen inte alls.",
-    "Säljes: barnvagn, nästan oanvänd. Barnet vägrade.",
+    t("Till den som INTE plockar upp efter sin hund. Vi VET vem du är. /Brf Solgläntan", "To whoever does NOT pick up after their dog. We KNOW who you are. /Sunnyside Neighbors"),
+    t("Bortsprungen katt. Svarar på namnet Måns. Svarar egentligen inte alls.", "Lost cat. Answers to the name Mittens. Doesn't really answer at all."),
+    t("Säljes: barnvagn, nästan oanvänd. Barnet vägrade.", "For sale: stroller, almost unused. The baby refused."),
   ],
-  kioskSkylt: "Korv med bröd 45 kr. (Ja, 45.)",
-  rastgardSkylt: "Hundrastgård – Hundar ska vara kopplade",
+  kioskSkylt: t("Korv med bröd 45 kr. (Ja, 45.)", "Hot dog $9. (Yes, 9.)"),
+  rastgardSkylt: t("Hundrastgård – Hundar ska vara kopplade", "Dog park – Dogs must be on a leash"),
 
-  karlek: "Det här är kärlek.",  // Syns ibland när man plockar upp
-  ingenSag: "Ingen såg. Eller?",  // Om man lämnar ett bajs när påsarna är slut
+  karlek: t("Det här är kärlek.", "This is love."),  // Syns ibland när man plockar upp
+  ingenSag: t("Ingen såg. Eller?", "No one saw. Right?"),  // Om man lämnar ett bajs när påsarna är slut
 
   utmarkelser: {
-    ensamstaende: { namn: "Ensamstående förälder", text: "Släpad efter hunden i 8 sekunder." },
-    detVarInteJag: { namn: "Det var inte jag", text: "Ett bajs blev kvar. Ingen såg. Eller?" },
-    vardagslyx: { namn: "Vardagslyx", text: "Korv till dig själv. Inte till hunden." },
-    vuxenpoang: { namn: "Vuxenpoäng", text: "Du har sagt \"Fot!\" 25 gånger." },
-    hogskolepoang: { namn: "Högskolepoäng", text: "Du har nu en högskolepoäng i hundägande." },
+    ensamstaende: { namn: t("Ensamstående förälder", "Single parent"), text: t("Släpad efter hunden i 8 sekunder.", "Dragged by the dog for 8 seconds.") },
+    detVarInteJag: { namn: t("Det var inte jag", "It wasn't me"), text: t("Ett bajs blev kvar. Ingen såg. Eller?", "A poop got left behind. No one saw. Right?") },
+    vardagslyx: { namn: t("Vardagslyx", "Treat yourself"), text: t("Korv till dig själv. Inte till hunden.", "A hot dog for you. Not for the dog.") },
+    vuxenpoang: { namn: t("Vuxenpoäng", "Grown-up points"), text: t("Du har sagt \"Fot!\" 25 gånger.", "You've said \"Heel!\" 25 times.") },
+    hogskolepoang: { namn: t("Högskolepoäng", "College credit"), text: t("Du har nu en högskolepoäng i hundägande.", "You now have a college credit in dog care.") },
   },
 
   // Betyget när man kommer fram, efter hur många stjärnor man fick
   betyg: {
-    3: "Hunden är glad. Grannarna är glada. Ingen tror på dig.",
-    2: "Ungefär som en vanlig tisdag.",
-    1: "Mamma tar nästa promenad.",
+    3: t("Hunden är glad. Grannarna är glada. Ingen tror på dig.", "The dog is happy. The neighbors are happy. Nobody believes you."),
+    2: t("Ungefär som en vanlig tisdag.", "Pretty much a normal Tuesday."),
+    1: t("Mamma tar nästa promenad.", "Mom is doing the next walk."),
   },
-  slut: "Hunden hittade hem själv. Den har aldrig varit gladare.",
+  slut: t("Hunden hittade hem själv. Den har aldrig varit gladare.", "The dog found its way home. It's never been happier."),
 
   barnFarg: "#4aa3df",  // Barnets jacka
   harFarg: "#5a3a22",   // Barnets hår
@@ -433,7 +436,7 @@ function fortsatt() {
 }
 
 function visaMusikKnapp() {
-  musikKnapp.textContent = musikPa ? "♪ Musik: på" : "♪ Musik: av";
+  musikKnapp.textContent = musikPa ? t("♪ Musik: på", "♪ Music: on") : t("♪ Musik: av", "♪ Music: off");
 }
 
 pausKnapp.addEventListener("click", pausa);
@@ -717,14 +720,14 @@ function startaSpel() {
   musikSteg = 0;
   banNr = 0;
   byggBana();
-  visaTips("Dra med fingret för att gå. Tryck på hunden: Fot!", 5);
+  visaTips(t("Dra med fingret för att gå. Tryck på hunden: Fot!", "Drag your finger to walk. Tap the dog: Heel!"), 5);
 }
 
 function nastaBana() {
   banNr += 1;
   lage = "spelar";
   byggBana();
-  visaTips(INSTALLNINGAR.banor[banNr].namn + "! Akta ankorna…", 3.5);
+  visaTips(t(INSTALLNINGAR.banor[banNr].namn + "! Akta ankorna…", INSTALLNINGAR.banor[banNr].namn + "! Watch out for the ducks…"), 3.5);
 }
 
 function raknaStjarnor(s) {
@@ -807,30 +810,30 @@ function utmarkelse(nyckel) {
 function sagFot() {
   const h = hund;
   if (h.los) {
-    saga(barn, "Fot!!", 0.9);
-    visaText("Hunden lyssnar inte!", h.x, h.v + 1, "#ffd1d1");
+    saga(barn, t("Fot!!", "Heel!!"), 0.9);
+    visaText(t("Hunden lyssnar inte!", "The dog isn't listening!"), h.x, h.v + 1, "#ffd1d1");
     return;
   }
   if (h.lage === "bajsar") {
-    saga(barn, "Fot…?", 0.9);
-    visaText("Det går inte att stoppa.", h.x, h.v + 1, "#ffe9b3");
+    saga(barn, t("Fot…?", "Heel…?"), 0.9);
+    visaText(t("Det går inte att stoppa.", "There's no stopping it."), h.x, h.v + 1, "#ffe9b3");
     return;
   }
   if (h.lage === "trasslad") {
-    saga(barn, "Fot…?", 0.9);
-    visaTips("Kopplet har trasslat sig! Gå runt trädet.", 3);
+    saga(barn, t("Fot…?", "Heel…?"), 0.9);
+    visaTips(t("Kopplet har trasslat sig! Gå runt trädet.", "The leash is tangled! Walk around the tree."), 3);
     return;
   }
   if (h.fotVila > 0) {
-    saga(barn, "Fot…?", 0.9);
+    saga(barn, t("Fot…?", "Heel…?"), 0.9);
     return;
   }
-  saga(barn, "Fot!", 1);
+  saga(barn, t("Fot!", "Heel!"), 1);
   spelaTon(1400, 1500, 0.12, "sine", 0.08);
   spelaTon(1500, 2100, 0.2, "sine", 0.08, 0.14);
   fotAntal += 1;
   if (fotAntal >= 25) utmarkelse("vuxenpoang");
-  if (h.lage === "spand") ge("Bra hund!", P.fot, h.x, h.v + 1, "#b6f09c");
+  if (h.lage === "spand") ge(t("Bra hund!", "Good dog!"), P.fot, h.x, h.v + 1, "#b6f09c");
   if (h.lage === "halsar" && h.mal) {
     h.mal.vantar = false;
     h.mal.halsat = true;
@@ -989,7 +992,7 @@ function bliSpand(s) {
   hund.mal = s;
   hund.tid = 0.8;
   spelaTon(700, 1000, 0.08, "square", 0.04);
-  visaTipsEnGang("spand", "Hunden har sett något! Tryck på hunden: Fot!", 3.5);
+  visaTipsEnGang("spand", t("Hunden har sett något! Tryck på hunden: Fot!", "The dog saw something! Tap the dog: Heel!"), 3.5);
 }
 
 // Hunden har stått och spänt sig. Nu kör den!
@@ -1006,7 +1009,7 @@ function efterSpand() {
     s.flyr = true;
     s.flyTid = 0;
     h.lage = "jagar";
-    saga(s, "FRÄÄS!", 1);
+    saga(s, t("FRÄÄS!", "HISSS!"), 1);
   } else if (s.typ === "ekorre") {
     s.springer = true;
     s.tid = 3.4;
@@ -1027,7 +1030,7 @@ function efterSpand() {
     h.malX = s.sida * 2.7;
     h.malV = begr(h.v + 1, s.v0 + 0.8, s.v1 - 0.8);
     h.tid = 5;
-    visaTipsEnGang("gras", "Hunden vill bajsa på gubbens gräsmatta! Säg Fot!", 3.5);
+    visaTipsEnGang("gras", t("Hunden vill bajsa på gubbens gräsmatta! Säg Fot!", "The dog wants to poop on the old man's lawn! Say Heel!"), 3.5);
   } else {
     tillbaka();
   }
@@ -1099,7 +1102,7 @@ function borjaBajsa() {
   hund.lage = "bajsar";
   hund.tid = 1.8;
   hund.mal = null;
-  visaTipsEnGang("bajs", "Hunden bajsar! Gå dit och plocka upp 💩", 4);
+  visaTipsEnGang("bajs", t("Hunden bajsar! Gå dit och plocka upp 💩", "The dog is pooping! Go pick it up 💩"), 4);
 }
 
 function laggBajs() {
@@ -1118,7 +1121,7 @@ function laggBajs() {
   h.bajsTid = slumpMellan(INSTALLNINGAR.bajsTakt[0], INSTALLNINGAR.bajsTakt[1]);
   spelaTon(190, 90, 0.25, "square", 0.05);
   if (b.regnbage) {
-    visaText("🌈 Ett regnbågsbajs!", b.x, b.v + 1, "#ffe14d");
+    visaText(t("🌈 Ett regnbågsbajs!", "🌈 A rainbow poop!"), b.x, b.v + 1, "#ffe14d");
     spelaArpeggio([1047, 1319, 1568, 2093]);
   }
   // Bajsade den på gubbens gräsmatta?
@@ -1146,11 +1149,11 @@ function borjaSmita() {
   trassel = [];
   humor = 70;
   skakning = 0.35;
-  visaText("Hunden smiter!", h.x, h.v + 1.2, "#ff8a7a");
+  visaText(t("Hunden smiter!", "The dog ran away!"), h.x, h.v + 1.2, "#ff8a7a");
   spelaTon(500, 150, 0.6, "sawtooth", 0.1);
   if (navigator.vibrate) navigator.vibrate(250);
   if (livKvar <= 0) slutOm = 2.6;
-  else visaTips("Spring ikapp hunden!", 3);
+  else visaTips(t("Spring ikapp hunden!", "Run and catch the dog!"), 3);
 }
 
 function fangaHund() {
@@ -1158,7 +1161,7 @@ function fangaHund() {
   h.los = false;
   humor = 55;
   tillbaka();
-  ge("Fångad!", 0, h.x, h.v + 1, "#b6f09c");
+  ge(t("Fångad!", "Caught!"), 0, h.x, h.v + 1, "#b6f09c");
   spelaArpeggio([523, 784]);
 }
 
@@ -1205,7 +1208,7 @@ function uppdateraHund(dt) {
       h.skall -= dt;
       if (h.skall <= 0) {
         h.skall = 0.6;
-        visaText("VOFF!", h.x + slumpMellan(-0.3, 0.3), h.v + 1, "#ffffff", true, 0.7);
+        visaText(t("VOFF!", "WOOF!"), h.x + slumpMellan(-0.3, 0.3), h.v + 1, "#ffffff", true, 0.7);
         spelaTon(420, 220, 0.12, "sawtooth", 0.06);
       }
       if (m.typ === "anka" && iDammen(h, m.damm)) plask(m.damm);
@@ -1241,7 +1244,7 @@ function uppdateraHund(dt) {
       if (h.tid <= 0) {
         p.vantar = false;
         p.halsat = true;
-        ge("Hej hej!", P.halsa, h.x, h.v + 1, "#b6f09c");
+        ge(t("Hej hej!", "Hello!"), P.halsa, h.x, h.v + 1, "#b6f09c");
         tillbaka();
       }
       break;
@@ -1266,7 +1269,7 @@ function uppdateraHund(dt) {
         if (avst(h, p) < 0.5) {
           h.lerig = 12;
           humor = Math.min(100, humor + 10);
-          visaText("PLASK!", h.x, h.v + 1, "#c9a27a");
+          visaText(t("PLASK!", "SPLASH!"), h.x, h.v + 1, "#c9a27a");
           spelaTon(700, 150, 0.3, "sine", 0.12);
         }
         tillbaka();
@@ -1313,7 +1316,7 @@ function plask(damm) {
   }
   h.blot = 10;
   humor = Math.min(100, humor + H.plask);
-  visaText("PLASK!", h.x, h.v + 1.1, "#9fd4ff");
+  visaText(t("PLASK!", "SPLASH!"), h.x, h.v + 1.1, "#9fd4ff");
   skakning = 0.2;
   spelaTon(900, 120, 0.45, "sine", 0.15);
   spelaTon(600, 90, 0.4, "triangle", 0.08, 0.1);
@@ -1396,20 +1399,20 @@ function uppdateraTrassel() {
   trassel = trassel.filter((t) => t === trasslad || nara(t.sak, KOPPEL + 0.8) || (Math.abs(t.w) > 1.2 && nara(t.sak, KOPPEL + 1.6)));
 
   if (!trasslad) {
-    const t = trassel.find((t) => Math.abs(t.w) >= TRASSLA);
-    if (t) {
-      trasslad = t;
+    const fast = trassel.find((t) => Math.abs(t.w) >= TRASSLA);
+    if (fast) {
+      trasslad = fast;
       if (hund.lage === "halsar" && hund.mal) hund.mal.vantar = false;
       hund.lage = "trasslad";
       hund.mal = null;
-      visaTips("Kopplet har trasslat sig! Gå runt trädet.", 4);
-      visaText("Trassel!", hund.x, hund.v + 1, "#ffe9b3");
+      visaTips(t("Kopplet har trasslat sig! Gå runt trädet.", "The leash is tangled! Walk around the tree."), 4);
+      visaText(t("Trassel!", "Tangled!"), hund.x, hund.v + 1, "#ffe9b3");
       spelaTon(300, 180, 0.35, "triangle", 0.08);
     }
   } else if (Math.abs(trasslad.w) <= Math.PI * 0.8) {
     trasslad = null;
     tillbaka();
-    ge("Löst!", P.trassel, hund.x, hund.v + 1, "#b6f09c");
+    ge(t("Löst!", "Untangled!"), P.trassel, hund.x, hund.v + 1, "#b6f09c");
     spelaTon(600, 1000, 0.12, "triangle", 0.1);
   }
 }
@@ -1474,7 +1477,7 @@ function uppdateraSaker(dt) {
             pasar = Math.min(INSTALLNINGAR.pasarMax, pasar + 1);
             visaText("+1 🛍️", s.x, s.v + 0.8, "#ffffff");
           } else {
-            ge(s.guld ? "Guldben!" : "", s.poang, s.x, s.v + 0.8, s.guld ? "#ffe14d" : "#ffffff");
+            ge(s.guld ? t("Guldben!", "Golden bone!") : "", s.poang, s.x, s.v + 0.8, s.guld ? "#ffe14d" : "#ffffff");
           }
           spelaTon(880, 1760, 0.15, "triangle", 0.09);
         }
@@ -1511,8 +1514,8 @@ function uppdateraSaker(dt) {
           if (barn.kioskTid > 1) {
             s.kopt = true;
             barn.korv = 10;
-            saga(barn, "En korv, tack!", 1.5);
-            visaText("-45 kr", s.x, s.v + 1.6, "#ffd1d1");
+            saga(barn, t("En korv, tack!", "A hot dog, please!"), 1.5);
+            visaText(t("-45 kr", "-$9"), s.x, s.v + 1.6, "#ffd1d1");
             utmarkelse("vardagslyx");
           }
         } else {
@@ -1603,7 +1606,7 @@ function uppdateraPerson(p, dt) {
     p.skall = (p.skall || 0) - dt;
     if (p.skall <= 0) {
       p.skall = 0.5;
-      visaText("VOFF!", p.hundX + slumpMellan(-0.2, 0.2), p.hundV + 0.9, "#ffffff", false, 0.6);
+      visaText(t("VOFF!", "WOOF!"), p.hundX + slumpMellan(-0.2, 0.2), p.hundV + 0.9, "#ffffff", false, 0.6);
       spelaTon(520, 300, 0.1, "sawtooth", 0.04);
     }
   }
@@ -1632,7 +1635,7 @@ function uppdateraBajs(dt) {
         // Ingen påse... och så klev man i det
         b.trampad = true;
         barn.lerskor = 6;
-        ge("BLÄÄ!", -5, b.x, b.v + 1, "#c9a27a");
+        ge(t("BLÄÄ!", "EWW!"), -5, b.x, b.v + 1, "#c9a27a");
         spelaTon(220, 110, 0.5, "sawtooth", 0.08);
       }
     }
@@ -1647,14 +1650,14 @@ function plocka(b) {
   stat.plockade += 1;
   plockadeTotalt += 1;
   if (b.regnbage) {
-    ge("🌈 Regnbågsbajs!", P.regnbage, b.x, b.v + 1, "#ffe14d");
+    ge(t("🌈 Regnbågsbajs!", "🌈 Rainbow poop!"), P.regnbage, b.x, b.v + 1, "#ffe14d");
     spelaArpeggio([1047, 1319, 1568, 2093, 2637]);
   } else {
     ge(Math.random() < 0.25 ? INSTALLNINGAR.karlek : "", P.bajs, b.x, b.v + 1, "#ffffff");
     spelaTon(600, 1200, 0.15, "triangle", 0.09);
   }
   if (plockadeTotalt === 10) utmarkelse("hogskolepoang");
-  if (pasar === 0) visaTipsEnGang("slut", "Slut på påsar! Leta efter en påsautomat 🛍️", 4);
+  if (pasar === 0) visaTipsEnGang("slut", t("Slut på påsar! Leta efter en påsautomat 🛍️", "Out of bags! Look for a bag dispenser 🛍️"), 4);
 }
 
 // Bajset försvann nedanför skärmen utan att någon plockade upp det
@@ -1694,8 +1697,8 @@ function uppdateraHumor(dt) {
   humor = begr(humor + f * dt, 0, 100);
   if (dt > 0) humorTrend += ((humor - fore) / dt - humorTrend) * Math.min(1, dt * 4);
   if (humor >= 25 && humor <= 75) stat.gladTid += dt;
-  if (humor < 20) visaTipsEnGang("trist", "Hunden har tråkigt. Låt den nosa på ett träd!", 4);
-  if (humor > 80) visaTipsEnGang("vild", "Hunden blir för vild! Tryck på hunden: Fot!", 4);
+  if (humor < 20) visaTipsEnGang("trist", t("Hunden har tråkigt. Låt den nosa på ett träd!", "The dog is bored. Let it sniff a tree!"), 4);
+  if (humor > 80) visaTipsEnGang("vild", t("Hunden blir för vild! Tryck på hunden: Fot!", "The dog is getting too wild! Tap the dog: Heel!"), 4);
   if (humor >= 100) borjaSmita();
 }
 
@@ -1753,7 +1756,7 @@ function uppdatera(dt) {
     // Barnet släpas efter hunden!
     if (barn.slapas <= 0 && tid - senastWii > 2.5) {
       senastWii = tid;
-      visaText(slumpa(["Wiiiii!", "Neeej!", "Vänta!"]), barn.x, barn.v + 1.2, "#ffffff");
+      visaText(slumpa([t("Wiiiii!", "Wheeee!"), t("Neeej!", "Nooo!"), t("Vänta!", "Wait!")]), barn.x, barn.v + 1.2, "#ffffff");
     }
     barn.slapas = 0.25;
     slapTid += dt;
@@ -1777,7 +1780,7 @@ function uppdatera(dt) {
     return;
   }
   if (barn.v >= langd - 0.8) {
-    if (hund.los) visaTipsEnGang("fanga", "Fånga hunden först!", 3);
+    if (hund.los) visaTipsEnGang("fanga", t("Fånga hunden först!", "Catch the dog first!"), 3);
     else banaKlar();
   }
 }
@@ -2058,8 +2061,8 @@ function ritaGrasmatta(g) {
   ctx.font = `bold ${Math.max(7, u * 0.11)}px ${TYPSNITT}`;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.fillText("BETRÄD EJ", sx, sy - u * 0.69);
-  ctx.fillText("GRÄSMATTAN", sx, sy - u * 0.56);
+  ctx.fillText(t("BETRÄD EJ", "KEEP OFF"), sx, sy - u * 0.69);
+  ctx.fillText(t("GRÄSMATTAN", "THE GRASS"), sx, sy - u * 0.56);
 }
 
 function ritaRastgard(r) {
@@ -2142,7 +2145,7 @@ function ritaMal() {
     ctx.moveTo(SX(-1.9), y - u * 1.6);
     ctx.quadraticCurveTo(SX(0), y - u * 2.6, SX(1.9), y - u * 1.6);
     ctx.stroke();
-    ritaText("PARKEN", SX(0), y - u * 2, u * 0.42, "#ffe9b3");
+    ritaText(t("PARKEN", "PARK"), SX(0), y - u * 2, u * 0.42, "#ffe9b3");
   } else {
     // Hemma!
     const x0 = SX(-3.2);
@@ -2167,7 +2170,7 @@ function ritaMal() {
     ctx.fillRect(SX(1.4), y - u * 3.2, u * 1, u * 0.8);
     ctx.fillStyle = "#c0392b";
     ctx.fillRect(SX(-0.7), y - u * 0.6, u * 1.4, u * 0.4); // Dörrmatta
-    ritaText("HEM", SX(0), y - u * 2.4, u * 0.45, "#ffffff");
+    ritaText(t("HEM", "HOME"), SX(0), y - u * 2.4, u * 0.45, "#ffffff");
   }
 }
 
@@ -2305,7 +2308,7 @@ function ritaKiosk(k) {
     ctx.fillRect(x - w * 0.55 + (i * w * 1.1) / 6, y - u * 1.55, (w * 1.1) / 6 + 0.5, u * 0.28);
   }
   ritaEmoji("🌭", x, y - u * 1.8, u * 0.45);
-  ritaText("45:-", x + w * 0.42, y - u * 0.3, u * 0.22, "#ffe14d");
+  ritaText(t("45:-", "$9"), x + w * 0.42, y - u * 0.3, u * 0.22, "#ffe14d");
 }
 
 function ritaBank(b) {
@@ -2897,12 +2900,13 @@ function ritaToast(t) {
 
 function ritaSkarmar() {
   if (lage === "spelar" || lage === "paus") return;
-  const t = Math.min(bredd, hojd) / 14; // Textstorlek
+  const ts = Math.min(bredd, hojd) / 14; // Textstorlek
   const mitt = bredd / 2;
 
   ctx.fillStyle = "rgba(20, 35, 20, 0.6)";
   ctx.fillRect(0, 0, bredd, hojd);
-  let y = marginal.topp + Math.max(t * 1.6, hojd * 0.1);
+  // Första raden hamnar under hus-knappen (som slutar 68 px ner), även på en låg skärm
+  let y = marginal.topp + Math.max(ts * 1.6, hojd * 0.1, 68 + ts * 0.9);
   const rad = (text, storlek, farg) => {
     // Bryter långa texter på flera rader och krymper ord som inte får plats
     ctx.font = `bold ${storlek}px ${TYPSNITT}`;
@@ -2916,47 +2920,48 @@ function ritaSkarmar() {
   const stjarnor = (st) => "⭐".repeat(st) + "☆".repeat(3 - st);
 
   if (lage === "start") {
-    rad("Hundpromenaden", t * 1.4, "#ffd27a");
-    y += t * 0.3;
-    rad("Dra med fingret för att gå", t * 0.7);
-    rad("Tryck på hunden så säger du \"Fot!\"", t * 0.7);
-    rad("Gå över 💩 för att plocka upp", t * 0.7);
-    rad("Låt hunden nosa – men inte bli för vild!", t * 0.7, "#ffb3b3");
-    y += t * 0.4;
-    rad("Tryck för att börja", t * 0.85, "#ffffff");
-    if (rekord > 0) rad("Rekord: " + rekord, t * 0.6, "#d5def0");
+    rad(t("Hundpromenaden", "Dog Walk"), ts * 1.4, "#ffd27a");
+    y += ts * 0.3;
+    rad(t("Dra med fingret för att gå", "Drag your finger to walk"), ts * 0.7);
+    rad(t("Tryck på hunden så säger du \"Fot!\"", "Tap the dog to say \"Heel!\""), ts * 0.7);
+    rad(t("Gå över 💩 för att plocka upp", "Walk over 💩 to pick it up"), ts * 0.7);
+    rad(t("Låt hunden nosa – men inte bli för vild!", "Let the dog sniff – but not get too wild!"), ts * 0.7, "#ffb3b3");
+    y += ts * 0.4;
+    rad(t("Tryck för att börja", "Tap to start"), ts * 0.85, "#ffffff");
+    if (rekord > 0) rad(t("Rekord: ", "High score: ") + rekord, ts * 0.6, "#d5def0");
   }
 
   if (lage === "mellan") {
     const st = betygLista[betygLista.length - 1];
-    rad(INSTALLNINGAR.banor[banNr].namn + " klart!", t * 1.2, "#ffd27a");
-    rad(stjarnor(st), t * 1.1);
-    rad(INSTALLNINGAR.betyg[st], t * 0.7);
-    rad(`💩 ${stat.plockade} av ${stat.bajsat} upplockade · 🐶 glad ${Math.round((100 * stat.gladTid) / Math.max(1, stat.banTid))} % av tiden`, t * 0.55, "#d5def0");
-    rad(poang + " poäng", t * 0.85);
-    y += t * 0.3;
-    if (tidSedanSlut > 1) rad("Tryck för att gå till " + INSTALLNINGAR.banor[banNr + 1].namn.toLowerCase(), t * 0.75);
+    rad(t(INSTALLNINGAR.banor[banNr].namn + " klart!", INSTALLNINGAR.banor[banNr].namn + " done!"), ts * 1.2, "#ffd27a");
+    rad(stjarnor(st), ts * 1.1);
+    rad(INSTALLNINGAR.betyg[st], ts * 0.7);
+    const gladProcent = Math.round((100 * stat.gladTid) / Math.max(1, stat.banTid));
+    rad(t(`💩 ${stat.plockade} av ${stat.bajsat} upplockade · 🐶 glad ${gladProcent} % av tiden`, `💩 ${stat.plockade} of ${stat.bajsat} picked up · 🐶 happy ${gladProcent}% of the time`), ts * 0.55, "#d5def0");
+    rad(t(poang + " poäng", poang === 1 ? "1 point" : poang + " points"), ts * 0.85);
+    y += ts * 0.3;
+    if (tidSedanSlut > 1) rad(t("Tryck för att gå till ", "Tap to go to ") + INSTALLNINGAR.banor[banNr + 1].namn.toLowerCase(), ts * 0.75);
   }
 
   if (lage === "hemma") {
     const st = betygLista[betygLista.length - 1];
-    rad("Hemma! 🏠", t * 1.3, "#ffd27a");
-    rad(stjarnor(st), t * 1.1);
-    rad(INSTALLNINGAR.betyg[st], t * 0.7);
-    rad(poang + " poäng", t * 1);
-    rad(poang > 0 && poang === rekord ? "🏆 Nytt rekord! 🏆" : "Rekord: " + rekord, t * 0.65);
-    if (fatt.size) rad("🏆 " + [...fatt].map((k) => INSTALLNINGAR.utmarkelser[k].namn).join(" · "), t * 0.5, "#d5def0");
-    y += t * 0.3;
-    if (tidSedanSlut > 1) rad("Tryck för att gå en ny promenad", t * 0.75);
+    rad(t("Hemma! 🏠", "Home! 🏠"), ts * 1.3, "#ffd27a");
+    rad(stjarnor(st), ts * 1.1);
+    rad(INSTALLNINGAR.betyg[st], ts * 0.7);
+    rad(t(poang + " poäng", poang === 1 ? "1 point" : poang + " points"), ts * 1);
+    rad(poang > 0 && poang === rekord ? t("🏆 Nytt rekord! 🏆", "🏆 New high score! 🏆") : t("Rekord: ", "High score: ") + rekord, ts * 0.65);
+    if (fatt.size) rad("🏆 " + [...fatt].map((k) => INSTALLNINGAR.utmarkelser[k].namn).join(" · "), ts * 0.5, "#d5def0");
+    y += ts * 0.3;
+    if (tidSedanSlut > 1) rad(t("Tryck för att gå en ny promenad", "Tap to go for a new walk"), ts * 0.75);
   }
 
   if (lage === "slut") {
-    rad(INSTALLNINGAR.slut, t * 0.95, "#ffd27a");
-    y += t * 0.2;
-    rad(poang + " poäng", t * 1);
-    rad(poang > 0 && poang === rekord ? "🏆 Nytt rekord! 🏆" : "Rekord: " + rekord, t * 0.65);
-    y += t * 0.3;
-    if (tidSedanSlut > 1) rad("Tryck för att försöka igen", t * 0.75);
+    rad(INSTALLNINGAR.slut, ts * 0.95, "#ffd27a");
+    y += ts * 0.2;
+    rad(t(poang + " poäng", poang === 1 ? "1 point" : poang + " points"), ts * 1);
+    rad(poang > 0 && poang === rekord ? t("🏆 Nytt rekord! 🏆", "🏆 New high score! 🏆") : t("Rekord: ", "High score: ") + rekord, ts * 0.65);
+    y += ts * 0.3;
+    if (tidSedanSlut > 1) rad(t("Tryck för att försöka igen", "Tap to try again"), ts * 0.75);
   }
 }
 
@@ -3013,7 +3018,8 @@ function rita() {
   }
   ctx.restore();
 
-  if (lage !== "start") ritaPanel();
+  // Poäng och hjärtan syns bara under spelet. Skärmarna mellan banorna visar poängen själva.
+  if (lage === "spelar" || lage === "paus") ritaPanel();
   ritaSkarmar();
 }
 
