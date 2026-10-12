@@ -2905,7 +2905,8 @@ function ritaSkarmar() {
 
   ctx.fillStyle = "rgba(20, 35, 20, 0.6)";
   ctx.fillRect(0, 0, bredd, hojd);
-  let y = marginal.topp + Math.max(ts * 1.6, hojd * 0.1);
+  // Första raden hamnar under hus-knappen (som slutar 68 px ner), även på en låg skärm
+  let y = marginal.topp + Math.max(ts * 1.6, hojd * 0.1, 68 + ts * 0.9);
   const rad = (text, storlek, farg) => {
     // Bryter långa texter på flera rader och krymper ord som inte får plats
     ctx.font = `bold ${storlek}px ${TYPSNITT}`;
@@ -3017,7 +3018,8 @@ function rita() {
   }
   ctx.restore();
 
-  if (lage !== "start") ritaPanel();
+  // Poäng och hjärtan syns bara under spelet. Skärmarna mellan banorna visar poängen själva.
+  if (lage === "spelar" || lage === "paus") ritaPanel();
   ritaSkarmar();
 }
 

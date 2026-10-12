@@ -684,7 +684,22 @@ function ge(mangd) {
   banPoang += mangd;
 }
 
+function textHojd(stor) {
+  return u * (stor ? 0.42 : 0.32) * 1.3;
+}
+
 function flyg(text, x, y, farg = "#ffffff", stor = false) {
+  // Flyger det redan texter på samma ställe flyttas de upp, så att de inte hamnar på varandra
+  const nyHalv = textHojd(stor) / 2;
+  let tak = y - nyHalv;
+  const ivagen = texter
+    .filter((tx) => Math.abs(tx.x - x) < u * 3 && tx.y - textHojd(tx.stor) / 2 < y + nyHalv)
+    .sort((a, b) => b.y - a.y);
+  for (const tx of ivagen) {
+    const halv = textHojd(tx.stor) / 2;
+    if (tx.y + halv > tak) tx.y = tak - halv;
+    tak = tx.y - halv;
+  }
   texter.push({ text, x, y, farg, stor, kvar: 1.7 });
 }
 
