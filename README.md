@@ -366,8 +366,8 @@ runt bordet så att alla blir nöjda.
 - **Dra en gäst** från bänken till en stol. Man kan också **trycka på en
   gäst och sedan på en stol**. Sitter någon redan där byter de plats. Drar
   man en gäst tillbaka till bänken reser hen sig.
-- På första banan visar en **hand 👆** vad man ska göra, ett önskemål i
-  taget.
+- På första banan visar en **hand 👆** hur man gör med det första
+  önskemålet. Sedan får man klura själv.
 - **Gästernas önskemål** står i listan bredvid bordet, med bilder så att
   man inte behöver kunna läsa:
   - 💕 vill sitta **bredvid** någon
@@ -410,7 +410,7 @@ Testa att ändra i `bord/game.js`:
   den hemliga önskan (`hemlig`) och vad som händer på middagen (`middag`)
 - vad mormor säger när man frågar henne (`mormorSager`)
 - titlarna man får efter sista banan (`titlar`)
-- `guide: true` på en bana gör att handen visar vad man ska göra
+- `guide: true` på en bana gör att handen visar hur man gör med det första önskemålet
 - `visaGrona: false` gör spelet svårare: då blir önskemålen inte gröna
   förrän man serverar
 
