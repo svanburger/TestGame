@@ -8,6 +8,7 @@ inget att installera. Startsidan är en meny där man väljer spel.
 | `index.html` | Menyn man ser först, med Bajskorv Studios-loggan.         |
 | `spel.css`   | Gemensam stil för spelen (fyller skärmen, hus-knappen).   |
 | `sprak.js`   | Väljer svenska eller engelska och översätter texterna.    |
+| `favicon.svg` | Ikonen med bajshögen som syns i webbläsarens flik. `favicon.png` och `apple-touch-icon.png` (hemskärmen på iPad) är samma bild som PNG. |
 | `stjarnor/`  | Spelet "Fånga stjärnorna".                                |
 | `parkour/`   | Spelet "Parkourkatten".                                   |
 | `pappa/`     | Spelet "Låt pappa vila".                                  |
@@ -31,7 +32,7 @@ Alla spel finns på svenska och engelska. Språket väljs av sig självt:
   på svensk tid (då är man nog i Sverige).
 - **Engelska** annars.
 
-Längst ner i menyn finns en knapp för att byta språk. Valet sparas på
+Uppe till höger i menyn finns en knapp för att byta språk. Valet sparas på
 enheten och gäller i alla spel.
 
 När man skriver en ny text i ett spel skriver man den på båda språken:
