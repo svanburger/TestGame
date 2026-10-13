@@ -265,6 +265,13 @@ bajsa överallt. Ta dig hem med en glad hund och en ren trottoar!
     bajs framför honom investerar han (Riskkapital!).
   - **🛋️ Psykologen** (stan) undrar hur det känns när hunden drar, och
     släpas barnet förbi har det en otrygg anknytning. Det blir 1 200 kr.
+  - **📚 Läraren med värdegrund** (parken) går med sin klass i reflexvästar
+    och sätter ord på känslor. Hunden vill hälsa på barnen ("HUNDEN!!"), och
+    alla hundar är olika och lika värda. Håller man i hunden får man en
+    guldstjärna, och bajsar hunden i närheten hamnar det i veckobrevet.
+  - **🦺 Ordningsvakten** (stan) stoppar barnet för kontroll: har hunden
+    legitimation? Han visslar om barnet släpas förbi och skriver en rapport
+    om hunden bajsar i närheten.
 - På vägen möter man folk som säger saker, och ibland får man en
   🏆 utmärkelse. När man kommer fram får man ⭐⭐⭐ för en glad hund och en
   ren trottoar.

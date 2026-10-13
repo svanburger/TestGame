@@ -188,6 +188,19 @@ const INSTALLNINGAR = {
       t("Modiga smaker, men inte helt övertygande.", "Bold flavors, but not entirely convincing."),
       t("Jordig doftprofil. Lätt nötig. Två av fem.", "Earthy bouquet. Slightly nutty. Two out of five."),
     ],
+    larare: [ // I parken, med en klass i reflexvästar
+      t("Barn, vad känner vi när vi ser en hund? Vi sätter ord på det.", "Children, what do we feel when we see a dog? Let's put it into words."),
+      t("Kom ihåg: alla hundar är olika och lika värda.", "Remember: all dogs are different and equally valuable."),
+      t("Fint! Ni visade respekt för vårt gemensamma rum.", "Lovely! You showed respect for our shared space."),
+      t("Det här tar vi upp i veckobrevet.", "I'll mention this in the weekly newsletter."), // Om hunden bajsar i närheten
+    ],
+    klassen: [t("HUNDEN!!", "DOGGY!!"), t("Får jag klappa?", "Can I pet it?"), t("Den luktar!", "It smells!")],
+    ordningsvakt: [ // I stan, mitt på gågatan
+      t("Stopp! Kontroll. Har hunden legitimation?", "Stop! Checkpoint. Does the dog have ID?"),
+      t("…Okej. Ni får passera. Den här gången.", "…Fine. You may pass. This time."),
+      t("PRRRT! Det där är inte tillåtet!", "TWEET! That is not allowed!"),       // Om barnet släpas förbi
+      t("Nedskräpning! Jag skriver en rapport.", "Littering! I'm writing a report."), // Om hunden bajsar i närheten
+    ],
     psykolog: [ // I stan, med en soffa på trottoaren
       t("Och hur känns det när hunden drar?", "And how does it feel when the dog pulls?"),
       t("Intressant. Ni har en otrygg anknytning.", "Interesting. You have an insecure attachment."),
@@ -246,6 +259,8 @@ const INSTALLNINGAR = {
     vuxenpoang: { namn: t("Vuxenpoäng", "Grown-up points"), text: t("Du har sagt \"Fot!\" 25 gånger.", "You've said \"Heel!\" 25 times.") },
     hogskolepoang: { namn: t("Högskolepoäng", "College credit"), text: t("Du har nu en högskolepoäng i hundägande.", "You now have a college credit in dog care.") },
     postvan: { namn: t("Brevbärarens vän", "Mail carrier's friend"), text: t("Hunden lät brevbäraren vara. För en gångs skull.", "The dog left the mail carrier alone. For once.") },
+    veckobrevet: { namn: t("Veckobrevet", "The newsletter"), text: t("Din hund nämndes i veckobrevet.", "Your dog was mentioned in the weekly newsletter.") },
+    rapporterad: { namn: t("Rapporterad", "Reported"), text: t("Någon har skrivit en rapport om dig.", "Someone has written a report about you.") },
     riskkapital: { namn: t("Riskkapital", "Venture capital"), text: t("Någon investerade i ditt bajs.", "Someone invested in your poop.") },
     foraldralognen: { namn: t("Föräldralögnen", "The parent lie"), text: t("Glassbilen hade visst glass.", "The ice cream truck had ice cream after all.") },
     friskluft: { namn: t("Friskluft", "Fresh air"), text: t("Ute i hela regnskuren. Det var väl skönt?", "Out in the whole rain shower. Wasn't that nice?") },
@@ -806,6 +821,15 @@ function nyPerson(sort, x, v, extra) {
   } else if (sort === "psykolog") {
     p.bild = "🧍";
     p.extra = [["🛋️", -0.95, -0.3, 0.85], ["📋", 0.3, -0.5, 0.3]];
+  } else if (sort === "larare") {
+    p.bild = "🧍‍♀️";
+    p.fart = -0.6;
+    p.lockar = 3.2; // Hunden vill hälsa på barnen
+    p.klass = 4;    // Så många barn i reflexväst som går efter
+    p.extra = [["📚", 0.3, -0.45, 0.3]];
+  } else if (sort === "ordningsvakt") {
+    p.bild = "🧍‍♂️";
+    p.extra = [["🦺", 0, -0.5, 0.45], ["📋", 0.38, -0.45, 0.28]];
   }
   if (p.hund) {
     p.hundX = x + 0.7;
@@ -957,6 +981,7 @@ function byggParken() {
   saker.push({ typ: "kiosk", x: s3 * 2.8, v: langd * 0.52, sida: s3, kopt: false });
   saker.push(nyPerson("matskribent", s3 * 1.7, langd * 0.52 + 1.1));
   saker.push(nyPerson("alfa", -s3 * 2.3, langd * 0.46));
+  saker.push(nyPerson("larare", 0.6, langd * 0.69));
   const bank = { typ: "bank", x: -s3 * 2.4, v: langd * 0.63 };
   saker.push(bank);
   saker.push(nyPerson("pappa", bank.x, bank.v - 0.05));
@@ -1084,6 +1109,7 @@ function byggStan() {
   saker.push(nyPerson("cykelbud", 0.9, langd * 0.24));
   saker.push(nyPerson("techinvesterare", 0.8, langd * 0.34));
   saker.push(nyPerson("psykolog", -1.6, langd * 0.8));
+  saker.push(nyPerson("ordningsvakt", 0.3, langd * 0.58));
   saker.push(nyPerson("brevbarare", -0.6, langd * 0.42));
   saker.push(nyPerson("influencer", 0.8, langd * 0.56, { pass: 3 }));
   saker.push(nyPerson("cykelbud", -0.3, langd * 0.74));
@@ -1392,6 +1418,12 @@ function uppdateraBarn(dt) {
       dv = b.malV - b.v;
     }
   }
+  if (b.stopp > 0) {
+    // Ordningsvakten har stoppat barnet för kontroll
+    b.stopp -= dt;
+    dx = 0;
+    dv = 0;
+  }
   const l = Math.hypot(dx, dv);
   b.ror = l > 0;
   if (b.ror) {
@@ -1684,12 +1716,27 @@ function laggBajs() {
     fas: Math.random() * 6,
     stor: !!hundTyp.storBajs,
   };
+  // Hamnade det i vattnet (dammen, fontänen eller havet) går det inte att plocka upp
+  const iVatten = saker.some((s) => s.typ === "damm" && iDammen(b, s, 1)) || (banTyp() === "strand" && b.x > strandlinje(b.v));
+  if (iVatten) {
+    visaText(t("Plopp! …i vattnet.", "Plop! …in the water."), b.x, b.v + 1, "#9fd4ff", true, 1.8);
+    spelaTon(500, 200, 0.2, "sine", 0.08);
+    h.bajsTid = bajsTakt();
+    tillbaka();
+    return;
+  }
   bajsen.push(b);
   stat.bajsat += 1;
   humor = Math.min(100, humor + H.bajs);
   h.bajsTid = bajsTakt();
   spelaTon(190, 90, 0.25, "square", 0.05);
   viral(b.x, b.v);
+  const vuxen = saker.find((p) => (p.sort === "larare" || p.sort === "ordningsvakt") && !p.bajsSett && Math.hypot(p.x - b.x, p.v - b.v) < 6);
+  if (vuxen) {
+    vuxen.bajsSett = true;
+    saga(vuxen, PRAT[vuxen.sort][3], 3);
+    utmarkelse(vuxen.sort === "larare" ? "veckobrevet" : "rapporterad");
+  }
   const kritiker = saker.find((p) => p.sort === "matskribent" && !p.recenserat && Math.hypot(p.x - b.x, p.v - b.v) < 6);
   if (kritiker) {
     kritiker.recenserat = true;
@@ -1854,6 +1901,14 @@ function uppdateraHund(dt) {
         if (m.sort === "brevbarare") {
           saga(m, PRAT.brevbarare[1], 3);
           visaText("✉️ ✉️ ✉️", m.x, m.v + 1.2, "#ffffff", true, 1.5);
+        } else if (m.sort === "larare") {
+          // Klassen jublar
+          m.glad = 2.5;
+          m.sagt = 2;
+          saga(m, PRAT.larare[1], 3);
+          visaText(slumpa(PRAT.klassen), m.x + 0.4, m.v + 2, "#ffe14d", true, 1.6);
+          humor = Math.min(100, humor + 8);
+          spelaArpeggio([660, 880, 990]);
         } else if (m.sort === "alfa") {
           m.skramd = 1.2;
           m.sagt = 2;
@@ -2720,6 +2775,37 @@ function uppdateraPerson(p, dt) {
       } else if (p.sagt === 1 && !p.jagad && barn.v - p.v > 1.5) {
         p.sagt = 3;
         saga(p, rep[2], 3);
+      }
+      break;
+    case "larare":
+      p.glad = Math.max(0, (p.glad || 0) - dt);
+      if (!p.sagt && d < 5) {
+        p.sagt = 1;
+        saga(p, rep[0], 3.5);
+      } else if (p.sagt === 1 && !p.jagad && barn.v - p.v > 2.5) {
+        // Man höll i hunden när man gick förbi klassen
+        p.sagt = 3;
+        saga(p, rep[2], 3);
+        ge(t("⭐ Guldstjärna!", "⭐ Gold star!"), 15, p.x, p.v + 1.8, "#ffe14d");
+      }
+      break;
+    case "ordningsvakt":
+      if (!p.sagt && d < 2.2) {
+        // Stopp! Kontroll!
+        p.sagt = 1;
+        barn.stopp = 2;
+        saga(p, rep[0], 2.2);
+        visaText("PRRRT!", p.x, p.v + 1.8, "#ffffff", true, 1);
+        spelaTon(2600, 2400, 0.4, "square", 0.04);
+      } else if (p.sagt === 1 && barn.stopp <= 0) {
+        p.sagt = 2;
+        saga(p, rep[1], 2.6);
+      }
+      if (!p.visslat && barn.slapas > 0 && d < 6) {
+        p.visslat = true;
+        saga(p, rep[2], 2.4);
+        visaText("PRRRT!", p.x, p.v + 1.8, "#ffffff", true, 1);
+        spelaTon(2600, 2400, 0.4, "square", 0.04);
       }
       break;
     case "psykolog":
@@ -3996,6 +4082,18 @@ function ritaPerson(p) {
       ctx.fill();
     }
     ritaEmoji("😴", vx + st * 0.1, y - st * 0.62, st * 0.24);
+  }
+  // Klassen i reflexvästar går två och två bakom läraren
+  if (p.klass) {
+    for (let i = 0; i < p.klass; i++) {
+      const kx = x + (i % 2 ? 0.35 : -0.35) * st;
+      const ky = y - (0.7 + Math.floor(i / 2) * 0.6) * st; // Bakom läraren (längre upp på vägen)
+      const hopp = p.glad > 0 ? Math.abs(Math.sin(tid * 10 + i)) * st * 0.2 : Math.abs(Math.sin(p.fas * 8 + i)) * st * 0.04;
+      const ks = st * 0.62;
+      skugga(kx, ky, ks * 0.25, ks * 0.07);
+      ritaEmoji(i % 2 ? "🧍‍♂️" : "🧍‍♀️", kx, ky - ks * 0.48 - hopp, ks);
+      ritaEmoji("🦺", kx, ky - ks * 0.52 - hopp, ks * 0.42);
+    }
   }
   if (!sitter) skugga(x, y, st * 0.3, st * 0.09);
   ritaEmoji(p.bild, x, y - st * (sitter ? 0.6 : 0.48) - studs, st);
