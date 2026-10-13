@@ -176,6 +176,21 @@ Testa att ändra i `pappa/game.js`:
 Du är ute och går med hunden. Hunden vill nosa på allt, jaga allt och
 bajsa överallt. Ta dig hem med en glad hund och en ren trottoar!
 
+- **Välj hund** på startskärmen (tryck på ett kort, eller använd
+  piltangenterna):
+  - **🐕 Hunden:** lagom på allt. Bra att börja med.
+  - **🌭 Taxen:** kort och snabb, drar inte så hårt och gräver gropar
+    överallt. Ibland hittar den ett ben.
+  - **🐩 Pudeln:** fin och lugn. Blir inte lika vild, bajsar mer sällan och
+    vägrar gå i pölar. Blir den blöt är den förolämpad. Influencern kallar
+    den "en kollega".
+  - **🦮 Sankt Bernhard:** jättestor och långsam, men drar dig överallt.
+    Jättestora bajs som det går åt två påsar till. Låses upp när man fått
+    800 poäng.
+  - **🐈 Katten:** går inte i koppel. Eller? Lyssnar inte alltid på "Fot!",
+    lägger sig ibland och vägrar gå, jagar inte katter och apporterar inte.
+    Hundägarna undrar om det är en katt. Låses upp när man kommit hem en
+    gång.
 - **Dra med fingret** (eller använd piltangenterna/WASD) så går barnet dit.
   Hunden sitter i kopplet och drar åt sitt eget håll. När den drar riktigt
   hårt blir barnet släpat efter ("Wiiiii!").
@@ -193,29 +208,103 @@ bajsa överallt. Ta dig hem med en glad hund och en ren trottoar!
   på andra hundar. Men jagar den katter, ekorrar och ankor blir den vild,
   och når mätaren 🤪 smiter den. Då måste man springa ikapp. Smiter hunden
   3 gånger är promenaden slut.
+- **❗ Oväntade händelser** dyker upp då och då, på alla banor:
+  - **📮 Brevbäraren** kommer springande med ett paket. Hunden HATAR
+    brevbärare och ser honom på långt håll. Hinner man säga "Fot!" innan
+    hunden jagar honom blir han glad, och man får utmärkelsen
+    **Brevbärarens vän**.
+  - **🌧️ Regnskur!** "Det var väl skönt med lite friskluft?" Det blir mörkt
+    och regnar, det blir nya pölar, och hunden vill hem NU och drar barnet
+    framåt som en galning. Efteråt är hunden blöt och skakar sig på folk.
+  - **🚒 Brandbilen** kör förbi med sirenen på, och hunden sätter sig och
+    ylar. (Katten bryr sig inte.)
+  - **🍦 Glassbilen** kör fram och stannar och spelar sin melodi. Familjeregeln
+    säger att glassen är slut när glassbilen spelar musik (barnet tror inte på
+    det). Hunden springer dit och tigger. Ställer man sig vid luckan köper man
+    en glass, och på stranden tar måsen den.
 - **Trassel:** Jagar hunden en ekorre runt ett träd trasslar kopplet sig.
   Gå runt trädet åt det håll som pilen visar för att få loss det.
-- Promenaden går genom **🏘️ Kvarteret** (lyktstolpar med lappar, katter på
-  staketen och en sur gubbe med en perfekt gräsmatta som hunden gärna vill
-  bajsa på) och sedan **🌳 Parken** (dammen med ankor, ekorrar, korvkiosken,
-  hundrastgården och en pappa på en parkbänk) hela vägen hem.
+- Promenaden går genom fyra banor och sedan hem:
+  - **🏘️ Kvarteret:** lyktstolpar med lappar, katter på staketen och en sur
+    gubbe med en perfekt gräsmatta som hunden gärna vill bajsa på.
+  - **🌳 Parken:** dammen med ankor, ekorrar, korvkiosken, hundrastgården och
+    en pappa på en parkbänk.
+  - **🏙️ Stan:** butiker med skyltar, bilar på gatan, en fontän med duvor,
+    lattepappan på caféet, gatumusikanten som spelar "sin egen" låt
+    Wonderwall (hunden ylar med), brevbäraren som hunden HATAR och cykelbud
+    som vill ha fem stjärnor.
+  - **🏖️ Stranden:** badhytter, parasoller, krabbor som nyper, måsar,
+    flickan med sandslottet (håll i hunden!), solbadaren, mannen med
+    metalldetektorn, kallbadaren som lockar ut hunden i vattnet och en
+    glasskiosk. Köper man en glass tar måsen den.
+- Förlorar man på en senare bana kan man **försöka igen från den banan**, med
+  poängen man hade när banan började.
+- **📱 Influencern** dyker upp på alla banor: med pudeln Coco i matchande
+  rosett, när hon vill filma din "autentiska" hund, med Coco i handväskan,
+  när hon gör en fika-reel i stan och när hon mediterar live på stranden. När hon filmar lyser en röd **REC**-lampa. Händer något
+  pinsamt framför kameran (barnet släpas, hunden bajsar, plaskar, smiter
+  eller man kliver i bajs) går det **viralt**: man får poäng och nya
+  följare, som syns högst upp och när man kommer hem. Plockar man upp bajs
+  på film blir det bara 3 likes.
+- **🎾 Padelgrannen** frågar om man har testat padel och tappar bollen över
+  staketet. Hunden springer efter den och kommer tillbaka med den
+  (**apport**), och då blir den lugn och nöjd. Man kan också plocka upp
+  bollen själv.
+- **🛴 Elsparkcyklar** ligger slängda mitt i vägen. Hunden vill gärna nosa
+  på dem, och kissar alltid på dem ("Rättvisa.").
+- **👀 Grannarna ser allt.** Kliver man i bajs i kvarteret, eller lämnar
+  det, rör sig en gardin och ett par ögon tittar ut.
+- **Fler figurer man möter:**
+  - **💼 Fastighetsmäklaren** (kvarteret) har visning: ljust och fräscht,
+    bara lite fukt i källaren. Varje gång hunden skäller nära honom räknar
+    han det som ett bud, och priset går upp. Kissar hunden på TILL
+    SALU-skylten står det "husdjursvänligt" i annonsen, och bajs kallar han
+    "lantlig charm".
+  - **🌿 Homeopaten** (kvarteret) ger hunden en droppe för lugn, utspädd en
+    miljon gånger. Effekt: ingen.
+  - **🏋️ Alfahannen** (parken) vaknar 04.30 och tar isbad. Springer hunden
+    fram till honom skriker han, men han blev inte rädd. Det var uppvärmning.
+  - **🤵 Matskribenten** (vid korvkiosken) recenserar korven, och bajsar
+    hunden i närheten recenserar han det också. Två av fem.
+  - **🕴️ Tech-investeraren** (stan) disruptar hundpromenader. Plockar man upp
+    bajs framför honom investerar han (Riskkapital!).
+  - **🛋️ Psykologen** (stan) undrar hur det känns när hunden drar, och
+    släpas barnet förbi har det en otrygg anknytning. Det blir 1 200 kr.
+  - **📚 Läraren med värdegrund** (parken) går med sin klass i reflexvästar
+    och sätter ord på känslor. Hunden vill hälsa på barnen ("HUNDEN!!"), och
+    alla hundar är olika och lika värda. Håller man i hunden får man en
+    guldstjärna, och bajsar hunden i närheten hamnar det i veckobrevet.
+  - **🦺 Ordningsvakten** (stan) stoppar barnet för kontroll: har hunden
+    legitimation? Han visslar om barnet släpas förbi och skriver en rapport
+    om hunden bajsar i närheten.
 - På vägen möter man folk som säger saker, och ibland får man en
   🏆 utmärkelse. När man kommer fram får man ⭐⭐⭐ för en glad hund och en
   ren trottoar.
 
 Testa att ändra i `hund/game.js`:
 
-- vad folk säger (`pratbubblor`), lapparna på lyktstolparna (`lappar`) och
-  betygen när man kommer hem (`betyg`)
+- hundarna man kan välja (`hundar`): hur snabba, stora och vilda de är, hur
+  hårt de drar och vad som krävs för att låsa upp dem
+
+- vad folk säger (`pratbubblor`), till exempel vad influencern säger när
+  något går viralt (`influencerViral`), lapparna på lyktstolparna
+  (`lappar`) och betygen när man kommer hem (`betyg`)
+- hur mycket poäng det blir när något går viralt eller hunden apporterar
+  (`poang`)
 - hur ofta hunden bajsar (`bajsTakt`) och hur ofta det blir regnbågsbajs
   (`regnbage`)
 - hur många påsar man har (`pasarStart`, `pasarMax`)
+- hur ofta det händer något oväntat, vilka händelser som finns och hur länge
+  det regnar (`handelser`)
 - hur långt kopplet är (`koppel`) och hur fort barnet och hunden går
   (`fart`, `hundFart`, `jaktFart`)
 - hur fort hunden får tråkigt eller blir vild (`humor`)
 - vilka godsaker som finns och hur mycket poäng de ger (`godsaker`)
 - vilka hundar och katter man möter (`andraHundar`, `katter`)
-- hur långa promenaderna är (`banor`)
+- vilka banor promenaden går genom, i vilken ordning och hur långa de är
+  (`banor`)
+- lapparna i stan (`lapparStan`), butikernas skyltar (`butiker`) och
+  skyltarna på stranden (`skyltarStrand`)
 - promenadvisslan: längst ner i `game.js` finns `MUSIK`
 
 ## Lagom tryck 💨
