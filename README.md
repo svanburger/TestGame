@@ -254,6 +254,17 @@ bajsa överallt. Ta dig hem med en glad hund och en ren trottoar!
   på dem, och kissar alltid på dem ("Rättvisa.").
 - **👀 Grannarna ser allt.** Kliver man i bajs i kvarteret, eller lämnar
   det, rör sig en gardin och ett par ögon tittar ut.
+- **Fler figurer man möter:**
+  - **🌿 Homeopaten** (kvarteret) ger hunden en droppe för lugn, utspädd en
+    miljon gånger. Effekt: ingen.
+  - **🏋️ Alfahannen** (parken) vaknar 04.30 och tar isbad. Springer hunden
+    fram till honom skriker han, men han blev inte rädd. Det var uppvärmning.
+  - **🤵 Matskribenten** (vid korvkiosken) recenserar korven, och bajsar
+    hunden i närheten recenserar han det också. Två av fem.
+  - **🕴️ Tech-investeraren** (stan) disruptar hundpromenader. Plockar man upp
+    bajs framför honom investerar han (Riskkapital!).
+  - **🛋️ Psykologen** (stan) undrar hur det känns när hunden drar, och
+    släpas barnet förbi har det en otrygg anknytning. Det blir 1 200 kr.
 - På vägen möter man folk som säger saker, och ibland får man en
   🏆 utmärkelse. När man kommer fram får man ⭐⭐⭐ för en glad hund och en
   ren trottoar.
