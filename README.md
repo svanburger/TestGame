@@ -176,6 +176,21 @@ Testa att ändra i `pappa/game.js`:
 Du är ute och går med hunden. Hunden vill nosa på allt, jaga allt och
 bajsa överallt. Ta dig hem med en glad hund och en ren trottoar!
 
+- **Välj hund** på startskärmen (tryck på ett kort, eller använd
+  piltangenterna):
+  - **🐕 Hunden:** lagom på allt. Bra att börja med.
+  - **🌭 Taxen:** kort och snabb, drar inte så hårt och gräver gropar
+    överallt. Ibland hittar den ett ben.
+  - **🐩 Pudeln:** fin och lugn. Blir inte lika vild, bajsar mer sällan och
+    vägrar gå i pölar. Blir den blöt är den förolämpad. Influencern kallar
+    den "en kollega".
+  - **🦮 Sankt Bernhard:** jättestor och långsam, men drar dig överallt.
+    Jättestora bajs som det går åt två påsar till. Låses upp när man fått
+    800 poäng.
+  - **🐈 Katten:** går inte i koppel. Eller? Lyssnar inte alltid på "Fot!",
+    lägger sig ibland och vägrar gå, jagar inte katter och apporterar inte.
+    Hundägarna undrar om det är en katt. Låses upp när man kommit hem en
+    gång.
 - **Dra med fingret** (eller använd piltangenterna/WASD) så går barnet dit.
   Hunden sitter i kopplet och drar åt sitt eget håll. När den drar riktigt
   hårt blir barnet släpat efter ("Wiiiii!").
@@ -230,6 +245,9 @@ bajsa överallt. Ta dig hem med en glad hund och en ren trottoar!
   ren trottoar.
 
 Testa att ändra i `hund/game.js`:
+
+- hundarna man kan välja (`hundar`): hur snabba, stora och vilda de är, hur
+  hårt de drar och vad som krävs för att låsa upp dem
 
 - vad folk säger (`pratbubblor`), till exempel vad influencern säger när
   något går viralt (`influencerViral`), lapparna på lyktstolparna
