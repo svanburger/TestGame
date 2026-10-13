@@ -366,16 +366,21 @@ runt bordet så att alla blir nöjda.
 - **Dra en gäst** från bänken till en stol. Man kan också **trycka på en
   gäst och sedan på en stol**. Sitter någon redan där byter de plats. Drar
   man en gäst tillbaka till bänken reser hen sig.
-- **Lapparna** visar vad gästerna vill, med bilder så att man inte behöver
-  kunna läsa:
+- På första banan visar en **hand 👆** vad man ska göra, ett önskemål i
+  taget.
+- **Gästernas önskemål** står i listan bredvid bordet, med bilder så att
+  man inte behöver kunna läsa:
   - 💕 vill sitta **bredvid** någon
   - 🚫 vill **inte** sitta bredvid någon
   - ↕️ vill sitta **mittemot** någon
   - ➡️ ska sitta vid en **stol med en bild**, till exempel 👑 (hedersplatsen),
     🪟 (fönstret), 🚪 (dörren), 🎤 (talarplatsen) eller 📶 (wifi:n)
 
-  Lapparna blir gröna när det stämmer och röda när det inte gör det.
-- **Tryck på en gäst eller en lapp** så får man veta mer. Här finns
+  Önskemålen blir gröna när det stämmer och röda när det inte gör det. Vid
+  bordet har varje gäst ett litet 😊 eller 😟, och 💢 syns mellan två som
+  inte vill sitta bredvid varandra.
+- **Tryck på en gäst** så får man veta vem det är och vad hen önskar.
+  **Tryck på ett önskemål** så lyser gästerna det gäller. Här finns också
   skämten för de vuxna.
 - **👵 Fråga mormor** om man kör fast. Då flyttar mormor en gäst till rätt
   plats.
@@ -383,11 +388,12 @@ runt bordet så att alla blir nöjda.
   säger vad de tycker. Stämningsmätaren visar hur det går.
 - Stjärnor:
   - ⭐ Alla sitter vid bordet (då kan man gå vidare till nästa bana).
-  - ⭐⭐ Alla lappar stämmer.
-  - ⭐⭐⭐ Någon har dessutom en **hemlig önskan**. Den står inte på någon
-    lapp, men då och då syns en 💭 tankebubbla ovanför gästen.
+  - ⭐⭐ Alla önskemål stämmer.
+  - ⭐⭐⭐ Någon har dessutom en **hemlig önskan**. Den dyker upp när man
+    har klarat banan en gång. Den står inte i listan, men då och då syns en
+    💭 tankebubbla ovanför gästen.
 - Fem banor: ☕ Fikat, 🥗 Förrätten, 🍖 Varmrätten, 🎤 Talet och 🎂 Tårtan.
-  Det blir fler gäster och fler lappar för varje bana.
+  Det blir fler gäster och fler önskemål för varje bana.
 
 **Om skämten:** Spelet ska gå att spela för barn, men det finns lite extra
 för de vuxna i det gästerna säger. De vuxna skämten handlar om vuxnas
@@ -400,11 +406,12 @@ Testa att ändra i `bord/game.js`:
 - gästerna (`folk`): namn, ansikte, sak, färg och vad de säger. Är det en
   pojke som spelar kan "Du" få ansiktet `"👦"`.
 - banorna (`banor`): hur stort bordet är (`bord`), bilderna vid stolarna
-  (`markeringar`), vilka gäster som är med (`gaster`), lapparna (`regler`),
+  (`markeringar`), vilka gäster som är med (`gaster`), önskemålen (`regler`),
   den hemliga önskan (`hemlig`) och vad som händer på middagen (`middag`)
 - vad mormor säger när man frågar henne (`mormorSager`)
 - titlarna man får efter sista banan (`titlar`)
-- `visaGrona: false` gör spelet svårare: då blir lapparna inte gröna
+- `guide: true` på en bana gör att handen visar vad man ska göra
+- `visaGrona: false` gör spelet svårare: då blir önskemålen inte gröna
   förrän man serverar
 
 Hur man skriver en egen bana står längst upp i `game.js`. Går en bana inte
