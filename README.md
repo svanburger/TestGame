@@ -255,6 +255,11 @@ bajsa överallt. Ta dig hem med en glad hund och en ren trottoar!
 - **👀 Grannarna ser allt.** Kliver man i bajs i kvarteret, eller lämnar
   det, rör sig en gardin och ett par ögon tittar ut.
 - **Fler figurer man möter:**
+  - **💼 Fastighetsmäklaren** (kvarteret) har visning: ljust och fräscht,
+    bara lite fukt i källaren. Varje gång hunden skäller nära honom räknar
+    han det som ett bud, och priset går upp. Kissar hunden på TILL
+    SALU-skylten står det "husdjursvänligt" i annonsen, och bajs kallar han
+    "lantlig charm".
   - **🌿 Homeopaten** (kvarteret) ger hunden en droppe för lugn, utspädd en
     miljon gånger. Effekt: ingen.
   - **🏋️ Alfahannen** (parken) vaknar 04.30 och tar isbad. Springer hunden

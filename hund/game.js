@@ -195,6 +195,13 @@ const INSTALLNINGAR = {
       t("Det här tar vi upp i veckobrevet.", "I'll mention this in the weekly newsletter."), // Om hunden bajsar i närheten
     ],
     klassen: [t("HUNDEN!!", "DOGGY!!"), t("Får jag klappa?", "Can I pet it?"), t("Den luktar!", "It smells!")],
+    maklare: [ // I kvarteret, vid huset som är till salu
+      t("Visning pågår! Ljust och fräscht. Bara lite fukt i källaren.", "Open house! Bright and fresh. Just a little damp in the basement."),
+      t("Utgångspriset är lågt. Det går nog på dubbla.", "The asking price is low. It'll probably go for double."),
+      t("Perfekt! Nu står det 'husdjursvänligt' i annonsen.", "Perfect! Now the listing says 'pet friendly'."), // Om hunden kissar på skylten
+      t("Det där kallar vi 'lantlig charm'.", "That's what we call 'rustic charm'."),           // Om hunden bajsar i närheten
+    ],
+    maklareSkylt: t("TILL SALU", "FOR SALE"),
     ordningsvakt: [ // I stan, mitt på gågatan
       t("Stopp! Kontroll. Har hunden legitimation?", "Stop! Checkpoint. Does the dog have ID?"),
       t("…Okej. Ni får passera. Den här gången.", "…Fine. You may pass. This time."),
@@ -259,6 +266,7 @@ const INSTALLNINGAR = {
     vuxenpoang: { namn: t("Vuxenpoäng", "Grown-up points"), text: t("Du har sagt \"Fot!\" 25 gånger.", "You've said \"Heel!\" 25 times.") },
     hogskolepoang: { namn: t("Högskolepoäng", "College credit"), text: t("Du har nu en högskolepoäng i hundägande.", "You now have a college credit in dog care.") },
     postvan: { namn: t("Brevbärarens vän", "Mail carrier's friend"), text: t("Hunden lät brevbäraren vara. För en gångs skull.", "The dog left the mail carrier alone. For once.") },
+    budgivning: { namn: t("Budgivning", "Bidding war"), text: t("Hunden har lagt ett bud på ett hus.", "The dog has placed a bid on a house.") },
     veckobrevet: { namn: t("Veckobrevet", "The newsletter"), text: t("Din hund nämndes i veckobrevet.", "Your dog was mentioned in the weekly newsletter.") },
     rapporterad: { namn: t("Rapporterad", "Reported"), text: t("Någon har skrivit en rapport om dig.", "Someone has written a report about you.") },
     riskkapital: { namn: t("Riskkapital", "Venture capital"), text: t("Någon investerade i ditt bajs.", "Someone invested in your poop.") },
@@ -827,6 +835,11 @@ function nyPerson(sort, x, v, extra) {
     p.lockar = 3.2; // Hunden vill hälsa på barnen
     p.klass = 4;    // Så många barn i reflexväst som går efter
     p.extra = [["📚", 0.3, -0.45, 0.3]];
+  } else if (sort === "maklare") {
+    p.bild = "🧍‍♂️";
+    p.pris = 4.2; // Miljoner
+    p.budVila = 0;
+    p.extra = [["💼", 0.38, -0.3, 0.32], ["🔑", -0.3, -0.55, 0.25]];
   } else if (sort === "ordningsvakt") {
     p.bild = "🧍‍♂️";
     p.extra = [["🦺", 0, -0.5, 0.45], ["📋", 0.38, -0.45, 0.28]];
@@ -911,6 +924,16 @@ function byggKvarteret() {
     const s = { typ: "staket", sida: h.sida, v0: h.v0, v1: h.v1 };
     saker.push(s);
     staket.push(s);
+  }
+
+  // Fastighetsmäklaren och huset som är till salu (en bit in på promenaden)
+  const saljHus = hus
+    .filter((h) => h !== gubbHus && h.v0 > 12 && h.v1 < langd * 0.3)
+    .sort((a, b) => Math.abs(a.v0 - langd * 0.13) - Math.abs(b.v0 - langd * 0.13))[0];
+  if (saljHus) {
+    const mv = (saljHus.v0 + saljHus.v1) / 2;
+    saker.push({ typ: "saljskylt", x: saljHus.sida * 2.05, v: mv - 0.8, stam: 0.1, nosbar: true });
+    saker.push(nyPerson("maklare", saljHus.sida * 2.7, mv + 0.4));
   }
 
   // Lyktstolpar, varannan på varje sida. På några sitter det lappar.
@@ -1666,7 +1689,7 @@ function hittaFrestelse(dt) {
     for (const s of saker) {
       if (!s.nosbar || h.nyss.has(s) || Math.abs(s.v - h.v) > 2) continue;
       const d = Math.hypot(s.x - h.x, s.v - h.v);
-      const spark = s.typ === "sparkcykel";
+      const spark = s.typ === "sparkcykel" || s.typ === "saljskylt";
       if (d < (spark ? 2.4 : 1.7) && Math.random() < dt * (spark ? 4 : 1.5)) {
         h.nyss.add(s);
         h.lage = "nosar";
@@ -1731,11 +1754,12 @@ function laggBajs() {
   h.bajsTid = bajsTakt();
   spelaTon(190, 90, 0.25, "square", 0.05);
   viral(b.x, b.v);
-  const vuxen = saker.find((p) => (p.sort === "larare" || p.sort === "ordningsvakt") && !p.bajsSett && Math.hypot(p.x - b.x, p.v - b.v) < 6);
+  const vuxen = saker.find((p) => ["larare", "ordningsvakt", "maklare"].includes(p.sort) && !p.bajsSett && Math.hypot(p.x - b.x, p.v - b.v) < 6);
   if (vuxen) {
     vuxen.bajsSett = true;
     saga(vuxen, PRAT[vuxen.sort][3], 3);
-    utmarkelse(vuxen.sort === "larare" ? "veckobrevet" : "rapporterad");
+    if (vuxen.sort === "larare") utmarkelse("veckobrevet");
+    if (vuxen.sort === "ordningsvakt") utmarkelse("rapporterad");
   }
   const kritiker = saker.find((p) => p.sort === "matskribent" && !p.recenserat && Math.hypot(p.x - b.x, p.v - b.v) < 6);
   if (kritiker) {
@@ -1861,6 +1885,7 @@ function uppdateraHund(dt) {
       if (h.skall <= 0) {
         h.skall = 0.6;
         visaText(hundTyp.katt ? t("MJAU!", "MEOW!") : t("VOFF!", "WOOF!"), h.x + slumpMellan(-0.3, 0.3), h.v + 1, "#ffffff", true, 0.7);
+        budgivning();
         spelaTon(420, 220, 0.12, "sawtooth", 0.06);
       }
       if (m.typ === "anka" && iDammen(h, m.damm)) plask(m.damm);
@@ -1949,8 +1974,14 @@ function uppdateraHund(dt) {
       gaMot(h, h.malX, h.malV, hundFart(), dt);
       if (h.mal) tittaMot(h.mal.x);
       if (h.tid <= 0) {
-        if (hundTyp.grava && h.mal && h.mal.typ !== "sparkcykel" && Math.random() < 0.6) {
+        if (hundTyp.grava && h.mal && h.mal.typ !== "sparkcykel" && h.mal.typ !== "saljskylt" && Math.random() < 0.6) {
           grava(h);
+        } else if (h.mal && h.mal.typ === "saljskylt") {
+          // Hunden kissar på TILL SALU-skylten. Mäklaren ser möjligheter.
+          h.mal.kiss = true;
+          visaText("pssss", h.x, h.v + 0.8, "#fff3a0", false, 1);
+          const m = saker.find((p) => p.sort === "maklare");
+          if (m) saga(m, PRAT.maklare[2], 3);
         } else if (h.mal && h.mal.typ === "sparkcykel") {
           // Hunden kissar alltid på elsparkcyklar
           h.mal.kiss = true;
@@ -2533,6 +2564,28 @@ function ritaRegn() {
   ctx.stroke();
 }
 
+// Mäklarens TILL SALU-skylt
+function ritaSaljskylt(s) {
+  const x = SX(s.x);
+  const y = SY(s.v);
+  skugga(x, y, u * 0.3, u * 0.08);
+  ctx.fillStyle = "#6b4a2a";
+  ctx.fillRect(x - u * 0.04, y - u * 1.1, u * 0.08, u * 1.1);
+  ctx.fillRect(x - u * 0.04, y - u * 1.1, u * 0.5, u * 0.06);
+  const bx = x + u * 0.05;
+  const by = y - u * 1.02;
+  ctx.fillStyle = "#ffffff";
+  ctx.strokeStyle = "#c0392b";
+  ctx.lineWidth = 2;
+  ctx.fillRect(bx, by, u * 0.9, u * 0.42);
+  ctx.strokeRect(bx, by, u * 0.9, u * 0.42);
+  ctx.fillStyle = "#c0392b";
+  ctx.font = `bold ${Math.max(8, u * 0.15)}px ${TYPSNITT}`;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText(PRAT.maklareSkylt, bx + u * 0.45, by + u * 0.21, u * 0.82);
+}
+
 function ritaGlassbil(s) {
   const x = SX(s.x);
   const y = SY(s.v);
@@ -2569,6 +2622,19 @@ function ritaBrandbil() {
   ritaEmoji("🚒", 0, 0, u * 1.4);
   ctx.restore();
   if (brandbil.hog) ritaEmoji("🚨", x, y - u * 0.75, u * 0.4);
+}
+
+// Skäller hunden nära mäklaren räknar han det som ett bud
+function budgivning() {
+  const m = saker.find((p) => p.sort === "maklare" && p.budVila <= 0 && avst(p, hund) < 6);
+  if (!m) return;
+  m.pris += 0.3;
+  m.budVila = 1.8;
+  const pris = t(m.pris.toFixed(1).replace(".", ",") + " miljoner", "$" + Math.round(m.pris * 100) + ",000");
+  saga(m, t("Nytt bud från hunden: ", "New bid from the dog: ") + pris + "!", 2.2);
+  visaText("📈", m.x + 0.5, m.v + 1.9, "#ffffff", true, 1.2);
+  spelaTon(1200, 1600, 0.1, "triangle", 0.06);
+  utmarkelse("budgivning");
 }
 
 // Säger första repliken när man kommer nära och den andra när man gått förbi
@@ -2787,6 +2853,18 @@ function uppdateraPerson(p, dt) {
         p.sagt = 3;
         saga(p, rep[2], 3);
         ge(t("⭐ Guldstjärna!", "⭐ Gold star!"), 15, p.x, p.v + 1.8, "#ffe14d");
+      }
+      break;
+    case "maklare":
+      p.budVila = Math.max(0, p.budVila - dt);
+      tvaRepliker(p, rep, d, 5);
+      if (!p.skallat && avst(p, hund) < 2.5 && !hund.los && hund.lage !== "bajsar") {
+        // Hunden skäller på främlingen. Mäklaren hör ett bud.
+        p.skallat = true;
+        visaText(hundTyp.katt ? t("MJAU!", "MEOW!") : t("VOFF!", "WOOF!"), hund.x, hund.v + 1, "#ffffff", true, 0.8);
+        spelaTon(420, 220, 0.12, "sawtooth", 0.06);
+        p.budVila = 0;
+        budgivning();
       }
       break;
     case "ordningsvakt":
@@ -4899,6 +4977,7 @@ function rita() {
     else if (s.typ === "krabba") r = ritaKrabba;
     else if (s.typ === "sandslott") r = ritaSandslott;
     else if (s.typ === "glassbil") r = ritaGlassbil;
+    else if (s.typ === "saljskylt") r = ritaSaljskylt;
     else if (s.typ === "sparkcykel") r = ritaSparkcykel;
     if (r) lista.push([s.v, () => r(s)]);
   }
