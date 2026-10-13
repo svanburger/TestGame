@@ -199,14 +199,32 @@ bajsa överallt. Ta dig hem med en glad hund och en ren trottoar!
   staketen och en sur gubbe med en perfekt gräsmatta som hunden gärna vill
   bajsa på) och sedan **🌳 Parken** (dammen med ankor, ekorrar, korvkiosken,
   hundrastgården och en pappa på en parkbänk) hela vägen hem.
+- **📱 Influencern** dyker upp tre gånger: med pudeln Coco i matchande
+  rosett, sedan när hon vill filma din "autentiska" hund, och sist med Coco
+  i handväskan. När hon filmar lyser en röd **REC**-lampa. Händer något
+  pinsamt framför kameran (barnet släpas, hunden bajsar, plaskar, smiter
+  eller man kliver i bajs) går det **viralt**: man får poäng och nya
+  följare, som syns högst upp och när man kommer hem. Plockar man upp bajs
+  på film blir det bara 3 likes.
+- **🎾 Padelgrannen** frågar om man har testat padel och tappar bollen över
+  staketet. Hunden springer efter den och kommer tillbaka med den
+  (**apport**), och då blir den lugn och nöjd. Man kan också plocka upp
+  bollen själv.
+- **🛴 Elsparkcyklar** ligger slängda mitt i vägen. Hunden vill gärna nosa
+  på dem, och kissar alltid på dem ("Rättvisa.").
+- **👀 Grannarna ser allt.** Kliver man i bajs i kvarteret, eller lämnar
+  det, rör sig en gardin och ett par ögon tittar ut.
 - På vägen möter man folk som säger saker, och ibland får man en
   🏆 utmärkelse. När man kommer fram får man ⭐⭐⭐ för en glad hund och en
   ren trottoar.
 
 Testa att ändra i `hund/game.js`:
 
-- vad folk säger (`pratbubblor`), lapparna på lyktstolparna (`lappar`) och
-  betygen när man kommer hem (`betyg`)
+- vad folk säger (`pratbubblor`), till exempel vad influencern säger när
+  något går viralt (`influencerViral`), lapparna på lyktstolparna
+  (`lappar`) och betygen när man kommer hem (`betyg`)
+- hur mycket poäng det blir när något går viralt eller hunden apporterar
+  (`poang`)
 - hur ofta hunden bajsar (`bajsTakt`) och hur ofta det blir regnbågsbajs
   (`regnbage`)
 - hur många påsar man har (`pasarStart`, `pasarMax`)

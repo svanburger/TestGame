@@ -55,6 +55,9 @@ const INSTALLNINGAR = {
     trassel: 10,        // När man trasslar loss kopplet
     halsa: 10,          // När hunden hälsat på en annan hund
     fot: 5,             // När man säger "Fot!" precis när hunden sett något
+    viral: 30,          // När influencern filmar något pinsamt
+    boll: 10,           // När man plockar upp padelbollen själv
+    apport: 20,         // När hunden kommer tillbaka med bollen
   },
 
   // Saker att plocka upp längs vägen. Ju lägre "vanlig", desto ovanligare.
@@ -78,7 +81,29 @@ const INSTALLNINGAR = {
   // Det folk säger. Lägg gärna till saker era egna grannar säger!
   pratbubblor: {
     hundagare: [t("Han är snäll, han vill bara hälsa!", "He's friendly, he just wants to say hi!"), t("Han har aldrig gjort så förut.", "He's never done that before.")],
-    influencer: [t("Säg hej till följarna, Coco!", "Say hi to my followers, Coco!"), t("Glöm inte att gilla!", "Don't forget to like!")],
+    // Influencern dyker upp tre gånger. Hon filmar allt.
+    influencer: [
+      [t("Säg hej till följarna, Coco!", "Say hi to my followers, Coco!"), t("Glöm inte att gilla!", "Don't forget to like!")],
+      [t("Får jag filma er hund? Den är så… autentisk.", "Can I film your dog? It's so… authentic."), t("Jag taggar er! Eller… vad heter ni?", "I'll tag you! Or… what are your names?")],
+      [t("Coco går inte på grus.", "Coco doesn't walk on gravel."), t("Inlägget är i samarbete med Bajspåsen AB.", "This post is sponsored by PoopBag Inc.")],
+    ],
+    influencerViral: [ // När hon filmar något pinsamt
+      t("Det här går VIRALT!", "This is going VIRAL!"),
+      t("Följarna kommer ÄLSKA det här!", "My followers will LOVE this!"),
+      t("#nofilter #hundliv", "#nofilter #doglife"),
+      t("Kan du göra om det? Jag hade fel vinkel.", "Can you do that again? Wrong angle."),
+    ],
+    influencerTrakigt: [ // När hon filmar något bra
+      t("Hmm. Det där får inga likes.", "Hmm. That won't get any likes."),
+      t("Gulligt. Men tråkigt.", "Cute. But boring."),
+    ],
+    padel: [t("Har du testat padel?", "Have you tried padel?"), t("Oj! Bollen!", "Oops! The ball!"), t("Du borde verkligen testa padel.", "You really should try padel.")],
+    sparkcykel: [ // Barnet säger det när det ser en elsparkcykel mitt i vägen
+      t("Någon har parkerat mitt i vägen. Igen.", "Someone parked it in the middle of the path. Again."),
+      t("Ännu en.", "Another one."),
+      t("Hur många finns det?!", "How many are there?!"),
+    ],
+    rattvisa: [t("Rättvisa.", "Justice.")], // När hunden kissar på en elsparkcykel
     mute: [t("…nej, jag är på mute.", "…no, I'm on mute."), t("Hörs jag nu?", "Can you hear me now?"), t("HÖRS JAG NU?", "CAN YOU HEAR ME NOW?")],
     joggare: [t("Morsning!", "Morning!"), t("Halvmara i maj!", "Half marathon in May!"), t("…halv… mara… i… maj…", "…half… mara… thon… in… May…")], // Han springer förbi tre gånger
     gubbe: [t("Jag har bott här i 34 år.", "I've lived here for 34 years.")],
@@ -93,6 +118,8 @@ const INSTALLNINGAR = {
     t("Till den som INTE plockar upp efter sin hund. Vi VET vem du är. /Brf Solgläntan", "To whoever does NOT pick up after their dog. We KNOW who you are. /Sunnyside Neighbors"),
     t("Bortsprungen katt. Svarar på namnet Måns. Svarar egentligen inte alls.", "Lost cat. Answers to the name Mittens. Doesn't really answer at all."),
     t("Säljes: barnvagn, nästan oanvänd. Barnet vägrade.", "For sale: stroller, almost unused. The baby refused."),
+    t("Hittad: en vante. Sitter på staketet. Har suttit där sedan 2019.", "Found: one mitten. It's on the fence. It's been there since 2019."),
+    t("Ny padelbana öppnar snart! (Den 47:e i kommunen.)", "New padel court opening soon! (The 47th in town.)"),
   ],
   kioskSkylt: t("Korv med bröd 45 kr. (Ja, 45.)", "Hot dog $9. (Yes, 9.)"),
   rastgardSkylt: t("Hundrastgård – Hundar ska vara kopplade", "Dog park – Dogs must be on a leash"),
@@ -106,6 +133,7 @@ const INSTALLNINGAR = {
     vardagslyx: { namn: t("Vardagslyx", "Treat yourself"), text: t("Korv till dig själv. Inte till hunden.", "A hot dog for you. Not for the dog.") },
     vuxenpoang: { namn: t("Vuxenpoäng", "Grown-up points"), text: t("Du har sagt \"Fot!\" 25 gånger.", "You've said \"Heel!\" 25 times.") },
     hogskolepoang: { namn: t("Högskolepoäng", "College credit"), text: t("Du har nu en högskolepoäng i hundägande.", "You now have a college credit in dog care.") },
+    viral: { namn: t("Viral", "Viral"), text: t("Du blev viral. Tyvärr för fel sak.", "You went viral. For the wrong reason.") },
   },
 
   // Betyget när man kommer fram, efter hur många stjärnor man fick
@@ -195,6 +223,9 @@ const fatt = new Set(); // Utmärkelser man fått
 let stat = nyStatistik();
 let betygLista = [];
 let fotAntal = 0;
+let foljare = 0;     // Nya följare från influencerns filmer
+let sparkAntal = 0;  // Hur många elsparkcyklar barnet har sett
+let kikare = null;   // Någon som tittar ut genom gardinen
 let slapTid = 0;
 let plockadeTotalt = 0;
 let senastWii = -10;
@@ -470,10 +501,18 @@ function nyPerson(sort, x, v, extra) {
     p.hund = slumpa(INSTALLNINGAR.andraHundar);
   } else if (sort === "influencer") {
     p.bild = "🧍‍♀️";
-    p.fart = -0.8;
-    p.hund = "🐩";
-    p.rosett = true;
+    p.fart = p.pass === 1 ? -0.5 : -0.8;
     p.telefon = true;
+    p.viralVila = 0;
+    if (p.pass === 2) {
+      p.vaska = true; // Coco åker i handväskan
+    } else {
+      p.hund = "🐩";
+      p.rosett = true;
+    }
+  } else if (sort === "padel") {
+    p.bild = "🤾‍♂️";
+    p.racket = true;
   } else if (sort === "mute") {
     p.bild = "🚶‍♀️";
     p.fart = -0.9;
@@ -518,6 +557,15 @@ function laggGodsak(x, v) {
 
 function laggPol(x, v) {
   if (ledigt(x, v, 0.6)) saker.push({ typ: "pol", x, v, r: slumpMellan(0.45, 0.65) });
+}
+
+// Elsparkcyklar som någon har slängt mitt på trottoaren
+function laggSparkcyklar(antal, kant) {
+  for (let i = 0; i < antal; i++) {
+    const v = slumpMellan(langd * 0.1, langd * 0.9);
+    const x = slumpSida() * slumpMellan(kant - 0.6, kant);
+    if (ledigt(x, v, 0.8)) saker.push({ typ: "sparkcykel", x, v, stam: 0.18, nosbar: true, lutning: slumpMellan(-0.3, 0.3) });
+  }
 }
 
 function laggAutomater(sidX) {
@@ -604,8 +652,11 @@ function byggKvarteret() {
   // Folk man möter
   saker.push(nyPerson("joggare", 1, langd * 0.2, { pass: 0 }));
   saker.push(nyPerson("hundagare", -0.9, langd * 0.32));
+  saker.push(nyPerson("influencer", 0.8, langd * 0.47, { pass: 0 }));
   saker.push(nyPerson("mute", 0.9, langd * 0.58));
+  saker.push(nyPerson("padel", slumpSida() * 2.9, langd * 0.69));
   saker.push(nyPerson("hundagare", -0.9, langd * 0.8));
+  laggSparkcyklar(3, 1.4);
 }
 
 function byggParken() {
@@ -671,9 +722,11 @@ function byggParken() {
   // Folk man möter
   saker.push(nyPerson("joggare", 1, langd * 0.13, { pass: 1 }));
   saker.push(nyPerson("hundagare", -0.8, langd * 0.21));
-  saker.push(nyPerson("influencer", 0.8, langd * 0.47));
-  saker.push(nyPerson("hundagare", -0.8, langd * 0.72));
+  saker.push(nyPerson("influencer", 0.8, langd * 0.35, { pass: 1 }));
+  saker.push(nyPerson("hundagare", -0.8, langd * 0.6));
+  saker.push(nyPerson("influencer", 0.8, langd * 0.76, { pass: 2 }));
   saker.push(nyPerson("joggare", 1, langd * 0.9, { pass: 2 }));
+  laggSparkcyklar(2, 1.1);
 }
 
 function byggBana() {
@@ -685,6 +738,7 @@ function byggBana() {
   trassel = [];
   trasslad = null;
   lapp = null;
+  kikare = null;
   fingerNere = false;
   langd = INSTALLNINGAR.banor[banNr].langd;
   satGrans();
@@ -715,6 +769,8 @@ function startaSpel() {
   toaster = [];
   betygLista = [];
   fotAntal = 0;
+  foljare = 0;
+  sparkAntal = 0;
   slapTid = 0;
   plockadeTotalt = 0;
   musikSteg = 0;
@@ -822,6 +878,10 @@ function sagFot() {
   if (h.lage === "trasslad") {
     saga(barn, t("Fot…?", "Heel…?"), 0.9);
     visaTips(t("Kopplet har trasslat sig! Gå runt trädet.", "The leash is tangled! Walk around the tree."), 3);
+    return;
+  }
+  if (h.lage === "apport") {
+    saga(barn, t("Hit med bollen!", "Bring the ball!"), 1);
     return;
   }
   if (h.fotVila > 0) {
@@ -955,6 +1015,7 @@ function hundDrag() {
     case "nosar":
     case "halsar":
     case "pol": return 0.6;
+    case "apport": return 0.2;
     case "jagar":
     case "tillGras": return 0.78 + tristBonus;
     case "tigger": return 0.85;
@@ -984,6 +1045,7 @@ function tillbaka() {
   hund.lage = "gar";
   hund.mal = null;
   hund.vandra = 0;
+  hund.boll = false;
 }
 
 function bliSpand(s) {
@@ -1014,7 +1076,7 @@ function efterSpand() {
     s.springer = true;
     s.tid = 3.4;
     h.lage = "jagar";
-  } else if (s.typ === "anka") {
+  } else if (s.typ === "anka" || s.typ === "boll") {
     h.lage = "jagar";
   } else if (s.typ === "pol") {
     h.lage = "pol";
@@ -1049,6 +1111,7 @@ function hittaFrestelse(dt) {
     if (s.typ === "katt" && !s.flyr) r = 3.2;
     else if (s.typ === "ekorre" && !s.springer) r = 3;
     else if (s.typ === "anka" && !s.flyger) r = 3.4;
+    else if (s.typ === "boll" && !s.flyger) r = 3.5;
     else if (s.typ === "pol") r = 1.8;
     else if (s.typ === "kiosk") r = 2.8;
     else if (s.typ === "person" && s.hund && !s.halsat) {
@@ -1080,7 +1143,8 @@ function hittaFrestelse(dt) {
     for (const s of saker) {
       if (!s.nosbar || h.nyss.has(s) || Math.abs(s.v - h.v) > 2) continue;
       const d = Math.hypot(s.x - h.x, s.v - h.v);
-      if (d < 1.7 && Math.random() < dt * 1.5) {
+      const spark = s.typ === "sparkcykel";
+      if (d < (spark ? 2.4 : 1.7) && Math.random() < dt * (spark ? 4 : 1.5)) {
         h.nyss.add(s);
         h.lage = "nosar";
         h.mal = s;
@@ -1120,6 +1184,8 @@ function laggBajs() {
   humor = Math.min(100, humor + H.bajs);
   h.bajsTid = slumpMellan(INSTALLNINGAR.bajsTakt[0], INSTALLNINGAR.bajsTakt[1]);
   spelaTon(190, 90, 0.25, "square", 0.05);
+  viral(b.x, b.v);
+  if (banNr === 0 && Math.random() < 0.35) kika(b.x, b.v);
   if (b.regnbage) {
     visaText(t("🌈 Ett regnbågsbajs!", "🌈 A rainbow poop!"), b.x, b.v + 1, "#ffe14d");
     spelaArpeggio([1047, 1319, 1568, 2093]);
@@ -1152,6 +1218,7 @@ function borjaSmita() {
   visaText(t("Hunden smiter!", "The dog ran away!"), h.x, h.v + 1.2, "#ff8a7a");
   spelaTon(500, 150, 0.6, "sawtooth", 0.1);
   if (navigator.vibrate) navigator.vibrate(250);
+  viral(h.x, h.v);
   if (livKvar <= 0) slutOm = 2.6;
   else visaTips(t("Spring ikapp hunden!", "Run and catch the dog!"), 3);
 }
@@ -1212,6 +1279,27 @@ function uppdateraHund(dt) {
         spelaTon(420, 220, 0.12, "sawtooth", 0.06);
       }
       if (m.typ === "anka" && iDammen(h, m.damm)) plask(m.damm);
+      if (m.typ === "boll" && avst(h, m) < 0.4) {
+        m.borta = true;
+        h.boll = true;
+        h.lage = "apport";
+        h.mal = null;
+        h.tid = 6;
+      }
+      break;
+    }
+    case "apport": {
+      const sida = Math.sign(h.x - barn.x) || 1;
+      gaMot(h, barn.x + sida * 0.5, barn.v + 0.2, INSTALLNINGAR.hundFart * 1.3, dt);
+      if (avst(h, barn) < 0.9) {
+        ge(t("Apport! Duktig hund!", "Fetch! Good dog!"), P.apport, h.x, h.v + 1, "#b6f09c");
+        humor += (50 - humor) * 0.5; // En nöjd och lite trött hund
+        humorTrend = 0;
+        spelaArpeggio([660, 880, 1100]);
+        tillbaka();
+      } else if (h.tid <= 0) {
+        tillbaka();
+      }
       break;
     }
     case "tillGras":
@@ -1221,7 +1309,11 @@ function uppdateraHund(dt) {
       gaMot(h, h.malX, h.malV, INSTALLNINGAR.hundFart, dt);
       if (h.mal) tittaMot(h.mal.x);
       if (h.tid <= 0) {
-        if (h.mal && h.mal.typ === "lykta" && Math.random() < 0.5) {
+        if (h.mal && h.mal.typ === "sparkcykel") {
+          // Hunden kissar alltid på elsparkcyklar
+          h.mal.kiss = true;
+          visaText(slumpa(PRAT.rattvisa), h.x, h.v + 1, "#fff3a0", true, 1.8);
+        } else if (h.mal && h.mal.typ === "lykta" && Math.random() < 0.5) {
           h.mal.kiss = true;
           visaText("pssss", h.x, h.v + 0.8, "#fff3a0", false, 1);
         }
@@ -1270,6 +1362,7 @@ function uppdateraHund(dt) {
           h.lerig = 12;
           humor = Math.min(100, humor + 10);
           visaText(t("PLASK!", "SPLASH!"), h.x, h.v + 1, "#c9a27a");
+          viral(h.x, h.v);
           spelaTon(700, 150, 0.3, "sine", 0.12);
         }
         tillbaka();
@@ -1317,6 +1410,7 @@ function plask(damm) {
   h.blot = 10;
   humor = Math.min(100, humor + H.plask);
   visaText(t("PLASK!", "SPLASH!"), h.x, h.v + 1.1, "#9fd4ff");
+  viral(h.x, h.v);
   skakning = 0.2;
   spelaTon(900, 120, 0.45, "sine", 0.15);
   spelaTon(600, 90, 0.4, "triangle", 0.08, 0.1);
@@ -1482,6 +1576,32 @@ function uppdateraSaker(dt) {
           spelaTon(880, 1760, 0.15, "triangle", 0.09);
         }
         break;
+      case "boll":
+        if (s.flyger) {
+          // Padelbollen flyger i en båge och landar på vägen
+          s.flyg = Math.min(1, s.flyg + dt / 1.1);
+          s.x = s.franX + (s.tillX - s.franX) * s.flyg;
+          s.v = s.franV + (s.tillV - s.franV) * s.flyg;
+          s.z = Math.sin(s.flyg * Math.PI) * 2;
+          if (s.flyg >= 1) {
+            s.flyger = false;
+            s.z = 0;
+            spelaTon(320, 200, 0.08, "sine", 0.08);
+          }
+        } else if (avst(s, barn) < 0.55) {
+          s.borta = true;
+          ge(t("Boll!", "Ball!"), P.boll, s.x, s.v + 0.8, "#ffffff");
+          spelaTon(880, 1760, 0.15, "triangle", 0.09);
+        }
+        break;
+      case "sparkcykel":
+        if (!s.sedd && avst(s, barn) < 1.8) {
+          s.sedd = true;
+          const rep = PRAT.sparkcykel;
+          saga(barn, rep[Math.min(sparkAntal, rep.length - 1)], 2.6);
+          sparkAntal += 1;
+        }
+        break;
       case "automat":
         if (!s.tagen && pasar < INSTALLNINGAR.pasarMax && avst(s, barn) < 1.1) {
           s.tagen = true;
@@ -1554,6 +1674,11 @@ function uppdateraPerson(p, dt) {
   }
   if (p.v < barn.v - 14) p.borta = true;
 
+  if (p.sort === "influencer") {
+    p.viralVila = Math.max(0, p.viralVila - dt);
+    p.filmar = d < 6.5 && barn.v - p.v < 2.5; // Hon filmar när man är nära
+  }
+
   const rep = PRAT[p.sort] || [];
   switch (p.sort) {
     case "joggare":
@@ -1562,8 +1687,34 @@ function uppdateraPerson(p, dt) {
         saga(p, rep[p.pass] || rep[0], 2.6);
       }
       break;
+    case "influencer": {
+      const r = PRAT.influencer[p.pass] || PRAT.influencer[0];
+      if (!p.sagt && d < 4.8) {
+        p.sagt = 1;
+        if (p.hund) p.skallTid = 2;
+        saga(p, r[0], 3.2);
+      } else if (p.sagt === 1 && barn.v - p.v > 1.2) {
+        p.sagt = 2;
+        saga(p, r[1], 3);
+      }
+      break;
+    }
+    case "padel":
+      if (p.sagt === 0 && d < 5.5) {
+        p.sagt = 1;
+        saga(p, rep[0], 2.6);
+      } else if (p.sagt === 1 && d < 3) {
+        // Bollen flyger över staketet och landar på trottoaren
+        p.sagt = 2;
+        saga(p, rep[1], 2);
+        saker.push({ typ: "boll", x: p.x, v: p.v, franX: p.x, franV: p.v, tillX: slumpMellan(-0.8, 0.8), tillV: barn.v + slumpMellan(2, 3), flyg: 0, z: 0, flyger: true });
+        spelaTon(500, 700, 0.06, "square", 0.05);
+      } else if (p.sagt === 2 && barn.v - p.v > 1.5) {
+        p.sagt = 3;
+        saga(p, rep[2], 3);
+      }
+      break;
     case "hundagare":
-    case "influencer":
       if (!p.sagt && d < 4.8) {
         p.sagt = 1;
         p.skallTid = 3.5;
@@ -1637,6 +1788,8 @@ function uppdateraBajs(dt) {
         barn.lerskor = 6;
         ge(t("BLÄÄ!", "EWW!"), -5, b.x, b.v + 1, "#c9a27a");
         spelaTon(220, 110, 0.5, "sawtooth", 0.08);
+        viral(b.x, b.v);
+        kika(b.x, b.v);
       }
     }
     if (b.v < botten - 0.7) lamna(b);
@@ -1656,6 +1809,7 @@ function plocka(b) {
     ge(Math.random() < 0.25 ? INSTALLNINGAR.karlek : "", P.bajs, b.x, b.v + 1, "#ffffff");
     spelaTon(600, 1200, 0.15, "triangle", 0.09);
   }
+  brasak(b.x, b.v);
   if (plockadeTotalt === 10) utmarkelse("hogskolepoang");
   if (pasar === 0) visaTipsEnGang("slut", t("Slut på påsar! Leta efter en påsautomat 🛍️", "Out of bags! Look for a bag dispenser 🛍️"), 4);
 }
@@ -1673,8 +1827,63 @@ function lamna(b) {
     spelaTon(200, 170, 0.35, "triangle", 0.15);
   } else {
     ge(INSTALLNINGAR.ingenSag, -P.lamna, barn.x, barn.v - 1, "#ffe9b3");
+    kika(barn.x, barn.v);
     utmarkelse("detVarInteJag");
   }
+}
+
+// ---------- Influencern filmar ----------
+
+function formatera(tal) {
+  return tal.toLocaleString(SPRAK === "sv" ? "sv-SE" : "en-US");
+}
+
+// Influencern som filmar just nu, om hon är nära (x, v)
+function filmare(x, v) {
+  return saker.find((p) => p.sort === "influencer" && p.filmar && p.viralVila <= 0 && Math.hypot(p.x - x, p.v - v) < 7);
+}
+
+// Något pinsamt hände på film. Det går viralt!
+function viral(x, v) {
+  const p = filmare(x, v);
+  if (!p) return;
+  p.viralVila = 3;
+  const nya = Math.round(slumpMellan(800, 4500) / 10) * 10;
+  foljare += nya;
+  ge(t("📱 VIRALT!", "📱 VIRAL!"), P.viral, x, v + 1.6, "#ff9ff3");
+  visaText(`+${formatera(nya)} ${t("följare", "followers")}`, x, v + 2.3, "#ffffff", false, 1.8);
+  saga(p, slumpa(PRAT.influencerViral), 2.6);
+  spelaArpeggio([880, 1175, 1568]);
+  utmarkelse("viral");
+}
+
+// Något bra hände på film. Ingen bryr sig.
+function brasak(x, v) {
+  const p = filmare(x, v);
+  if (!p) return;
+  p.viralVila = 3;
+  visaText(t("📱 3 likes", "📱 3 likes"), x, v + 1.9, "#ffffff", false, 1.8);
+  saga(p, slumpa(PRAT.influencerTrakigt), 2.6);
+}
+
+// Någon i ett hus i närheten tittar ut genom gardinen
+function kika(x, v) {
+  if (banNr !== 0) return;
+  let bast = null;
+  let bastD = 6;
+  for (const h of saker) {
+    if (h.typ !== "hus") continue;
+    for (let fv = h.v0 + 0.8; fv < h.v1 - 0.5; fv += 1.6) {
+      const d = Math.hypot(h.sida * 3.9 - x, fv - v);
+      if (d < bastD) {
+        bast = { hus: h, v: fv };
+        bastD = d;
+      }
+    }
+  }
+  if (!bast) return;
+  kikare = { ...bast, kvar: 3.5 };
+  visaText(t("*gardinen rör sig*", "*the curtain twitches*"), bast.hus.sida * 3.2, bast.v + 0.7, "#ffffff", false, 2.2);
 }
 
 // ---------- Hundmätaren ----------
@@ -1691,6 +1900,7 @@ function uppdateraHumor(dt) {
     case "tillGras": f = H.jaga; break;
     case "tigger": f = 2; break;
     case "pol": f = 6; break;
+    case "apport": f = 0; break;
     case "fot": f = -2; break;
     case "trasslad": f = -3; break;
   }
@@ -1733,6 +1943,10 @@ function uppdatera(dt) {
     toaster[0].kvar -= dt;
     if (toaster[0].kvar <= 0) toaster.shift();
   }
+  if (kikare) {
+    kikare.kvar -= dt;
+    if (kikare.kvar <= 0) kikare = null;
+  }
   for (const t of texter) {
     t.kvar -= dt;
     t.v += dt * 0.8;
@@ -1757,6 +1971,7 @@ function uppdatera(dt) {
     if (barn.slapas <= 0 && tid - senastWii > 2.5) {
       senastWii = tid;
       visaText(slumpa([t("Wiiiii!", "Wheeee!"), t("Neeej!", "Nooo!"), t("Vänta!", "Wait!")]), barn.x, barn.v + 1.2, "#ffffff");
+      viral(barn.x, barn.v);
     }
     barn.slapas = 0.25;
     slapTid += dt;
@@ -1954,10 +2169,17 @@ function ritaMarken() {
   for (const s of saker) {
     if (s.typ === "hus" && s.v1 > syn.botten && s.v0 < syn.topp) ritaHus(s);
   }
+  if (kikare) {
+    // Ögon i fönstret
+    const h = kikare.hus;
+    ctx.globalAlpha = Math.min(1, kikare.kvar * 2);
+    ritaEmoji("👀", SX(h.sida * 3.8) + h.sida * u * 0.175, SY(kikare.v), u * 0.3);
+    ctx.globalAlpha = 1;
+  }
   for (const s of saker) {
     if (s.typ === "staket" && s.v1 > syn.botten && s.v0 < syn.topp) ritaStaket(s);
     if (s.typ === "pol" && s.v > syn.botten && s.v < syn.topp) ritaPol(s);
-    if (s.typ === "lykta" && s.kiss && s.v > syn.botten && s.v < syn.topp) {
+    if (s.kiss && s.v > syn.botten && s.v < syn.topp) {
       ctx.fillStyle = "rgba(240, 220, 90, 0.55)";
       ctx.beginPath();
       ctx.ellipse(SX(s.x) + u * 0.15, SY(s.v) + u * 0.05, u * 0.25, u * 0.09, 0, 0, VARV);
@@ -2338,6 +2560,25 @@ function ritaSkylt(s) {
   ritaEmoji("🔗", x + u * 0.18, y - u * 1.15, u * 0.24);
 }
 
+function ritaBoll(s) {
+  const x = SX(s.x);
+  const y = SY(s.v);
+  skugga(x, y, u * 0.14 * (1 - s.z * 0.2), u * 0.05);
+  ritaEmoji("🎾", x, y - u * 0.15 - s.z * u, u * 0.3);
+}
+
+// En elsparkcykel som ligger på sidan
+function ritaSparkcykel(s) {
+  const x = SX(s.x);
+  const y = SY(s.v);
+  skugga(x, y, u * 0.45, u * 0.1);
+  ctx.save();
+  ctx.translate(x, y - u * 0.12);
+  ctx.rotate((s.x > 0 ? 1.35 : -1.35) + s.lutning);
+  ritaEmoji("🛴", 0, 0, u * 0.62);
+  ctx.restore();
+}
+
 function ritaPerson(p) {
   const x = SX(p.x);
   const y = SY(p.v);
@@ -2363,7 +2604,35 @@ function ritaPerson(p) {
   }
   if (!sitter) skugga(x, y, st * 0.3, st * 0.09);
   ritaEmoji(p.bild, x, y - st * (sitter ? 0.6 : 0.48) - studs, st);
-  if (p.telefon) ritaEmoji("📱", x + st * 0.22, y - st * (sitter ? 0.45 : 0.6) - studs, st * 0.3);
+  if (p.vaska) {
+    // Coco tittar upp ur handväskan
+    ritaEmoji("🐩", x - st * 0.32, y - st * 0.62 - studs, st * 0.34);
+    ritaEmoji("🎀", x - st * 0.22, y - st * 0.78 - studs, st * 0.16);
+    ritaEmoji("👜", x - st * 0.32, y - st * 0.38 - studs, st * 0.42);
+  }
+  if (p.racket) ritaEmoji("🏓", x + st * 0.3, y - st * 0.55 - studs, st * 0.38);
+  if (p.filmar) {
+    // Telefonen uppe och en blinkande REC-lampa
+    ritaEmoji("📱", x + st * 0.28, y - st * 0.8 - studs, st * 0.34);
+    if (Math.sin(tid * 6) > -0.3) {
+      const rx = x + st * 0.55;
+      const ry = y - st * 1.05 - studs;
+      ctx.fillStyle = "rgba(0, 0, 0, 0.55)";
+      rundRekt(ctx, rx - st * 0.08, ry - st * 0.12, st * 0.62, st * 0.24, st * 0.12);
+      ctx.fill();
+      ctx.fillStyle = "#ff3b3b";
+      ctx.beginPath();
+      ctx.arc(rx + st * 0.05, ry, st * 0.06, 0, VARV);
+      ctx.fill();
+      ctx.fillStyle = "#ffffff";
+      ctx.font = `bold ${Math.max(9, st * 0.16)}px ${TYPSNITT}`;
+      ctx.textAlign = "left";
+      ctx.textBaseline = "middle";
+      ctx.fillText("REC", rx + st * 0.15, ry + 1);
+    }
+  } else if (p.telefon) {
+    ritaEmoji("📱", x + st * 0.22, y - st * (sitter ? 0.45 : 0.6) - studs, st * 0.3);
+  }
   if (p.lurar) ritaEmoji("🎧", x, y - st * 0.92 - studs, st * 0.32);
   ctx.globalAlpha = 1;
 }
@@ -2546,6 +2815,7 @@ function ritaHund() {
   ctx.restore();
   halsband.x = x + h.riktning * st * 0.28;
   halsband.y = y - studs - st * 0.58;
+  if (h.boll) ritaEmoji("🎾", x + h.riktning * st * 0.42, y - studs - st * 0.45, u * 0.24);
 
   if (h.blot > 0) {
     ctx.fillStyle = "rgba(140, 200, 255, 0.85)";
@@ -2754,6 +3024,16 @@ function ritaPanel() {
   const pasX = vanster + storlek * 1.6 + ctx.measureText(String(poang)).width;
   ritaEmoji("🛍️", pasX, rad1, storlek * 0.85, "left");
   ritaText("×" + pasar, pasX + storlek * 1.05, rad1, storlek * 0.8, pasar ? "#ffffff" : "#ff8a7a", "left");
+  if (foljare > 0) {
+    // Nya följare (om det får plats före hjärtana)
+    const fx = pasX + storlek * 1.45 + ctx.measureText("×" + pasar).width;
+    const text = formatera(foljare);
+    ctx.font = `bold ${storlek * 0.7}px ${TYPSNITT}`;
+    if (fx + storlek * 1.1 + ctx.measureText(text).width < hoger - INSTALLNINGAR.liv * storlek * 1.2) {
+      ritaEmoji("📱", fx, rad1, storlek * 0.75, "left");
+      ritaText(text, fx + storlek * 0.9, rad1, storlek * 0.7, "#ffc4f2", "left");
+    }
+  }
   for (let i = 0; i < INSTALLNINGAR.liv; i++) {
     ritaEmoji(i < livKvar ? "❤️" : "💔", hoger - i * storlek * 1.2, rad1, storlek * 0.85, "right");
   }
@@ -2950,6 +3230,7 @@ function ritaSkarmar() {
     rad(INSTALLNINGAR.betyg[st], ts * 0.7);
     rad(t(poang + " poäng", poang === 1 ? "1 point" : poang + " points"), ts * 1);
     rad(poang > 0 && poang === rekord ? t("🏆 Nytt rekord! 🏆", "🏆 New high score! 🏆") : t("Rekord: ", "High score: ") + rekord, ts * 0.65);
+    if (foljare > 0) rad(t(`📱 ${formatera(foljare)} nya följare`, `📱 ${formatera(foljare)} new followers`), ts * 0.55, "#ffc4f2");
     if (fatt.size) rad("🏆 " + [...fatt].map((k) => INSTALLNINGAR.utmarkelser[k].namn).join(" · "), ts * 0.5, "#d5def0");
     y += ts * 0.3;
     if (tidSedanSlut > 1) rad(t("Tryck för att gå en ny promenad", "Tap to go for a new walk"), ts * 0.75);
@@ -2959,6 +3240,7 @@ function ritaSkarmar() {
     rad(INSTALLNINGAR.slut, ts * 0.95, "#ffd27a");
     y += ts * 0.2;
     rad(t(poang + " poäng", poang === 1 ? "1 point" : poang + " points"), ts * 1);
+    if (foljare > 0) rad(t(`📱 ${formatera(foljare)} nya följare`, `📱 ${formatera(foljare)} new followers`), ts * 0.55, "#ffc4f2");
     rad(poang > 0 && poang === rekord ? t("🏆 Nytt rekord! 🏆", "🏆 New high score! 🏆") : t("Rekord: ", "High score: ") + rekord, ts * 0.65);
     y += ts * 0.3;
     if (tidSedanSlut > 1) rad(t("Tryck för att försöka igen", "Tap to try again"), ts * 0.75);
@@ -3000,6 +3282,8 @@ function rita() {
     else if (s.typ === "kiosk") r = ritaKiosk;
     else if (s.typ === "bank") r = ritaBank;
     else if (s.typ === "skylt") r = ritaSkylt;
+    else if (s.typ === "boll") r = ritaBoll;
+    else if (s.typ === "sparkcykel") r = ritaSparkcykel;
     if (r) lista.push([s.v, () => r(s)]);
   }
   lista.push([hund.v, ritaHund]);
