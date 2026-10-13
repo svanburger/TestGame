@@ -218,6 +218,10 @@ bajsa överallt. Ta dig hem med en glad hund och en ren trottoar!
     framåt som en galning. Efteråt är hunden blöt och skakar sig på folk.
   - **🚒 Brandbilen** kör förbi med sirenen på, och hunden sätter sig och
     ylar. (Katten bryr sig inte.)
+  - **🍦 Glassbilen** kör fram och stannar och spelar sin melodi. Familjeregeln
+    säger att glassen är slut när glassbilen spelar musik (barnet tror inte på
+    det). Hunden springer dit och tigger. Ställer man sig vid luckan köper man
+    en glass, och på stranden tar måsen den.
 - **Trassel:** Jagar hunden en ekorre runt ett träd trasslar kopplet sig.
   Gå runt trädet åt det håll som pilen visar för att få loss det.
 - Promenaden går genom fyra banor och sedan hem:

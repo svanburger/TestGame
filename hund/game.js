@@ -95,6 +95,8 @@ const INSTALLNINGAR = {
     brevbarare: true,     // Brevbäraren kommer springande. Hunden HATAR brevbärare.
     regn: true,           // Regnskur! Hunden vill hem och drar som en galning.
     brandbil: true,       // Brandbilen åker förbi och hunden sätter sig och ylar
+    glassbil: true,       // Glassbilen stannar och spelar sin melodi. Hunden springer dit.
+    glassbilTid: 12,      // Hur länge glassbilen står kvar
   },
 
   katter: ["🐈", "🐈‍⬛"],
@@ -145,6 +147,12 @@ const INSTALLNINGAR = {
     musikant: [t("Den här har jag skrivit själv. Den heter Wonderwall.", "I wrote this one myself. It's called Wonderwall."), t("Swish går bra!", "I take tips!")],
     brevbarare: [t("Bara räkningar idag!", "Only bills today!"), t("Han hatar mig. Det är okej.", "He hates me. It's fine."), t("Tack! Ni är de första i år som inte jagat mig.", "Thanks! You're the first this year who didn't chase me.")],
     brevbarareHandelse: [t("Ett paket till… nej, inte till er.", "A package for… no, not for you.")], // När han kommer som en oväntad händelse
+    glassbil: [ // Det som står när glassbilen kommer, och vad folk säger
+      t("När glassbilen spelar musik betyder det att glassen är slut.", "When the ice cream truck plays music, it means it's sold out."),
+      t("Det tror jag inte på.", "I don't believe that."),       // Barnet
+      t("Glass! Glass! Glass!", "Ice cream! Ice cream!"),         // Glassbilen
+      t("Bara kort. Inga kontanter.", "Card only. No cash."),      // Glassbilen när man köper
+    ],
     regn: [ // Det som står när regnskuren kommer, och vad folk säger
       t("Det var väl skönt med lite friskluft?", "Isn't it nice with some fresh air?"),
       t("Mitt hår!!", "My hair!!"),                  // Influencern
@@ -211,6 +219,7 @@ const INSTALLNINGAR = {
     vuxenpoang: { namn: t("Vuxenpoäng", "Grown-up points"), text: t("Du har sagt \"Fot!\" 25 gånger.", "You've said \"Heel!\" 25 times.") },
     hogskolepoang: { namn: t("Högskolepoäng", "College credit"), text: t("Du har nu en högskolepoäng i hundägande.", "You now have a college credit in dog care.") },
     postvan: { namn: t("Brevbärarens vän", "Mail carrier's friend"), text: t("Hunden lät brevbäraren vara. För en gångs skull.", "The dog left the mail carrier alone. For once.") },
+    foraldralognen: { namn: t("Föräldralögnen", "The parent lie"), text: t("Glassbilen hade visst glass.", "The ice cream truck had ice cream after all.") },
     friskluft: { namn: t("Friskluft", "Fresh air"), text: t("Ute i hela regnskuren. Det var väl skönt?", "Out in the whole rain shower. Wasn't that nice?") },
     kattmanniska: { namn: t("Kattmänniska", "Cat person"), text: t("Du gick hela vägen hem med en katt. I koppel.", "You walked a cat all the way home. On a leash.") },
     viral: { namn: t("Viral", "Viral"), text: t("Du blev viral. Tyvärr för fel sak.", "You went viral. For the wrong reason.") },
@@ -1371,6 +1380,7 @@ function hindra(f, arBarn) {
     else if (s.typ === "kiosk") r = 0.95;
     else if (s.typ === "bank" || s.typ === "badhytt") r = 0.6;
     else if (s.typ === "cafe") r = 0.55;
+    else if (s.typ === "glassbil" && s.fas === "star") r = 0.9;
     else if (s.typ === "sandslott" && arBarn) r = 0.45; // Barnet trampar inte på slottet (men hunden...)
     if (r) {
       // Går man rakt in i något glider man av åt sidan i stället för att fastna
@@ -1503,7 +1513,7 @@ function efterSpand() {
     h.tid = s.sort === "cykelbud" ? 2.5 : 3.5;
   } else if (s.typ === "pol") {
     h.lage = "pol";
-  } else if (s.typ === "kiosk") {
+  } else if (s.typ === "kiosk" || s.typ === "glassbil") {
     h.lage = "tigger";
     h.tid = 6;
   } else if (s.typ === "person") {
@@ -1539,6 +1549,7 @@ function hittaFrestelse(dt) {
     else if (s.typ === "krabba" && !s.flyr) r = 2.8;
     else if (s.typ === "sandslott" && !s.raserat) r = 2.8;
     else if (s.typ === "person" && s.lockar && !s.jagad) r = s.lockar;
+    else if (s.typ === "glassbil" && s.fas === "star" && !hundTyp.katt) r = 8; // Alla hundar springer till glassbilen
     else if (s.typ === "pol" && !hundTyp.fin) r = 1.8; // Pudeln går inte i pölar
     else if (s.typ === "kiosk") r = 2.8;
     else if (s.typ === "person" && s.hund && !s.halsat) {
@@ -1858,8 +1869,8 @@ function uppdateraHund(dt) {
         tillbaka();
         break;
       }
-      gaMot(h, k.x - k.sida * 1.05, k.v - 0.2, hundFart() * 1.2, dt);
-      if (h.tid <= 0) tillbaka();
+      gaMot(h, k.x - k.sida * (k.typ === "glassbil" ? 1.3 : 1.05), k.v - 0.2, hundFart() * 1.2, dt);
+      if (h.tid <= 0 || k.borta || k.fas === "ut") tillbaka();
       break;
     }
     case "pol": {
@@ -2090,6 +2101,50 @@ function uppdateraSaker(dt) {
           s.v += s.riktning * 0.35 * dt;
         }
         break;
+      case "glassbil": {
+        if (s.fas === "in") {
+          // Kör in och stannar
+          s.x += Math.sign(s.malX - s.x) * Math.min(6 * dt, Math.abs(s.malX - s.x));
+          if (Math.abs(s.x - s.malX) < 0.01) {
+            s.fas = "star";
+            saga(s, PRAT.glassbil[2], 2.5);
+          }
+        } else if (s.fas === "star") {
+          s.kvar -= dt;
+          s.melodi -= dt;
+          if (s.melodi <= 0) {
+            s.melodi = 4;
+            spelaGlassmelodi();
+          }
+          // Står man vid luckan en stund köper man en glass
+          const framX = s.x - s.sida * 1.3;
+          if (!s.kopt && Math.hypot(barn.x - framX, barn.v - s.v) < 1) {
+            s.kopTid = (s.kopTid || 0) + dt;
+            if (s.kopTid > 1) {
+              s.kopt = true;
+              barn.korv = 10;
+              barn.mat = "🍦";
+              saga(s, PRAT.glassbil[3], 2.2);
+              visaText(t("-35 kr", "-$5"), s.x, s.v + 1.8, "#ffd1d1");
+              utmarkelse("foraldralognen");
+              if (banTyp() === "strand") masOm = 2.5; // Måsen har sett glassen…
+            }
+          } else {
+            s.kopTid = 0;
+          }
+          if (s.kvar <= 0) {
+            s.fas = "ut";
+            s.kvar = 3;
+            if (hund.mal === s) tillbaka();
+          }
+        } else {
+          // Kör iväg framåt
+          s.v += 6 * dt;
+          s.kvar -= dt;
+          if (s.kvar <= 0) s.borta = true;
+        }
+        break;
+      }
       case "masattack": {
         // Måsen dyker ner, tar glassen och flyger iväg
         s.fas += dt / (s.har ? 1.5 : 0.9);
@@ -2286,7 +2341,7 @@ function uppdateraHandelser(dt) {
   nastaHandelse -= dt;
   if (nastaHandelse > 0) return;
   nastaHandelse = slumpMellan(HA.mellanrum[0], HA.mellanrum[1]);
-  const val = ["brevbarare", "regn", "brandbil"].filter((h) => HA[h] && h !== forraHandelse);
+  const val = ["brevbarare", "regn", "brandbil", "glassbil"].filter((h) => HA[h] && h !== forraHandelse);
   if (!val.length) return;
   startaHandelse(slumpa(val));
 }
@@ -2301,6 +2356,18 @@ function startaHandelse(typ) {
     saker.push(p);
     visaText(t("❗ Brevbäraren kommer!", "❗ The mail carrier!"), barn.x, barn.v + 2, "#ffe14d", true, 2);
     visaTips(t("Brevbäraren! Säg Fot innan hunden får syn på honom!", "The mail carrier! Say Heel before the dog sees him!"), 4);
+  } else if (typ === "glassbil") {
+    // Glassbilen kör in från sidan och stannar en bit framför barnet.
+    // I stan står den på gatan och på stranden på sanden (inte i havet).
+    const sida = banTyp() === "stad" ? 1 : banTyp() === "strand" ? -1 : slumpSida();
+    const malX = sida * 3.4;
+    saker.push({
+      typ: "glassbil", handelse: true, sida, malX, x: sida * (bredd / 2 / u + 2), v: barn.v + 3.8,
+      fas: "in", kvar: HA.glassbilTid, melodi: 0, kopt: false,
+    });
+    visaText(t("❗ Glassbilen!", "❗ Ice cream truck!"), barn.x, barn.v + 2, "#ffc4f2", true, 2);
+    visaLapp(t("📜 Familjeregel: ", "📜 Family rule: ") + PRAT.glassbil[0]);
+    saga(barn, PRAT.glassbil[1], 2.5);
   } else if (typ === "regn") {
     regn = HA.regnTid;
     visaText(t("❗ Regnskur! 🌧️", "❗ Rain shower! 🌧️"), barn.x, barn.v + 2, "#cfe8ff", true, 2);
@@ -2344,6 +2411,32 @@ function ritaRegn() {
     ctx.lineTo(x - 6, y + 18);
   }
   ctx.stroke();
+}
+
+function ritaGlassbil(s) {
+  const x = SX(s.x);
+  const y = SY(s.v);
+  const st = u * 1.7;
+  skugga(x, y, st * 0.5, u * 0.15);
+  const skak = s.fas === "star" ? 0 : Math.sin(tid * 30) * u * 0.02;
+  ctx.save();
+  ctx.translate(x, y - st * 0.4 + skak);
+  if (s.sida < 0) ctx.scale(-1, 1); // Emojin pekar åt vänster
+  ritaEmoji("🚚", 0, 0, st);
+  ctx.restore();
+  // Rosa tak med en stor glass
+  ctx.fillStyle = "#ff9ed1";
+  rundRekt(ctx, x - st * 0.3, y - st * 0.78 + skak, st * 0.6, st * 0.14, st * 0.05);
+  ctx.fill();
+  ritaEmoji("🍦", x, y - st * 0.95 + skak, u * 0.55);
+  if (s.fas === "star") {
+    for (let i = 0; i < 3; i++) {
+      const f = (tid * 0.7 + i / 3) % 1;
+      ctx.globalAlpha = Math.sin(f * Math.PI);
+      ritaText(i % 2 ? "♫" : "♪", x - s.sida * st * (0.2 + f * 0.4), y - st * (0.9 + f * 0.5), u * 0.32, "#ffffff");
+      ctx.globalAlpha = 1;
+    }
+  }
 }
 
 function ritaBrandbil() {
@@ -4598,6 +4691,7 @@ function rita() {
     else if (s.typ === "tang") r = ritaTang;
     else if (s.typ === "krabba") r = ritaKrabba;
     else if (s.typ === "sandslott") r = ritaSandslott;
+    else if (s.typ === "glassbil") r = ritaGlassbil;
     else if (s.typ === "sparkcykel") r = ritaSparkcykel;
     if (r) lista.push([s.v, () => r(s)]);
   }
@@ -4615,7 +4709,7 @@ function rita() {
   ritaTexter();
   for (const b of bubblor) {
     const a = b.agare;
-    const hojdUpp = a === barn ? 1.25 : a.sort === "pappa" ? 1.3 : 1.45;
+    const hojdUpp = a === barn ? 1.25 : a.typ === "glassbil" ? 2.3 : a.sort === "pappa" ? 1.3 : 1.45;
     ctx.globalAlpha = Math.min(1, b.kvar * 3);
     ritaPratbubbla(b.text, SX(a.x), SY(a.v) - u * hojdUpp);
     ctx.globalAlpha = 1;
@@ -4715,6 +4809,12 @@ function uppdateraRegnljud() {
   } catch (e) {
     regnLjud = null; // Inget regnljud – spelet fungerar ändå
   }
+}
+
+// Glassbilens melodi
+function spelaGlassmelodi() {
+  const toner = [784, 659, 784, 880, 784, 659, 523, 587, 659];
+  toner.forEach((f, i) => spelaTon(f, f, 0.22, "square", 0.035, i * 0.2));
 }
 
 function spelaArpeggio(toner) {
