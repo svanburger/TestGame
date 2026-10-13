@@ -73,9 +73,13 @@ const INSTALLNINGAR = {
   katter: ["🐈", "🐈‍⬛"],
   andraHundar: ["🐩", "🐕‍🦺", "🦮"],
 
+  // Promenaden går genom de här banorna, i den här ordningen. "typ" säger
+  // hur banan ser ut och vad som finns där.
   banor: [
-    { namn: t("Kvarteret", "Our Street"), langd: 170 },
-    { namn: t("Parken", "The Park"), langd: 190 },
+    { typ: "kvarter", namn: t("Kvarteret", "Our Street"), langd: 170, ikon: "🏘️" },
+    { typ: "park", namn: t("Parken", "The Park"), langd: 190, ikon: "🌳", tips: t("Parken! Akta ankorna…", "The park! Watch out for the ducks…") },
+    { typ: "stad", namn: t("Stan", "Downtown"), langd: 170, ikon: "🏙️", tips: t("Stan! Akta cykelbuden…", "Downtown! Watch out for the bike couriers…") },
+    { typ: "strand", namn: t("Stranden", "The Beach"), langd: 170, ikon: "🏖️", tips: t("Stranden! Akta måsarna…", "The beach! Watch out for the seagulls…") },
   ],
 
   // Det folk säger. Lägg gärna till saker era egna grannar säger!
@@ -86,6 +90,8 @@ const INSTALLNINGAR = {
       [t("Säg hej till följarna, Coco!", "Say hi to my followers, Coco!"), t("Glöm inte att gilla!", "Don't forget to like!")],
       [t("Får jag filma er hund? Den är så… autentisk.", "Can I film your dog? It's so… authentic."), t("Jag taggar er! Eller… vad heter ni?", "I'll tag you! Or… what are your names?")],
       [t("Coco går inte på grus.", "Coco doesn't walk on gravel."), t("Inlägget är i samarbete med Bajspåsen AB.", "This post is sponsored by PoopBag Inc.")],
+      [t("Jag gör en fika-reel. Det tar bara 45 minuter.", "I'm making a coffee reel. It only takes 45 minutes."), t("Kanelbullen får man inte äta. Den är rekvisita.", "You can't eat the cinnamon bun. It's a prop.")],
+      [t("Schh. Jag mediterar. Live.", "Shh. I'm meditating. Live."), t("Glöm inte att prenumerera på min inre frid.", "Don't forget to subscribe to my inner peace.")],
     ],
     influencerViral: [ // När hon filmar något pinsamt
       t("Det här går VIRALT!", "This is going VIRAL!"),
@@ -104,8 +110,22 @@ const INSTALLNINGAR = {
       t("Hur många finns det?!", "How many are there?!"),
     ],
     rattvisa: [t("Rättvisa.", "Justice.")], // När hunden kissar på en elsparkcykel
+
+    // I stan
+    lattepappa: [t("Tredje latten idag. Barnet sover.", "Third latte today. The baby's asleep."), t("Föräldraledig. Som semester, fast tvärtom.", "Parental leave. Like a vacation, but the opposite.")],
+    musikant: [t("Den här har jag skrivit själv. Den heter Wonderwall.", "I wrote this one myself. It's called Wonderwall."), t("Swish går bra!", "I take tips!")],
+    brevbarare: [t("Bara räkningar idag!", "Only bills today!"), t("Han hatar mig. Det är okej.", "He hates me. It's fine.")],
+    cykelbud: [t("Akta! Matleverans!", "Watch out! Food delivery!"), t("Ge mig fem stjärnor!", "Give me five stars!")],
+
+    // På stranden
+    byggare: [t("Rör inte mitt slott!", "Don't touch my castle!"), t("MITT SLOTT!", "MY CASTLE!"), t("Tack för att du höll i hunden!", "Thanks for holding your dog!")],
+    solbadare: [t("Jag ska bara bli lite brun.", "I'm just getting a little tan."), t("…eller röd.", "…or red.")],
+    detektor: [t("34 kapsyler och en nyckel. Inte min nyckel.", "34 bottle caps and a key. Not my key."), t("En skatt! …Nej, en kapsyl.", "Treasure! …No, a bottle cap.")],
+    kallbadare: [t("Det är jätteskönt!", "It's lovely!"), t("…12 grader.", "…54 degrees.")],
+    mas: [t("MÅSEN!", "SEAGULL!"), t("Hallå!? Min glass!", "Hey!? My ice cream!")],
     mute: [t("…nej, jag är på mute.", "…no, I'm on mute."), t("Hörs jag nu?", "Can you hear me now?"), t("HÖRS JAG NU?", "CAN YOU HEAR ME NOW?")],
-    joggare: [t("Morsning!", "Morning!"), t("Halvmara i maj!", "Half marathon in May!"), t("…halv… mara… i… maj…", "…half… mara… thon… in… May…")], // Han springer förbi tre gånger
+    // Joggaren springer förbi en gång per bana. På stranden orkar han inte mer.
+    joggare: [t("Morsning!", "Morning!"), t("Halvmara i maj!", "Half marathon in May!"), t("…halv… mara… i… maj…", "…half… mara… thon… in… May…"), t("Jag har sprungit sedan parken!", "I've been running since the park!"), t("Maj… nästa år…", "May… next year…")],
     gubbe: [t("Jag har bott här i 34 år.", "I've lived here for 34 years.")],
     pappa: [t("Bara fem minuter till…", "Just five more minutes…")],
     tradgubbe: [t("Jag tar dem på vägen tillbaka.", "I'll grab them on the way back.")],
@@ -121,6 +141,28 @@ const INSTALLNINGAR = {
     t("Hittad: en vante. Sitter på staketet. Har suttit där sedan 2019.", "Found: one mitten. It's on the fence. It's been there since 2019."),
     t("Ny padelbana öppnar snart! (Den 47:e i kommunen.)", "New padel court opening soon! (The 47th in town.)"),
   ],
+  // Lappar på lyktstolparna i stan
+  lapparStan: [
+    t("Uthyres: etta, 12 kvm, 14 000 kr/mån. Charmig! (Ingen dusch.)", "For rent: studio, 130 sq ft, $2,400/month. Charming! (No shower.)"),
+    t("Hittad: en hörlur. Bara vänster.", "Found: one earbud. Left only."),
+    t("Gratis att hämta: soffa. Lukten ingår.", "Free to take: sofa. Smell included."),
+  ],
+  // Skyltarna (trottoarpratarna) utanför butikerna i stan
+  butiker: [
+    t("Hundfrisör Lurvig", "Shaggy Dog Groomer"),
+    t("Café Havremjölk", "Oat Milk Café"),
+    t("Vintage (= gammalt)", "Vintage (= old)"),
+    t("Padelbutiken", "The Padel Shop"),
+    t("Kebab & Sushi", "Kebab & Sushi"),
+    t("Lokal uthyres", "Space for rent"),
+    t("Kaffe 72 kr", "Coffee $7"),
+  ],
+  // Skyltar på stranden
+  skyltarStrand: [
+    t("Badvakt i tjänst: tisdagar 13.00–13.15", "Lifeguard on duty: Tuesdays 1:00–1:15 pm"),
+    t("Förbjudet att mata måsarna. (Måsarna har inte läst skylten.)", "Do not feed the seagulls. (The seagulls haven't read this sign.)"),
+  ],
+  glassSkylt: t("Glass 49 kr. Smälter på 4 minuter.", "Ice cream $6. Melts in 4 minutes."),
   kioskSkylt: t("Korv med bröd 45 kr. (Ja, 45.)", "Hot dog $9. (Yes, 9.)"),
   rastgardSkylt: t("Hundrastgård – Hundar ska vara kopplade", "Dog park – Dogs must be on a leash"),
 
@@ -134,6 +176,8 @@ const INSTALLNINGAR = {
     vuxenpoang: { namn: t("Vuxenpoäng", "Grown-up points"), text: t("Du har sagt \"Fot!\" 25 gånger.", "You've said \"Heel!\" 25 times.") },
     hogskolepoang: { namn: t("Högskolepoäng", "College credit"), text: t("Du har nu en högskolepoäng i hundägande.", "You now have a college credit in dog care.") },
     viral: { namn: t("Viral", "Viral"), text: t("Du blev viral. Tyvärr för fel sak.", "You went viral. For the wrong reason.") },
+    masad: { namn: t("Måsad", "Gulled"), text: t("En mås tog din glass. Som alltid.", "A seagull took your ice cream. As always.") },
+    kritiker: { namn: t("Arkitekturkritiker", "Architecture critic"), text: t("Hunden recenserade ett sandslott.", "The dog reviewed a sandcastle.") },
   },
 
   // Betyget när man kommer fram, efter hur många stjärnor man fick
@@ -226,6 +270,9 @@ let fotAntal = 0;
 let foljare = 0;     // Nya följare från influencerns filmer
 let sparkAntal = 0;  // Hur många elsparkcyklar barnet har sett
 let kikare = null;   // Någon som tittar ut genom gardinen
+let banStartPoang = 0; // Poängen när banan började (om man försöker igen)
+let bilar = [];      // Bilarna på gatan i stan
+let masOm = 0;       // Tid tills måsen tar glassen
 let slapTid = 0;
 let plockadeTotalt = 0;
 let senastWii = -10;
@@ -348,8 +395,21 @@ function anpassaStorlek() {
   emojiMinne.clear();
 }
 
+// Hur långt ut åt sidorna man kan gå, och hur långt ut hunden går av sig själv
+const GRANSER = { kvarter: [3.3, 2], park: [4.4, 2.6], stad: [2.6, 2.2], strand: [4.4, 2.6] };
+const MARKFARG = { kvarter: "#8ccd66", park: "#84c75c", stad: "#d6d1c8", strand: "#f0d9a0" };
+
+function banTyp() {
+  return INSTALLNINGAR.banor[banNr].typ;
+}
+
 function satGrans() {
-  grans = Math.min(banNr === 0 ? 3.3 : 4.4, bredd / 2 / u - 0.4);
+  grans = Math.min(GRANSER[banTyp()][0], bredd / 2 / u - 0.4);
+}
+
+// Var vattnet börjar på stranden (det går lite i vågor)
+function strandlinje(v) {
+  return 3.1 + Math.sin(v * 0.45) * 0.35 + Math.sin(v * 1.3) * 0.15;
 }
 
 // Mäter hur snabbt bilderna ritas. Går det för långsamt ritar vi med färre pixlar.
@@ -381,6 +441,10 @@ function malFranFinger() {
 }
 
 function tryckIgang() {
+  if (lage === "slut" && tidSedanSlut > 1 && banNr > 0) {
+    forsokIgen();
+    return true;
+  }
   if (lage === "start" || ((lage === "slut" || lage === "hemma") && tidSedanSlut > 1)) {
     startaSpel();
     return true;
@@ -495,17 +559,25 @@ function nyPerson(sort, x, v, extra) {
   if (sort === "joggare") {
     p.bild = "🏃";
     p.fart = -3.6;
+    if (p.pass === 4) {
+      // Utslagen på stranden
+      p.bild = "🥵";
+      p.fart = 0;
+      p.ligger = true;
+    }
   } else if (sort === "hundagare") {
     p.bild = slumpa(["🚶‍♂️", "🚶‍♀️", "🚶"]);
     p.fart = -1;
     p.hund = slumpa(INSTALLNINGAR.andraHundar);
   } else if (sort === "influencer") {
-    p.bild = "🧍‍♀️";
-    p.fart = p.pass === 1 ? -0.5 : -0.8;
+    p.bild = p.pass === 4 ? "🧘‍♀️" : "🧍‍♀️";
+    p.fart = [-0.8, -0.5, -0.8, -0.6, 0][p.pass] || 0;
     p.telefon = true;
     p.viralVila = 0;
     if (p.pass === 2) {
       p.vaska = true; // Coco åker i handväskan
+    } else if (p.pass === 4) {
+      p.stativ = true; // Yoga på stranden, med telefonen på ett stativ
     } else {
       p.hund = "🐩";
       p.rosett = true;
@@ -526,6 +598,36 @@ function nyPerson(sort, x, v, extra) {
     p.bild = "🧍‍♂️";
   } else if (sort === "granne") {
     p.bild = "👵";
+  } else if (sort === "lattepappa") {
+    p.bild = "🧍‍♂️";
+    p.vagn = true;
+    p.kaffe = true;
+  } else if (sort === "musikant") {
+    p.bild = "🕺";
+    p.gitarr = true;
+  } else if (sort === "brevbarare") {
+    p.bild = "🚶‍♂️";
+    p.fart = -0.8;
+    p.lockar = 4.5; // Hunden HATAR brevbärare och ser dem på långt håll
+    p.post = true;
+  } else if (sort === "cykelbud") {
+    p.bild = "🚴";
+    p.fart = -5.5;
+    p.lockar = 3.2;
+    p.matlada = true;
+  } else if (sort === "byggare") {
+    p.bild = "👧";
+    p.hink = true;
+  } else if (sort === "solbadare") {
+    p.bild = "😎";
+  } else if (sort === "detektor") {
+    p.bild = "🧍‍♂️";
+    p.fart = -0.35;
+    p.detektor = true;
+  } else if (sort === "kallbadare") {
+    p.bild = "🏊";
+    p.iVatten = true;
+    p.lockar = 3.5; // Hunden vill bada med honom
   }
   if (p.hund) {
     p.hundX = x + 0.7;
@@ -729,6 +831,145 @@ function byggParken() {
   laggSparkcyklar(2, 1.1);
 }
 
+const BUTIKSFARGER = ["#e8b4a0", "#f2d98d", "#b9d7ea", "#d9c8f0", "#c9e4b4", "#f0c8d8"];
+const MARKISFARGER = ["#e63946", "#2a9d8f", "#f4a261", "#264653", "#9b5de5"];
+const HYTTFARGER = ["#4aa3df", "#e63946", "#2ecc71", "#f4a261", "#9b59b6"];
+
+// En flock fåglar som pickar på marken (duvor i stan, måsar på stranden)
+function laggFaglar(x, v, antal) {
+  const flock = {};
+  for (let i = 0; i < antal; i++) {
+    const hx = x + slumpMellan(-0.8, 0.8);
+    const hv = v + slumpMellan(-0.7, 0.7);
+    saker.push({ typ: "fagel", flock, hemX: hx, hemV: hv, x: hx, v: hv, fas: Math.random() * 6, lyft: 0, ut: 1, riktning: slumpSida() });
+  }
+}
+
+function byggStan() {
+  // Fontänen med duvorna
+  const fv = langd * 0.3;
+  saker.push({ typ: "damm", fontan: true, x: -1.3, v: fv, rx: 0.85, rv: 0.85 });
+  laggFaglar(0.7, fv, 6);
+
+  // Caféet med lattepappan, och gatumusikanten
+  const cafe = { typ: "cafe", x: -2.05, v: langd * 0.5 };
+  saker.push(cafe);
+  saker.push(nyPerson("lattepappa", -1.35, cafe.v - 0.35));
+  saker.push(nyPerson("musikant", 1.9, langd * 0.64));
+
+  // Lyktstolpar vid trottoarkanten, med lappar
+  const lyktor = [];
+  for (let v = 6; v < langd - 4; v += slumpMellan(10, 14)) {
+    if (!ledigt(2.4, v, 0.6)) continue;
+    const l = { typ: "lykta", x: 2.4, v, stam: 0.12, nosbar: true };
+    saker.push(l);
+    lyktor.push(l);
+  }
+  INSTALLNINGAR.lapparStan.forEach((text, i) => {
+    const l = lyktor[Math.floor(((i + 0.5) / INSTALLNINGAR.lapparStan.length) * lyktor.length)];
+    if (l) l.lapp = text;
+  });
+
+  // Butiker till vänster, med en skylt utanför de flesta
+  const namn = [...INSTALLNINGAR.butiker].sort(() => Math.random() - 0.5);
+  let n = 0;
+  for (let v = -8; v < langd + 10; ) {
+    const l = slumpMellan(5, 7);
+    saker.push({ typ: "butik", v0: v, v1: v + l, farg: slumpa(BUTIKSFARGER), markis: slumpa(MARKISFARGER) });
+    const sv = v + l / 2;
+    if (sv > 4 && sv < langd - 4 && ledigt(-2.2, sv, 0.8)) {
+      saker.push({ typ: "pratare", x: -2.2, v: sv, text: namn[n++ % namn.length], stam: 0.15, nosbar: true });
+    }
+    v += l + 0.15;
+  }
+
+  laggAutomater(2.4);
+  laggSparkcyklar(5, 2.2);
+
+  // Det som händer längs vägen
+  for (let v = 8; v < langd - 8; v += slumpMellan(5, 8)) {
+    const r = Math.random();
+    if (r < 0.25) {
+      if (ledigt(0.5, v, 1.5)) laggFaglar(slumpMellan(-0.5, 1.2), v, 4);
+    } else if (r < 0.35) {
+      laggPol(slumpMellan(-1, 1.5), v);
+    } else {
+      laggGodsak(slumpMellan(-1.5, 1.8), v);
+    }
+  }
+
+  // Folk man möter
+  saker.push(nyPerson("joggare", 1, langd * 0.14, { pass: 3 }));
+  saker.push(nyPerson("cykelbud", 0.9, langd * 0.24));
+  saker.push(nyPerson("brevbarare", -0.6, langd * 0.42));
+  saker.push(nyPerson("influencer", 0.8, langd * 0.56, { pass: 3 }));
+  saker.push(nyPerson("cykelbud", -0.3, langd * 0.74));
+  saker.push(nyPerson("hundagare", -0.8, langd * 0.85));
+}
+
+function byggStranden() {
+  // Badhytter längst till vänster
+  for (let v = 1; v < langd + 4; v += slumpMellan(2.4, 4)) {
+    saker.push({ typ: "badhytt", x: -3.9, v, farg: slumpa(HYTTFARGER) });
+  }
+
+  // Glasskiosken (och måsen som tar glassen)
+  saker.push({ typ: "kiosk", x: -2.65, v: langd * 0.36, sida: -1, kopt: false, glass: true });
+
+  // Sandslottet och flickan som byggt det
+  const slott = { typ: "sandslott", x: 2, v: langd * 0.54 };
+  saker.push(slott);
+  saker.push(nyPerson("byggare", 2.5, slott.v - 0.35, { slott }));
+
+  // Folk på stranden
+  saker.push(nyPerson("solbadare", -2.3, langd * 0.22));
+  saker.push(nyPerson("kallbadare", strandlinje(langd * 0.68) + 0.9, langd * 0.68));
+  saker.push(nyPerson("joggare", -2.1, langd * 0.62, { pass: 4 }));
+  saker.push(nyPerson("influencer", -2.3, langd * 0.83, { pass: 4 }));
+
+  // Skyltar
+  const ikoner = [["🛟", "⏰"], ["🕊️", "🚫"]];
+  INSTALLNINGAR.skyltarStrand.forEach((text, i) => {
+    saker.push({ typ: "skylt", x: i % 2 ? 1.6 : -1.6, v: langd * (0.12 + i * 0.33), text, ikoner: ikoner[i % 2] });
+  });
+
+  laggAutomater(1.55);
+
+  // Tånghögar att nosa på
+  for (let v = 3; v < langd - 2; v += slumpMellan(3.5, 6)) {
+    const x = slumpSida() * slumpMellan(1.6, 2.3);
+    if (ledigt(x, v, 0.6)) saker.push({ typ: "tang", x, v, stam: 0.1, nosbar: true, fas: Math.random() * 6 });
+  }
+
+  // Parasoller på sanden
+  for (let v = 4; v < langd - 2; v += slumpMellan(4, 7)) {
+    const sida = slumpSida();
+    const x = sida > 0 ? slumpMellan(1.8, strandlinje(v) - 0.9) : slumpMellan(-3, -1.8);
+    if (ledigt(x, v, 0.9)) saker.push({ typ: "parasoll", x, v, stam: 0.06, nosbar: true });
+  }
+
+  // Krabbor vid vattenbrynet
+  for (let i = 0; i < 7; i++) {
+    const v = slumpMellan(langd * 0.08, langd * 0.95);
+    const x = strandlinje(v) - 0.6;
+    if (ledigt(x, v, 0.5)) saker.push({ typ: "krabba", x, v, fas: Math.random() * 6, riktning: slumpSida(), ut: 1 });
+  }
+
+  // Det som händer längs vägen
+  for (let v = 8; v < langd - 8; v += slumpMellan(5, 8)) {
+    if (Math.random() < 0.3) {
+      if (ledigt(2, v, 1.5)) laggFaglar(2, v, 4); // Måsar
+    } else {
+      laggGodsak(slumpMellan(-1, 1), v);
+    }
+  }
+
+  // Folk man möter
+  saker.push(nyPerson("hundagare", -0.6, langd * 0.18));
+  saker.push(nyPerson("detektor", -1.9, langd * 0.46));
+  saker.push(nyPerson("hundagare", 0.6, langd * 0.75));
+}
+
 function byggBana() {
   saker = [];
   bajsen = [];
@@ -742,8 +983,14 @@ function byggBana() {
   fingerNere = false;
   langd = INSTALLNINGAR.banor[banNr].langd;
   satGrans();
-  if (banNr === 0) byggKvarteret();
-  else byggParken();
+  bilar = [];
+  masOm = 0;
+  banStartPoang = poang;
+  const typ = banTyp();
+  if (typ === "kvarter") byggKvarteret();
+  else if (typ === "park") byggParken();
+  else if (typ === "stad") byggStan();
+  else byggStranden();
   barn = nyttBarn();
   const gammalHund = hund;
   hund = nyHund();
@@ -783,7 +1030,21 @@ function nastaBana() {
   banNr += 1;
   lage = "spelar";
   byggBana();
-  visaTips(t(INSTALLNINGAR.banor[banNr].namn + "! Akta ankorna…", INSTALLNINGAR.banor[banNr].namn + "! Watch out for the ducks…"), 3.5);
+  const b = INSTALLNINGAR.banor[banNr];
+  visaTips(b.tips || b.namn + "!", 3.5);
+}
+
+// Försök igen från början av banan man var på, med poängen man hade då
+function forsokIgen() {
+  lage = "spelar";
+  poang = banStartPoang;
+  slutOm = 0;
+  livKvar = INSTALLNINGAR.liv;
+  pasar = INSTALLNINGAR.pasarStart;
+  humor = H.start;
+  humorTrend = 0;
+  byggBana();
+  visaTips(INSTALLNINGAR.banor[banNr].namn + t(" – igen!", " – again!"), 3);
 }
 
 function raknaStjarnor(s) {
@@ -967,9 +1228,12 @@ function hindra(f, arBarn) {
     let r = 0;
     if (s.stam) r = s.stam + 0.22;
     else if (s.typ === "kiosk") r = 0.95;
-    else if (s.typ === "bank") r = 0.6;
+    else if (s.typ === "bank" || s.typ === "badhytt") r = 0.6;
+    else if (s.typ === "cafe") r = 0.55;
+    else if (s.typ === "sandslott" && arBarn) r = 0.45; // Barnet trampar inte på slottet (men hunden...)
     if (r) {
-      const dx = f.x - s.x;
+      // Går man rakt in i något glider man av åt sidan i stället för att fastna
+      const dx = Math.abs(f.x - s.x) < 0.04 ? (f.x >= s.x ? 0.04 : -0.04) : f.x - s.x;
       const dv = f.v - s.v;
       const d = Math.hypot(dx, dv);
       if (d < r) {
@@ -992,6 +1256,10 @@ function hindra(f, arBarn) {
   }
   f.x = begr(f.x, -grans, grans);
   f.v = begr(f.v, 0.3, langd + 0.3);
+  if (banTyp() === "strand") {
+    // Barnet stannar vid vattenbrynet. Hunden kan springa en bit ut i vattnet.
+    f.x = Math.min(f.x, strandlinje(f.v) + (arBarn ? -0.25 : 1));
+  }
 }
 
 function iDammen(f, d, marg = 0.85) {
@@ -1076,8 +1344,12 @@ function efterSpand() {
     s.springer = true;
     s.tid = 3.4;
     h.lage = "jagar";
-  } else if (s.typ === "anka" || s.typ === "boll") {
+  } else if (["anka", "boll", "fagel", "krabba", "sandslott"].includes(s.typ)) {
     h.lage = "jagar";
+  } else if (s.typ === "person" && s.lockar) {
+    // Brevbäraren eller cykelbudet
+    h.lage = "jagar";
+    h.tid = s.sort === "cykelbud" ? 2.5 : 3.5;
   } else if (s.typ === "pol") {
     h.lage = "pol";
   } else if (s.typ === "kiosk") {
@@ -1112,6 +1384,10 @@ function hittaFrestelse(dt) {
     else if (s.typ === "ekorre" && !s.springer) r = 3;
     else if (s.typ === "anka" && !s.flyger) r = 3.4;
     else if (s.typ === "boll" && !s.flyger) r = 3.5;
+    else if (s.typ === "fagel" && !s.flyger) r = 3.2;
+    else if (s.typ === "krabba" && !s.flyr) r = 2.8;
+    else if (s.typ === "sandslott" && !s.raserat) r = 2.8;
+    else if (s.typ === "person" && s.lockar && !s.jagad) r = s.lockar;
     else if (s.typ === "pol") r = 1.8;
     else if (s.typ === "kiosk") r = 2.8;
     else if (s.typ === "person" && s.hund && !s.halsat) {
@@ -1185,7 +1461,7 @@ function laggBajs() {
   h.bajsTid = slumpMellan(INSTALLNINGAR.bajsTakt[0], INSTALLNINGAR.bajsTakt[1]);
   spelaTon(190, 90, 0.25, "square", 0.05);
   viral(b.x, b.v);
-  if (banNr === 0 && Math.random() < 0.35) kika(b.x, b.v);
+  if (banTyp() === "kvarter" && Math.random() < 0.35) kika(b.x, b.v);
   if (b.regnbage) {
     visaText(t("🌈 Ett regnbågsbajs!", "🌈 A rainbow poop!"), b.x, b.v + 1, "#ffe14d");
     spelaArpeggio([1047, 1319, 1568, 2093]);
@@ -1242,7 +1518,7 @@ function uppdateraHund(dt) {
   h.lerig = Math.max(0, h.lerig - dt);
   h.blot = Math.max(0, h.blot - dt);
   if (h.lage !== "bajsar") h.bajsTid -= dt;
-  const vandraGrans = Math.min(grans, banNr === 0 ? 2 : 2.6);
+  const vandraGrans = Math.min(grans, GRANSER[banTyp()][1]);
 
   switch (h.lage) {
     case "gar": {
@@ -1257,6 +1533,7 @@ function uppdateraHund(dt) {
       h.malV = barn.v + h.ov;
       const damm = saker.find((s) => s.typ === "damm" && iDammen({ x: h.malX, v: h.malV }, s, 1.3));
       if (damm) h.malX = damm.x - Math.sign(damm.x) * (damm.rx + 0.6);
+      if (banTyp() === "strand") h.malX = Math.min(h.malX, strandlinje(h.malV) - 0.7);
       gaMot(h, h.malX, h.malV, INSTALLNINGAR.hundFart, dt);
       if (!hittaFrestelse(dt) && h.bajsTid <= 0) borjaBajsa();
       break;
@@ -1267,7 +1544,7 @@ function uppdateraHund(dt) {
       break;
     case "jagar": {
       const m = h.mal;
-      if (!m || m.borta || m.flyger || h.tid <= 0 || (m.typ === "katt" && m.ut < 0.5) || (m.typ === "ekorre" && !m.springer)) {
+      if (!m || m.borta || m.flyger || m.flyr && m.typ === "krabba" || m.raserat || m.jagad || h.tid <= 0 || (m.typ === "katt" && m.ut < 0.5) || (m.typ === "ekorre" && !m.springer)) {
         tillbaka();
         break;
       }
@@ -1279,6 +1556,47 @@ function uppdateraHund(dt) {
         spelaTon(420, 220, 0.12, "sawtooth", 0.06);
       }
       if (m.typ === "anka" && iDammen(h, m.damm)) plask(m.damm);
+      if (m.typ === "krabba" && avst(h, m) < 0.45) {
+        // Krabban nyper hunden i nosen
+        m.flyr = true;
+        visaText(t("NYP!", "PINCH!"), m.x, m.v + 0.8, "#ff8a7a");
+        visaText(t("Aj aj aj!", "Ow ow ow!"), h.x, h.v + 1.3, "#ffffff", true, 1.4);
+        spelaTon(1300, 1900, 0.12, "sine", 0.08);
+        spelaTon(1300, 1900, 0.12, "sine", 0.08, 0.18);
+        humor = Math.max(0, humor - 20);
+        viral(h.x, h.v);
+        h.lage = "fot"; // Springer tillbaka till barnet
+        h.mal = null;
+        h.tid = 2;
+        break;
+      }
+      if (m.typ === "sandslott" && avst(h, m) < 0.55) {
+        // KRASCH! Hunden springer rakt igenom sandslottet
+        m.raserat = true;
+        const byggare = saker.find((p) => p.sort === "byggare" && p.slott === m);
+        if (byggare) {
+          byggare.bild = "😭";
+          byggare.sagt = 2;
+          saga(byggare, PRAT.byggare[1], 3);
+        }
+        ge(t("KRASCH!", "CRASH!"), -20, m.x, m.v + 1, "#ff8a7a");
+        spelaTon(300, 80, 0.4, "sawtooth", 0.08);
+        skakning = 0.2;
+        utmarkelse("kritiker");
+        viral(m.x, m.v);
+        tillbaka();
+        break;
+      }
+      if (m.typ === "person" && avst(h, m) < 0.7) {
+        // Hunden kom ikapp brevbäraren
+        m.jagad = true;
+        if (m.sort === "brevbarare") {
+          saga(m, PRAT.brevbarare[1], 3);
+          visaText("✉️ ✉️ ✉️", m.x, m.v + 1.2, "#ffffff", true, 1.5);
+        }
+        tillbaka();
+        break;
+      }
       if (m.typ === "boll" && avst(h, m) < 0.4) {
         m.borta = true;
         h.boll = true;
@@ -1382,6 +1700,7 @@ function uppdateraHund(dt) {
         const toppV = kamera + (ankare - panelH) / u - 1;
         h.malX = slumpMellan(-grans + 0.3, grans - 0.3);
         h.malV = Math.min(barn.v + slumpMellan(1.5, 4), toppV, langd - 1);
+        if (banTyp() === "strand") h.malX = Math.min(h.malX, strandlinje(h.malV) - 0.5);
         if (slutOm > 0) h.malV = barn.v + 30; // Sista gången springer den sin väg
       }
       gaMot(h, h.malX, h.malV, INSTALLNINGAR.smitFart * (slutOm > 0 ? 2 : 1), dt);
@@ -1392,6 +1711,13 @@ function uppdateraHund(dt) {
       break;
     default:
       tillbaka();
+  }
+
+  // Hamnar hunden i vattnet blir det PLASK (dammen, fontänen eller havet)
+  if (h.blot <= 0) {
+    const vatten = saker.find((s) => s.typ === "damm" && iDammen(h, s));
+    if (vatten) plask(vatten);
+    else if (banTyp() === "strand" && h.x > strandlinje(h.v) + 0.15) plask(null);
   }
 
   // Leriga tassar lämnar spår
@@ -1405,7 +1731,7 @@ function uppdateraHund(dt) {
 function plask(damm) {
   const h = hund;
   for (const s of saker) {
-    if (s.typ === "anka" && s.damm === damm) s.flyger = true;
+    if (s.typ === "anka" && damm && s.damm === damm) s.flyger = true;
   }
   h.blot = 10;
   humor = Math.min(100, humor + H.plask);
@@ -1414,8 +1740,9 @@ function plask(damm) {
   skakning = 0.2;
   spelaTon(900, 120, 0.45, "sine", 0.15);
   spelaTon(600, 90, 0.4, "triangle", 0.08, 0.1);
+  if (h.los) return; // Har hunden smitit fortsätter den springa
   tillbaka();
-  h.ox = -Math.sign(damm.x) * 0.8;
+  h.ox = damm ? -Math.sign(damm.x) * 0.8 : -1;
   h.ov = 1;
   h.vandra = 2;
 }
@@ -1528,6 +1855,73 @@ function uppdateraSaker(dt) {
           if (s.ut <= 0) s.borta = true;
         }
         break;
+      case "fagel":
+        if (s.flyger) {
+          s.lyft += dt * 1.8;
+          s.v += dt * 1.2;
+          s.x += s.riktning * dt;
+          s.ut -= dt * 0.6;
+          if (s.ut <= 0) s.borta = true;
+        } else {
+          // Pickar och tassar runt lite
+          s.fas += dt;
+          s.x = s.hemX + Math.sin(s.fas * 0.7) * 0.25;
+          s.v = s.hemV + Math.cos(s.fas * 0.5) * 0.15;
+          if (avst(s, hund) < 1.3 || avst(s, barn) < 0.8) {
+            // Hela flocken flyger iväg
+            if (!s.flock.flugit) {
+              s.flock.flugit = true;
+              visaText(t("FLAX FLAX!", "FLAP FLAP!"), s.x, s.v + 0.8, "#ffffff");
+              spelaTon(900, 1400, 0.08, "triangle", 0.05);
+              spelaTon(1000, 1500, 0.08, "triangle", 0.05, 0.1);
+            }
+            for (const f of saker) if (f.flock === s.flock) f.flyger = true;
+          }
+        }
+        break;
+      case "krabba":
+        s.fas += dt;
+        if (s.flyr) {
+          // Krabban springer ut i vattnet
+          s.x += 1.5 * dt;
+          s.ut -= dt * 0.8;
+          if (s.ut <= 0) s.borta = true;
+        } else {
+          // Går i sidled fram och tillbaka
+          if (Math.sin(s.fas * 0.8) > 0.95) s.riktning = -s.riktning;
+          s.v += s.riktning * 0.35 * dt;
+        }
+        break;
+      case "masattack": {
+        // Måsen dyker ner, tar glassen och flyger iväg
+        s.fas += dt / (s.har ? 1.5 : 0.9);
+        if (!s.har) {
+          const f = Math.min(1, s.fas);
+          s.x = s.franX + (barn.x - s.franX) * f;
+          s.v = s.franV + (barn.v - s.franV) * f;
+          s.z = 3 - 2 * f;
+          if (s.fas >= 1) {
+            s.har = barn.korv > 0;
+            s.fas = 0;
+            if (s.har) {
+              barn.korv = 0;
+              visaText(PRAT.mas[0], barn.x, barn.v + 2, "#ff8a7a");
+              saga(barn, PRAT.mas[1], 2);
+              spelaTon(1500, 900, 0.25, "sawtooth", 0.06);
+              utmarkelse("masad");
+              viral(barn.x, barn.v);
+            } else {
+              s.har = true; // Glassen var redan slut – flyg iväg ändå
+            }
+          }
+        } else {
+          s.x -= 2.5 * dt;
+          s.v += 3 * dt;
+          s.z += 2 * dt;
+          if (s.fas >= 1) s.borta = true;
+        }
+        break;
+      }
       case "ekorre": {
         const t = s.trad;
         if (s.springer) {
@@ -1625,18 +2019,26 @@ function uppdateraSaker(dt) {
       case "kiosk": {
         if (!s.last && avst(s, barn) < 2.8) {
           s.last = true;
-          visaLapp(INSTALLNINGAR.kioskSkylt);
+          visaLapp(s.glass ? INSTALLNINGAR.glassSkylt : INSTALLNINGAR.kioskSkylt);
         }
-        // Står man vid luckan en stund köper man en korv. Till sig själv.
+        // Står man vid luckan en stund köper man en korv (eller glass). Till sig själv.
         const framX = s.x - s.sida * 1.05;
         if (!s.kopt && Math.hypot(barn.x - framX, barn.v - s.v) < 0.9) {
           barn.kioskTid += dt;
           if (barn.kioskTid > 1) {
             s.kopt = true;
             barn.korv = 10;
-            saga(barn, t("En korv, tack!", "A hot dog, please!"), 1.5);
-            visaText(t("-45 kr", "-$9"), s.x, s.v + 1.6, "#ffd1d1");
-            utmarkelse("vardagslyx");
+            if (s.glass) {
+              barn.mat = "🍦";
+              saga(barn, t("En glass, tack!", "An ice cream, please!"), 1.5);
+              visaText(t("-49 kr", "-$6"), s.x, s.v + 1.6, "#ffd1d1");
+              masOm = 2.5; // Måsen har sett glassen
+            } else {
+              barn.mat = "🌭";
+              saga(barn, t("En korv, tack!", "A hot dog, please!"), 1.5);
+              visaText(t("-45 kr", "-$9"), s.x, s.v + 1.6, "#ffd1d1");
+              utmarkelse("vardagslyx");
+            }
           }
         } else {
           barn.kioskTid = 0;
@@ -1647,6 +2049,32 @@ function uppdateraSaker(dt) {
     if (s.borta) nagonBorta = true;
   }
   if (nagonBorta) saker = saker.filter((s) => !s.borta);
+}
+
+// Säger första repliken när man kommer nära och den andra när man gått förbi
+function tvaRepliker(p, rep, d, nara) {
+  if (!p.sagt && d < nara) {
+    p.sagt = 1;
+    saga(p, rep[0], 3.2);
+  } else if (p.sagt === 1 && rep[1] && barn.v - p.v > 1.2) {
+    p.sagt = 2;
+    saga(p, rep[1], 3);
+  }
+}
+
+// Bilarna som kör på gatan i stan (de är bara till för syns skull)
+function uppdateraBilar(dt) {
+  if (banTyp() !== "stad") return;
+  for (const b of bilar) b.v += b.fart * dt;
+  bilar = bilar.filter((b) => Math.abs(b.v - kamera) < 16);
+  for (const [x, fart] of [[3.6, -6], [5.5, 5]]) {
+    const iFilen = bilar.filter((b) => b.x === x);
+    const ledig = iFilen.every((b) => Math.abs(b.v - (kamera + (fart < 0 ? 14 : -14))) > 4);
+    if (iFilen.length < 2 && ledig && Math.random() < dt * 0.8) {
+      bilar.push({ x, fart: fart * slumpMellan(0.85, 1.15), v: kamera + (fart < 0 ? 14 : -14), bild: slumpa(["🚗", "🚕", "🚙", "🚌", "🚐"]) });
+    }
+  }
+  if (Math.random() < dt * 0.06) spelaTon(520, 520, 0.12, "square", 0.025); // Tuuut
 }
 
 function uppdateraPerson(p, dt) {
@@ -1748,6 +2176,57 @@ function uppdateraPerson(p, dt) {
         p.sagt = 1;
         saga(p, rep[0], 3.2);
       }
+      break;
+    case "byggare":
+      if (!p.sagt && d < 4.5) {
+        p.sagt = 1;
+        saga(p, rep[0], 3);
+      } else if (p.sagt === 1 && !p.slott.raserat && barn.v - p.v > 2) {
+        // Man höll i hunden hela vägen förbi slottet
+        p.sagt = 3;
+        saga(p, rep[2], 3);
+        ge(t("Snällt!", "Nice!"), 10, p.x, p.v + 1.6, "#b6f09c");
+      }
+      break;
+    case "musikant":
+      if (!p.ylat && d < 3) {
+        // Hunden sjunger med
+        p.ylat = true;
+        visaText(t("Auuuuu!", "Awoooo!"), hund.x, hund.v + 1.2, "#ffffff", true, 1.6);
+        spelaTon(450, 750, 0.5, "sine", 0.07);
+        spelaTon(750, 520, 0.6, "sine", 0.07, 0.5);
+        humor = Math.min(100, humor + 5);
+      }
+      tvaRepliker(p, rep, d, 4.5);
+      break;
+    case "cykelbud":
+      if (!p.plingat && d < 6) {
+        p.plingat = true;
+        visaText(t("Pling pling!", "Ring ring!"), p.x, p.v + 1.3, "#ffffff", true, 1.2);
+        spelaTon(2000, 2000, 0.08, "triangle", 0.06);
+        spelaTon(2000, 2000, 0.08, "triangle", 0.06, 0.15);
+      }
+      tvaRepliker(p, rep, d, 5);
+      break;
+    case "brevbarare":
+      if (!p.sagt && d < 5) {
+        p.sagt = 1;
+        saga(p, rep[0], 3);
+      }
+      break;
+    case "detektor":
+      p.pip = (p.pip || 0) - dt;
+      if (p.pip <= 0 && d < 8) {
+        p.pip = slumpMellan(1.5, 3);
+        visaText("pip", p.x + 0.6, p.v + 0.4, "#ffffff", false, 0.8);
+        spelaTon(1800, 1800, 0.05, "square", 0.02);
+      }
+      tvaRepliker(p, rep, d, 4.5);
+      break;
+    case "lattepappa":
+    case "solbadare":
+    case "kallbadare":
+      tvaRepliker(p, rep, d, 4.5);
       break;
   }
 
@@ -1868,7 +2347,7 @@ function brasak(x, v) {
 
 // Någon i ett hus i närheten tittar ut genom gardinen
 function kika(x, v) {
-  if (banNr !== 0) return;
+  if (banTyp() !== "kvarter") return;
   let bast = null;
   let bastD = 6;
   for (const h of saker) {
@@ -1982,6 +2461,14 @@ function uppdatera(dt) {
   hartKoppel();
   uppdateraTrassel();
   uppdateraSaker(dt);
+  uppdateraBilar(dt);
+  if (masOm > 0) {
+    masOm -= dt;
+    if (masOm <= 0 && barn.korv > 0) {
+      saker.push({ typ: "masattack", x: grans + 1, v: barn.v + 5, franX: grans + 1, franV: barn.v + 5, z: 3, fas: 0, har: false });
+      spelaTon(1600, 1200, 0.3, "sawtooth", 0.05);
+    }
+  }
   uppdateraBajs(dt);
   uppdateraHumor(dt);
   uppdateraKamera(dt);
@@ -2088,11 +2575,59 @@ function synligt() {
 
 function ritaMarken() {
   const syn = synligt();
-  const park = banNr === 1;
-  ctx.fillStyle = park ? "#84c75c" : "#8ccd66";
+  const typ = banTyp();
+  ctx.fillStyle = MARKFARG[typ];
   ctx.fillRect(0, 0, bredd, hojd);
+  if (typ === "kvarter" || typ === "park") ritaGras(syn, typ === "park");
+  else if (typ === "stad") ritaGatan(syn);
+  else ritaSanden(syn);
 
-  // Grästuvor (och blommor i parken)
+  // Gubbens gräsmatta, hundrastgården och dammen ligger under vägen
+  for (const s of saker) {
+    if (s.typ === "grasmatta" && s.v1 > syn.botten && s.v0 < syn.topp) ritaGrasmatta(s);
+    if (s.typ === "rastgard" && s.v1 > syn.botten && s.v0 < syn.topp) ritaRastgard(s);
+    if (s.typ === "damm" && !s.fontan && Math.abs(s.v - kamera) < 14) ritaDamm(s);
+  }
+
+  ritaVagen(syn, typ);
+  for (const s of saker) {
+    if (s.fontan && Math.abs(s.v - kamera) < 14) ritaDamm(s); // Fontänen står mitt på gågatan
+  }
+
+  for (const s of saker) {
+    if (s.typ === "hus" && s.v1 > syn.botten && s.v0 < syn.topp) ritaHus(s);
+    if (s.typ === "butik" && s.v1 > syn.botten && s.v0 < syn.topp) ritaButik(s);
+  }
+  if (kikare) {
+    // Ögon i fönstret
+    const h = kikare.hus;
+    ctx.globalAlpha = Math.min(1, kikare.kvar * 2);
+    ritaEmoji("👀", SX(h.sida * 3.8) + h.sida * u * 0.175, SY(kikare.v), u * 0.3);
+    ctx.globalAlpha = 1;
+  }
+  for (const s of saker) {
+    if (s.typ === "staket" && s.v1 > syn.botten && s.v0 < syn.topp) ritaStaket(s);
+    if (s.typ === "pol" && s.v > syn.botten && s.v < syn.topp) ritaPol(s);
+    if (s.kiss && s.v > syn.botten && s.v < syn.topp) {
+      ctx.fillStyle = "rgba(240, 220, 90, 0.55)";
+      ctx.beginPath();
+      ctx.ellipse(SX(s.x) + u * 0.15, SY(s.v) + u * 0.05, u * 0.25, u * 0.09, 0, 0, VARV);
+      ctx.fill();
+    }
+  }
+  ritaMal();
+
+  // Leriga tassavtryck
+  for (const tass of tassar) {
+    ctx.fillStyle = `rgba(110, 75, 40, ${Math.min(0.6, tass.kvar * 0.3)})`;
+    ctx.beginPath();
+    ctx.arc(SX(tass.x), SY(tass.v), u * 0.05, 0, VARV);
+    ctx.fill();
+  }
+}
+
+// Grästuvor (och blommor i parken)
+function ritaGras(syn, park) {
   const ruta = 0.8;
   ctx.strokeStyle = park ? "#69ae44" : "#72b551";
   ctx.lineWidth = Math.max(1.5, u * 0.03);
@@ -2123,21 +2658,91 @@ function ritaMarken() {
       ctx.fill();
     }
   }
+}
 
-  // Gubbens gräsmatta, hundrastgården och dammen ligger under vägen
-  for (const s of saker) {
-    if (s.typ === "grasmatta" && s.v1 > syn.botten && s.v0 < syn.topp) ritaGrasmatta(s);
-    if (s.typ === "rastgard" && s.v1 > syn.botten && s.v0 < syn.topp) ritaRastgard(s);
-    if (s.typ === "damm" && Math.abs(s.v - kamera) < 14) ritaDamm(s);
+// Bilgatan till höger i stan, med bilar som kör förbi
+function ritaGatan(syn) {
+  const kant = SX(2.75);
+  ctx.fillStyle = "#5b5f66";
+  ctx.fillRect(kant, 0, bredd - kant, hojd);
+  ctx.fillStyle = "#9a958c"; // Trottoarkanten
+  ctx.fillRect(kant - u * 0.08, 0, u * 0.08, hojd);
+  ctx.fillStyle = "#f2f2f2";
+  for (let v = Math.floor(syn.botten / 2) * 2; v <= syn.topp; v += 2) {
+    ctx.fillRect(SX(4.55) - u * 0.04, SY(v + 1), u * 0.08, u * 1);
   }
+  for (const b of bilar) {
+    ctx.save();
+    ctx.translate(SX(b.x), SY(b.v));
+    ctx.rotate(b.fart < 0 ? -Math.PI / 2 : Math.PI / 2);
+    ritaEmoji(b.bild, 0, 0, u * 1.1);
+    ctx.restore();
+  }
+}
 
-  // Trottoaren eller grusvägen
-  const halvVag = park ? 1.3 : 1.6;
+// Sanden, sanddynerna och havet till höger
+function ritaSanden(syn) {
+  // Strandgräs och prickar i sanden
+  ctx.strokeStyle = "#9bb35a";
+  ctx.lineWidth = Math.max(1.5, u * 0.03);
+  ctx.lineCap = "round";
+  ctx.beginPath();
+  ctx.fillStyle = "rgba(170, 130, 70, 0.3)";
+  const ruta = 0.7;
+  for (let i = Math.floor(syn.botten / ruta); i <= syn.topp / ruta; i++) {
+    for (let j = Math.floor(-syn.halv / ruta); j <= syn.halv / ruta; j++) {
+      const r = slumpTal(i * 53 + j * 31 + 77);
+      const xe = (j + slumpTal(i * 11 + j * 3)) * ruta;
+      const x = SX(xe);
+      const y = SY((i + slumpTal(i * 7 + j * 19)) * ruta);
+      if (r < 0.35) ctx.fillRect(x, y, 2, 2);
+      if (xe < -2.2 && r > 0.75) {
+        ctx.moveTo(x - u * 0.1, y - u * 0.15);
+        ctx.lineTo(x, y);
+        ctx.lineTo(x + u * 0.03, y - u * 0.22);
+        ctx.moveTo(x, y);
+        ctx.lineTo(x + u * 0.12, y - u * 0.14);
+      }
+    }
+  }
+  ctx.stroke();
+
+  // Havet
+  const steg = 0.4;
+  const v0 = Math.floor(syn.botten / steg) * steg;
+  const kust = (vatt, extra) => {
+    ctx.beginPath();
+    ctx.moveTo(bredd, SY(v0));
+    for (let v = v0; v <= syn.topp + steg; v += steg) ctx.lineTo(SX(strandlinje(v) + extra(v)), SY(v));
+    ctx.lineTo(bredd, SY(syn.topp + steg));
+    ctx.closePath();
+    ctx.fillStyle = vatt;
+    ctx.fill();
+  };
+  kust("#dcc48e", () => -0.35); // Blöt sand
+  kust("#4fa8d8", () => 0);
+  kust("#3b8fc4", () => 1.4);
+  // Vågor som rullar in
+  ctx.strokeStyle = "rgba(255, 255, 255, 0.85)";
+  ctx.lineWidth = Math.max(2, u * 0.05);
+  ctx.beginPath();
+  const vag = Math.sin(tid * 1.5) * 0.12;
+  for (let v = v0; v <= syn.topp + steg; v += steg) {
+    const x = SX(strandlinje(v) + vag + 0.05);
+    if (v === v0) ctx.moveTo(x, SY(v));
+    else ctx.lineTo(x, SY(v));
+  }
+  ctx.stroke();
+}
+
+// Trottoaren, grusvägen, gågatan eller strandpromenaden
+function ritaVagen(syn, typ) {
+  const halvVag = { kvarter: 1.6, park: 1.3, stad: 2.6, strand: 1.2 }[typ];
   const x0 = SX(-halvVag);
   const x1 = SX(halvVag);
-  ctx.fillStyle = park ? "#e3d1a0" : "#cfc9be";
+  ctx.fillStyle = { kvarter: "#cfc9be", park: "#e3d1a0", stad: "#c9c3ba", strand: "#b98a5a" }[typ];
   ctx.fillRect(x0, 0, x1 - x0, hojd);
-  if (park) {
+  if (typ === "park") {
     // Småsten i gruset
     ctx.fillStyle = "rgba(150, 120, 70, 0.35)";
     for (let i = Math.floor(syn.botten / 0.5); i <= syn.topp / 0.5; i++) {
@@ -2149,51 +2754,43 @@ function ritaMarken() {
         ctx.fill();
       }
     }
-  } else {
-    // Plattor
-    ctx.strokeStyle = "rgba(120, 110, 100, 0.35)";
+  } else if (typ === "strand") {
+    // Plankor
+    ctx.strokeStyle = "rgba(90, 55, 25, 0.45)";
     ctx.lineWidth = 1.5;
     ctx.beginPath();
-    for (let v = Math.floor(syn.botten); v <= syn.topp; v++) {
+    for (let v = Math.floor(syn.botten / 0.35) * 0.35; v <= syn.topp; v += 0.35) {
       ctx.moveTo(x0, SY(v));
       ctx.lineTo(x1, SY(v));
     }
-    ctx.moveTo(SX(0), 0);
-    ctx.lineTo(SX(0), hojd);
     ctx.stroke();
-    ctx.fillStyle = "#a9a39a"; // Trottoarkanten
-    ctx.fillRect(x0 - u * 0.06, 0, u * 0.06, hojd);
-    ctx.fillRect(x1, 0, u * 0.06, hojd);
-  }
-
-  for (const s of saker) {
-    if (s.typ === "hus" && s.v1 > syn.botten && s.v0 < syn.topp) ritaHus(s);
-  }
-  if (kikare) {
-    // Ögon i fönstret
-    const h = kikare.hus;
-    ctx.globalAlpha = Math.min(1, kikare.kvar * 2);
-    ritaEmoji("👀", SX(h.sida * 3.8) + h.sida * u * 0.175, SY(kikare.v), u * 0.3);
-    ctx.globalAlpha = 1;
-  }
-  for (const s of saker) {
-    if (s.typ === "staket" && s.v1 > syn.botten && s.v0 < syn.topp) ritaStaket(s);
-    if (s.typ === "pol" && s.v > syn.botten && s.v < syn.topp) ritaPol(s);
-    if (s.kiss && s.v > syn.botten && s.v < syn.topp) {
-      ctx.fillStyle = "rgba(240, 220, 90, 0.55)";
-      ctx.beginPath();
-      ctx.ellipse(SX(s.x) + u * 0.15, SY(s.v) + u * 0.05, u * 0.25, u * 0.09, 0, 0, VARV);
-      ctx.fill();
-    }
-  }
-  ritaMal();
-
-  // Leriga tassavtryck
-  for (const t of tassar) {
-    ctx.fillStyle = `rgba(110, 75, 40, ${Math.min(0.6, t.kvar * 0.3)})`;
+    ctx.fillStyle = "#8a5f36";
+    ctx.fillRect(x0 - u * 0.08, 0, u * 0.08, hojd);
+    ctx.fillRect(x1, 0, u * 0.08, hojd);
+  } else {
+    // Plattor (stora i stan)
+    const ruta = typ === "stad" ? 1.3 : 1;
+    ctx.strokeStyle = "rgba(120, 110, 100, 0.35)";
+    ctx.lineWidth = 1.5;
     ctx.beginPath();
-    ctx.arc(SX(t.x), SY(t.v), u * 0.05, 0, VARV);
-    ctx.fill();
+    for (let v = Math.floor(syn.botten / ruta) * ruta; v <= syn.topp; v += ruta) {
+      ctx.moveTo(x0, SY(v));
+      ctx.lineTo(x1, SY(v));
+    }
+    for (let x = -halvVag + ruta; x < halvVag; x += ruta) {
+      ctx.moveTo(SX(x), 0);
+      ctx.lineTo(SX(x), hojd);
+    }
+    if (typ === "kvarter") {
+      ctx.moveTo(SX(0), 0);
+      ctx.lineTo(SX(0), hojd);
+    }
+    ctx.stroke();
+    if (typ === "kvarter") {
+      ctx.fillStyle = "#a9a39a"; // Trottoarkanten
+      ctx.fillRect(x0 - u * 0.06, 0, u * 0.06, hojd);
+      ctx.fillRect(x1, 0, u * 0.06, hojd);
+    }
   }
 }
 
@@ -2311,6 +2908,31 @@ function ritaRastgard(r) {
 function ritaDamm(d) {
   const x = SX(d.x);
   const y = SY(d.v);
+  if (d.fontan) {
+    // Stenkant, vatten och en stråle i mitten
+    ctx.fillStyle = "#a9a39a";
+    ctx.beginPath();
+    ctx.arc(x, y, (d.rx + 0.15) * u, 0, VARV);
+    ctx.fill();
+    ctx.fillStyle = "#6cb8e8";
+    ctx.beginPath();
+    ctx.arc(x, y, d.rx * u, 0, VARV);
+    ctx.fill();
+    ctx.fillStyle = "#a9a39a";
+    ctx.beginPath();
+    ctx.arc(x, y, u * 0.15, 0, VARV);
+    ctx.fill();
+    ctx.fillStyle = "rgba(220, 240, 255, 0.9)";
+    for (let i = 0; i < 10; i++) {
+      const f = (tid * 1.2 + i / 10) % 1;
+      const a = i * 2.4;
+      const r = f * d.rx * u * 0.8;
+      ctx.beginPath();
+      ctx.arc(x + Math.cos(a) * r, y + Math.sin(a) * r * 0.8 - Math.sin(f * Math.PI) * u * 0.6, u * 0.04, 0, VARV);
+      ctx.fill();
+    }
+    return;
+  }
   ctx.fillStyle = "#6f9e5a";
   ctx.beginPath();
   ctx.ellipse(x, y, (d.rx + 0.18) * u, (d.rv + 0.18) * u, 0, 0, VARV);
@@ -2343,19 +2965,21 @@ function ritaPol(p) {
   ctx.fill();
 }
 
-// Parkens grind i slutet av kvarteret, och huset man bor i i slutet av parken
+// En grind till nästa bana i slutet, och huset man bor i i slutet av sista banan
 function ritaMal() {
   const y = SY(langd);
   if (y < -u * 6 || y > hojd + u) return;
-  if (banNr === 0) {
-    // Häck med en grind
-    ctx.fillStyle = "#3f8f3a";
-    ctx.fillRect(0, y - u * 0.8, SX(-1.9), u * 0.8);
-    ctx.fillRect(SX(1.9), y - u * 0.8, bredd - SX(1.9), u * 0.8);
-    ctx.fillStyle = "#84c75c";
+  const nasta = INSTALLNINGAR.banor[banNr + 1];
+  if (nasta) {
+    // Häck (eller mur i stan) med en grind, och nästa bana på andra sidan
+    const oppning = banTyp() === "stad" ? 2.9 : 1.9;
+    ctx.fillStyle = MARKFARG[nasta.typ];
     ctx.fillRect(0, 0, bredd, y - u * 0.8);
+    ctx.fillStyle = banTyp() === "stad" ? "#8a8f98" : "#3f8f3a";
+    ctx.fillRect(0, y - u * 0.8, SX(-oppning), u * 0.8);
+    ctx.fillRect(SX(oppning), y - u * 0.8, bredd - SX(oppning), u * 0.8);
     for (const sida of [-1, 1]) {
-      const px = SX(sida * 1.9);
+      const px = SX(sida * oppning);
       ctx.fillStyle = "#9a9a9a";
       ctx.fillRect(px - u * 0.25, y - u * 1.6, u * 0.5, u * 1.6);
       ctx.fillStyle = "#7d7d7d";
@@ -2364,10 +2988,11 @@ function ritaMal() {
     ctx.strokeStyle = "#3a3a3a";
     ctx.lineWidth = Math.max(3, u * 0.08);
     ctx.beginPath();
-    ctx.moveTo(SX(-1.9), y - u * 1.6);
-    ctx.quadraticCurveTo(SX(0), y - u * 2.6, SX(1.9), y - u * 1.6);
+    ctx.moveTo(SX(-oppning), y - u * 1.6);
+    ctx.quadraticCurveTo(SX(0), y - u * 2.6, SX(oppning), y - u * 1.6);
     ctx.stroke();
-    ritaText(t("PARKEN", "PARK"), SX(0), y - u * 2, u * 0.42, "#ffe9b3");
+    ritaText(nasta.namn.toUpperCase(), SX(0), y - u * 2, u * 0.42, "#ffe9b3");
+    ritaEmoji(nasta.ikon, SX(0), y - u * 2.75, u * 0.5);
   } else {
     // Hemma!
     const x0 = SX(-3.2);
@@ -2526,11 +3151,11 @@ function ritaKiosk(k) {
   ctx.fillRect(x - w * 0.4, y - u * 0.58, w * 0.8, u * 0.1);
   // Randigt tak
   for (let i = 0; i < 6; i++) {
-    ctx.fillStyle = i % 2 ? "#ffffff" : "#e63946";
+    ctx.fillStyle = i % 2 ? "#ffffff" : k.glass ? "#ff8fb1" : "#e63946";
     ctx.fillRect(x - w * 0.55 + (i * w * 1.1) / 6, y - u * 1.55, (w * 1.1) / 6 + 0.5, u * 0.28);
   }
-  ritaEmoji("🌭", x, y - u * 1.8, u * 0.45);
-  ritaText(t("45:-", "$9"), x + w * 0.42, y - u * 0.3, u * 0.22, "#ffe14d");
+  ritaEmoji(k.glass ? "🍦" : "🌭", x, y - u * 1.8, u * 0.45);
+  ritaText(k.glass ? t("49:-", "$6") : t("45:-", "$9"), x + w * 0.42, y - u * 0.3, u * 0.22, "#ffe14d");
 }
 
 function ritaBank(b) {
@@ -2556,8 +3181,197 @@ function ritaSkylt(s) {
   rundRekt(ctx, x - u * 0.45, y - u * 1.4, u * 0.9, u * 0.5, 4);
   ctx.fill();
   ctx.stroke();
-  ritaEmoji("🐕", x - u * 0.2, y - u * 1.15, u * 0.28);
-  ritaEmoji("🔗", x + u * 0.18, y - u * 1.15, u * 0.24);
+  const [ikon1, ikon2] = s.ikoner || ["🐕", "🔗"];
+  ritaEmoji(ikon1, x - u * 0.2, y - u * 1.15, u * 0.28);
+  ritaEmoji(ikon2, x + u * 0.18, y - u * 1.15, u * 0.24);
+}
+
+// Butikerna i stan: väggen med skyltfönster, en randig markis och taket
+function ritaButik(b) {
+  const inne = SX(-2.95);
+  const x0 = SX(-14);
+  const y0 = SY(b.v1);
+  const y1 = SY(b.v0);
+  const vagg = u * 0.35;
+  ctx.fillStyle = "#6b6f78";
+  ctx.fillRect(x0, y0, inne - x0, y1 - y0);
+  ctx.fillStyle = "rgba(0, 0, 0, 0.15)";
+  for (let y = y0 + u * 0.4; y < y1; y += u * 0.4) ctx.fillRect(x0, y, inne - vagg - x0, 2);
+  ctx.fillStyle = b.farg;
+  ctx.fillRect(inne - vagg, y0, vagg, y1 - y0);
+  // Skyltfönster och dörr
+  ctx.fillStyle = "#bfe3f5";
+  ctx.fillRect(inne - vagg * 0.75, y0 + u * 0.5, vagg * 0.5, y1 - y0 - u * 1.4);
+  ctx.fillStyle = "#5a3a22";
+  ctx.fillRect(inne - vagg * 0.8, y1 - u * 0.75, vagg * 0.6, u * 0.45);
+  // Markis
+  const mx = inne;
+  const mw = u * 0.32;
+  for (let v = b.v0 + 0.3, i = 0; v < b.v1 - 0.3; v += 0.4, i++) {
+    ctx.fillStyle = i % 2 ? "#ffffff" : b.markis;
+    const ya = SY(Math.min(v + 0.4, b.v1 - 0.3));
+    ctx.fillRect(mx, ya, mw, SY(v) - ya);
+  }
+  ctx.fillStyle = "rgba(0, 0, 0, 0.12)";
+  ctx.fillRect(mx + mw, SY(b.v1 - 0.3), u * 0.12, SY(b.v0 + 0.3) - SY(b.v1 - 0.3));
+  ctx.strokeStyle = "rgba(0, 0, 0, 0.3)";
+  ctx.lineWidth = 2;
+  ctx.strokeRect(x0, y0, inne - x0, y1 - y0);
+}
+
+// Trottoarpratare: en skylt med butikens namn
+function ritaPratare(s) {
+  const x = SX(s.x);
+  const y = SY(s.v);
+  const w = u * 1.3;
+  const h = u * 0.6;
+  skugga(x, y, w * 0.45, u * 0.08);
+  ctx.strokeStyle = "#7a5a3a";
+  ctx.lineWidth = Math.max(2, u * 0.05);
+  ctx.beginPath();
+  ctx.moveTo(x - w * 0.4, y);
+  ctx.lineTo(x - w * 0.35, y - h - u * 0.3);
+  ctx.moveTo(x + w * 0.4, y);
+  ctx.lineTo(x + w * 0.35, y - h - u * 0.3);
+  ctx.stroke();
+  ctx.fillStyle = "#2f3640";
+  rundRekt(ctx, x - w / 2, y - h - u * 0.35, w, h, 4);
+  ctx.fill();
+  ctx.strokeStyle = "#a8774a";
+  ctx.stroke();
+  ctx.fillStyle = "#ffffff";
+  ctx.font = `${Math.max(9, u * 0.17)}px ${HANDSTIL}`;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText(s.text, x, y - h / 2 - u * 0.35, w - u * 0.15);
+}
+
+function ritaCafe(c) {
+  const x = SX(c.x);
+  const y = SY(c.v);
+  for (const [dx, dv] of [[0, 0], [0.1, 1.1]]) {
+    const tx = x + dx * u;
+    const ty = y - dv * u;
+    skugga(tx, ty, u * 0.35, u * 0.1);
+    ctx.fillStyle = "#3d3d3d";
+    ctx.fillRect(tx - u * 0.03, ty - u * 0.45, u * 0.06, u * 0.45);
+    ctx.fillStyle = "#ffffff";
+    ctx.strokeStyle = "#555555";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.ellipse(tx, ty - u * 0.48, u * 0.32, u * 0.12, 0, 0, VARV);
+    ctx.fill();
+    ctx.stroke();
+    ritaEmoji(dv ? "🥐" : "☕", tx, ty - u * 0.62, u * 0.26);
+  }
+}
+
+function ritaBadhytt(b) {
+  const x = SX(b.x);
+  const y = SY(b.v);
+  const w = u * 0.95;
+  const h = u * 1.1;
+  skugga(x, y, w * 0.6, u * 0.12);
+  for (let i = 0; i < 5; i++) {
+    ctx.fillStyle = i % 2 ? "#ffffff" : b.farg;
+    ctx.fillRect(x - w / 2 + (i * w) / 5, y - h, w / 5 + 0.5, h);
+  }
+  ctx.fillStyle = "#5a3a22";
+  ctx.fillRect(x - w * 0.18, y - h * 0.65, w * 0.36, h * 0.65);
+  ctx.fillStyle = b.farg;
+  ctx.beginPath();
+  ctx.moveTo(x - w * 0.6, y - h);
+  ctx.lineTo(x, y - h - u * 0.45);
+  ctx.lineTo(x + w * 0.6, y - h);
+  ctx.closePath();
+  ctx.fill();
+  ctx.strokeStyle = "rgba(0, 0, 0, 0.3)";
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+}
+
+function ritaParasoll(s) {
+  const x = SX(s.x);
+  const y = SY(s.v);
+  skugga(x - u * 0.2, y, u * 0.6, u * 0.18);
+  ritaEmoji("⛱️", x, y - u * 0.55, u * 1.2);
+}
+
+function ritaTang(s) {
+  const x = SX(s.x);
+  const y = SY(s.v);
+  ctx.fillStyle = "#4f6b2f";
+  for (const [dx, dy, r] of [[-0.15, 0, 0.16], [0.1, -0.03, 0.14], [0, -0.1, 0.12], [0.2, 0.04, 0.1]]) {
+    ctx.beginPath();
+    ctx.ellipse(x + dx * u, y + dy * u, r * u * 1.5, r * u * 0.7, 0, 0, VARV);
+    ctx.fill();
+  }
+  ritaEmoji("🐚", x + u * 0.25, y - u * 0.1, u * 0.22);
+}
+
+function ritaFagel(s) {
+  const x = SX(s.x);
+  const y = SY(s.v) - s.lyft * u;
+  ctx.globalAlpha = begr(s.ut, 0, 1);
+  if (!s.flyger) skugga(x, SY(s.v), u * 0.13, u * 0.04);
+  const pick = s.flyger ? 0 : Math.max(0, Math.sin(s.fas * 6)) * u * 0.05;
+  ritaEmoji("🕊️", x, y - u * 0.15 + pick, u * 0.36, "center", s.flyger ? s.riktning > 0 : Math.cos(s.fas * 0.7) > 0);
+  ctx.globalAlpha = 1;
+}
+
+function ritaKrabba(s) {
+  const x = SX(s.x) + Math.sin(s.fas * 18) * u * 0.02;
+  const y = SY(s.v);
+  ctx.globalAlpha = begr(s.ut, 0, 1);
+  skugga(x, y, u * 0.16, u * 0.05);
+  ritaEmoji("🦀", x, y - u * 0.13, u * 0.36);
+  ctx.globalAlpha = 1;
+}
+
+function ritaSandslott(s) {
+  const x = SX(s.x);
+  const y = SY(s.v);
+  if (s.raserat) {
+    // En sandhög. Hunden har recenserat.
+    ctx.fillStyle = "#e0bf7a";
+    ctx.beginPath();
+    ctx.ellipse(x, y - u * 0.05, u * 0.5, u * 0.18, 0, 0, VARV);
+    ctx.fill();
+    ritaEmoji("🚩", x + u * 0.25, y - u * 0.2, u * 0.25);
+    return;
+  }
+  skugga(x, y, u * 0.45, u * 0.12);
+  ritaEmoji("🏰", x, y - u * 0.38, u * 0.8);
+}
+
+// Måsen som tar glassen
+function ritaMasattack(s) {
+  const x = SX(s.x);
+  const y = SY(s.v) - s.z * u;
+  skugga(SX(s.x), SY(s.v), u * 0.2, u * 0.06);
+  const flax = 1 + Math.sin(tid * 20) * 0.1;
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.scale(1, flax);
+  ritaEmoji("🕊️", 0, 0, u * 0.6, "center", !s.har);
+  ctx.restore();
+  if (s.har) ritaEmoji("🍦", x, y + u * 0.3, u * 0.3);
+}
+
+// Solbadaren ligger på en randig handduk
+function ritaSolbadare(p, x, y, st) {
+  const w = st * 1.4;
+  const h = st * 0.5;
+  for (let i = 0; i < 6; i++) {
+    ctx.fillStyle = i % 2 ? "#ffffff" : "#ff6b5a";
+    ctx.fillRect(x - w / 2 + (i * w) / 6, y - h, w / 6 + 0.5, h);
+  }
+  ctx.fillStyle = "#f2b48a"; // Kroppen (blir lite röd)
+  rundRekt(ctx, x - w * 0.3, y - h * 0.72, w * 0.62, h * 0.44, h * 0.2);
+  ctx.fill();
+  ctx.fillStyle = "#2a6fdb";
+  ctx.fillRect(x + w * 0.02, y - h * 0.72, w * 0.14, h * 0.44);
+  ritaEmoji(p.bild, x - w * 0.36, y - h * 0.5, st * 0.42);
 }
 
 function ritaBoll(s) {
@@ -2602,6 +3416,51 @@ function ritaPerson(p) {
     if (p.rosett) ritaEmoji("🎀", hx + (hund.x > p.hundX ? 1 : -1) * u * 0.15, hy - u * 0.5 - hopp, u * 0.22);
     if (hund.lage === "halsar" && hund.mal === p) ritaEmoji("💕", (hx + SX(hund.x)) / 2, Math.min(hy, SY(hund.v)) - u * 0.85, u * 0.35);
   }
+  if (p.sort === "solbadare") {
+    ritaSolbadare(p, x, y, st);
+    return;
+  }
+  if (p.ligger) {
+    // Joggaren ligger utslagen i sanden
+    skugga(x, y, st * 0.45, st * 0.1);
+    ctx.save();
+    ctx.translate(x, y - st * 0.25);
+    ctx.rotate(-1.4);
+    ritaEmoji("🏃", 0, 0, st);
+    ctx.restore();
+    ritaEmoji(p.bild, x - st * 0.45, y - st * 0.35, st * 0.4);
+    ritaEmoji("💦", x - st * 0.2, y - st * 0.7 - Math.abs(Math.sin(tid * 3)) * st * 0.1, st * 0.25);
+    return;
+  }
+  if (p.iVatten) {
+    // Kallbadaren ute i vattnet
+    const gung = Math.sin(tid * 2) * u * 0.05;
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.7)";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.ellipse(x, y, st * 0.45, st * 0.12, 0, 0, VARV);
+    ctx.stroke();
+    ritaEmoji(p.bild, x, y - st * 0.25 + gung, st);
+    ritaEmoji("🥶", x + st * 0.35, y - st * 0.75 + gung, st * 0.35);
+    return;
+  }
+  if (p.vagn) {
+    // Barnvagnen bredvid lattepappan
+    const vx = x - st * 0.75;
+    ctx.fillStyle = "#2f4f7a";
+    rundRekt(ctx, vx - st * 0.3, y - st * 0.6, st * 0.6, st * 0.38, st * 0.12);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(vx - st * 0.12, y - st * 0.6, st * 0.2, Math.PI, 0);
+    ctx.fill();
+    ctx.fillStyle = "#222222";
+    for (const i of [-1, 1]) {
+      ctx.beginPath();
+      ctx.arc(vx + i * st * 0.2, y - st * 0.12, st * 0.1, 0, VARV);
+      ctx.fill();
+    }
+    ritaEmoji("😴", vx + st * 0.1, y - st * 0.62, st * 0.24);
+  }
   if (!sitter) skugga(x, y, st * 0.3, st * 0.09);
   ritaEmoji(p.bild, x, y - st * (sitter ? 0.6 : 0.48) - studs, st);
   if (p.vaska) {
@@ -2611,6 +3470,44 @@ function ritaPerson(p) {
     ritaEmoji("👜", x - st * 0.32, y - st * 0.38 - studs, st * 0.42);
   }
   if (p.racket) ritaEmoji("🏓", x + st * 0.3, y - st * 0.55 - studs, st * 0.38);
+  if (p.kaffe) ritaEmoji("☕", x + st * 0.3, y - st * 0.5, st * 0.3);
+  if (p.gitarr) {
+    ritaEmoji("🎸", x + st * 0.12, y - st * 0.4, st * 0.5);
+    ritaEmoji("🎩", x + st * 0.65, y - st * 0.08, st * 0.32);
+    for (let i = 0; i < 2; i++) {
+      const f = (tid * 0.6 + i / 2) % 1;
+      ctx.globalAlpha = Math.sin(f * Math.PI);
+      ritaText(i ? "♫" : "♪", x - st * 0.4 + f * st * 0.2, y - st * (1 + f * 0.8), st * 0.3, "#ffffff");
+      ctx.globalAlpha = 1;
+    }
+  }
+  if (p.post) ritaEmoji("✉️", x + st * 0.28, y - st * 0.42 - studs, st * 0.28);
+  if (p.matlada) ritaEmoji("📦", x - st * 0.18, y - st * 0.8 - studs, st * 0.34);
+  if (p.hink) ritaEmoji("🪣", x + st * 0.38, y - st * 0.12, st * 0.3);
+  if (p.detektor) {
+    // Metalldetektorn sveper fram och tillbaka
+    const sv = Math.sin(tid * 2.5) * st * 0.2;
+    ctx.strokeStyle = "#555555";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(x + st * 0.2, y - st * 0.45 - studs);
+    ctx.lineTo(x + st * 0.6 + sv, y - st * 0.03);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.ellipse(x + st * 0.6 + sv, y - st * 0.02, st * 0.14, st * 0.05, 0, 0, VARV);
+    ctx.stroke();
+  }
+  if (p.stativ) {
+    // Telefonstativet framför yogan
+    ctx.strokeStyle = "#333333";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    for (const i of [-1, 0, 1]) {
+      ctx.moveTo(x + st * 0.28, y - st * 0.7);
+      ctx.lineTo(x + st * (0.28 + i * 0.15), y);
+    }
+    ctx.stroke();
+  }
   if (p.filmar) {
     // Telefonen uppe och en blinkande REC-lampa
     ritaEmoji("📱", x + st * 0.28, y - st * 0.8 - studs, st * 0.34);
@@ -2757,7 +3654,7 @@ function ritaBarnet() {
   hand.x = x + (cs * hl[0] - sn * hl[1]) * s;
   hand.y = y - studs * s + (sn * hl[0] + cs * hl[1]) * s;
   if (b.korv > 0) {
-    ritaEmoji("🌭", x + (cs * andra[0] - sn * andra[1]) * s, y - studs * s + (sn * andra[0] + cs * andra[1]) * s - s * 0.1, s * 0.38);
+    ritaEmoji(b.mat || "🌭", x + (cs * andra[0] - sn * andra[1]) * s, y - studs * s + (sn * andra[0] + cs * andra[1]) * s - s * 0.1, s * 0.38);
   }
   if (b.lerskor > 0) {
     // Det luktar...
@@ -3101,7 +3998,8 @@ function ritaPanel() {
     ctx.moveTo(px, py0);
     ctx.lineTo(px, py1);
     ctx.stroke();
-    ritaEmoji(banNr === 0 ? "🌳" : "🏠", px, py0 - 14, 22);
+    const nasta = INSTALLNINGAR.banor[banNr + 1];
+    ritaEmoji(nasta ? nasta.ikon : "🏠", px, py0 - 14, 22);
     ritaEmoji("🐾", px, py1 - (py1 - py0) * begr(barn.v / langd, 0, 1), 18);
   }
 
@@ -3243,7 +4141,10 @@ function ritaSkarmar() {
     if (foljare > 0) rad(t(`📱 ${formatera(foljare)} nya följare`, `📱 ${formatera(foljare)} new followers`), ts * 0.55, "#ffc4f2");
     rad(poang > 0 && poang === rekord ? t("🏆 Nytt rekord! 🏆", "🏆 New high score! 🏆") : t("Rekord: ", "High score: ") + rekord, ts * 0.65);
     y += ts * 0.3;
-    if (tidSedanSlut > 1) rad(t("Tryck för att försöka igen", "Tap to try again"), ts * 0.75);
+    if (tidSedanSlut > 1) {
+      if (banNr > 0) rad(t("Tryck för att försöka igen från ", "Tap to try again from ") + INSTALLNINGAR.banor[banNr].namn.toLowerCase(), ts * 0.75);
+      else rad(t("Tryck för att försöka igen", "Tap to try again"), ts * 0.75);
+    }
   }
 }
 
@@ -3283,6 +4184,14 @@ function rita() {
     else if (s.typ === "bank") r = ritaBank;
     else if (s.typ === "skylt") r = ritaSkylt;
     else if (s.typ === "boll") r = ritaBoll;
+    else if (s.typ === "pratare") r = ritaPratare;
+    else if (s.typ === "cafe") r = ritaCafe;
+    else if (s.typ === "badhytt") r = ritaBadhytt;
+    else if (s.typ === "parasoll") r = ritaParasoll;
+    else if (s.typ === "fagel") r = ritaFagel;
+    else if (s.typ === "tang") r = ritaTang;
+    else if (s.typ === "krabba") r = ritaKrabba;
+    else if (s.typ === "sandslott") r = ritaSandslott;
     else if (s.typ === "sparkcykel") r = ritaSparkcykel;
     if (r) lista.push([s.v, () => r(s)]);
   }
@@ -3291,6 +4200,9 @@ function rita() {
   lista.sort((a, b) => b[0] - a[0]);
   for (const [, ritaDen] of lista) ritaDen();
 
+  for (const s of saker) {
+    if (s.typ === "masattack") ritaMasattack(s); // Måsen flyger över allt
+  }
   ritaKoppel();
   ritaTexter();
   for (const b of bubblor) {

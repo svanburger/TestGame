@@ -195,13 +195,24 @@ bajsa överallt. Ta dig hem med en glad hund och en ren trottoar!
   3 gånger är promenaden slut.
 - **Trassel:** Jagar hunden en ekorre runt ett träd trasslar kopplet sig.
   Gå runt trädet åt det håll som pilen visar för att få loss det.
-- Promenaden går genom **🏘️ Kvarteret** (lyktstolpar med lappar, katter på
-  staketen och en sur gubbe med en perfekt gräsmatta som hunden gärna vill
-  bajsa på) och sedan **🌳 Parken** (dammen med ankor, ekorrar, korvkiosken,
-  hundrastgården och en pappa på en parkbänk) hela vägen hem.
-- **📱 Influencern** dyker upp tre gånger: med pudeln Coco i matchande
-  rosett, sedan när hon vill filma din "autentiska" hund, och sist med Coco
-  i handväskan. När hon filmar lyser en röd **REC**-lampa. Händer något
+- Promenaden går genom fyra banor och sedan hem:
+  - **🏘️ Kvarteret:** lyktstolpar med lappar, katter på staketen och en sur
+    gubbe med en perfekt gräsmatta som hunden gärna vill bajsa på.
+  - **🌳 Parken:** dammen med ankor, ekorrar, korvkiosken, hundrastgården och
+    en pappa på en parkbänk.
+  - **🏙️ Stan:** butiker med skyltar, bilar på gatan, en fontän med duvor,
+    lattepappan på caféet, gatumusikanten som spelar "sin egen" låt
+    Wonderwall (hunden ylar med), brevbäraren som hunden HATAR och cykelbud
+    som vill ha fem stjärnor.
+  - **🏖️ Stranden:** badhytter, parasoller, krabbor som nyper, måsar,
+    flickan med sandslottet (håll i hunden!), solbadaren, mannen med
+    metalldetektorn, kallbadaren som lockar ut hunden i vattnet och en
+    glasskiosk. Köper man en glass tar måsen den.
+- Förlorar man på en senare bana kan man **försöka igen från den banan**, med
+  poängen man hade när banan började.
+- **📱 Influencern** dyker upp på alla banor: med pudeln Coco i matchande
+  rosett, när hon vill filma din "autentiska" hund, med Coco i handväskan,
+  när hon gör en fika-reel i stan och när hon mediterar live på stranden. När hon filmar lyser en röd **REC**-lampa. Händer något
   pinsamt framför kameran (barnet släpas, hunden bajsar, plaskar, smiter
   eller man kliver i bajs) går det **viralt**: man får poäng och nya
   följare, som syns högst upp och när man kommer hem. Plockar man upp bajs
@@ -233,7 +244,10 @@ Testa att ändra i `hund/game.js`:
 - hur fort hunden får tråkigt eller blir vild (`humor`)
 - vilka godsaker som finns och hur mycket poäng de ger (`godsaker`)
 - vilka hundar och katter man möter (`andraHundar`, `katter`)
-- hur långa promenaderna är (`banor`)
+- vilka banor promenaden går genom, i vilken ordning och hur långa de är
+  (`banor`)
+- lapparna i stan (`lapparStan`), butikernas skyltar (`butiker`) och
+  skyltarna på stranden (`skyltarStrand`)
 - promenadvisslan: längst ner i `game.js` finns `MUSIK`
 
 ## Lagom tryck 💨
