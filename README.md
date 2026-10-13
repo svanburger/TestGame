@@ -208,6 +208,16 @@ bajsa överallt. Ta dig hem med en glad hund och en ren trottoar!
   på andra hundar. Men jagar den katter, ekorrar och ankor blir den vild,
   och når mätaren 🤪 smiter den. Då måste man springa ikapp. Smiter hunden
   3 gånger är promenaden slut.
+- **❗ Oväntade händelser** dyker upp då och då, på alla banor:
+  - **📮 Brevbäraren** kommer springande med ett paket. Hunden HATAR
+    brevbärare och ser honom på långt håll. Hinner man säga "Fot!" innan
+    hunden jagar honom blir han glad, och man får utmärkelsen
+    **Brevbärarens vän**.
+  - **🌧️ Regnskur!** "Det var väl skönt med lite friskluft?" Det blir mörkt
+    och regnar, det blir nya pölar, och hunden vill hem NU och drar barnet
+    framåt som en galning. Efteråt är hunden blöt och skakar sig på folk.
+  - **🚒 Brandbilen** kör förbi med sirenen på, och hunden sätter sig och
+    ylar. (Katten bryr sig inte.)
 - **Trassel:** Jagar hunden en ekorre runt ett träd trasslar kopplet sig.
   Gå runt trädet åt det håll som pilen visar för att få loss det.
 - Promenaden går genom fyra banor och sedan hem:
@@ -257,6 +267,8 @@ Testa att ändra i `hund/game.js`:
 - hur ofta hunden bajsar (`bajsTakt`) och hur ofta det blir regnbågsbajs
   (`regnbage`)
 - hur många påsar man har (`pasarStart`, `pasarMax`)
+- hur ofta det händer något oväntat, vilka händelser som finns och hur länge
+  det regnar (`handelser`)
 - hur långt kopplet är (`koppel`) och hur fort barnet och hunden går
   (`fart`, `hundFart`, `jaktFart`)
 - hur fort hunden får tråkigt eller blir vild (`humor`)

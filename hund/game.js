@@ -87,6 +87,16 @@ const INSTALLNINGAR = {
     { bild: "🛍️", poang: 0, vanlig: 2, pase: true },     // En extra bajspåse
   ],
 
+  // Oväntade händelser som dyker upp då och då, på alla banor
+  handelser: {
+    forstaEfter: 25,      // Sekunder in på banan innan den första
+    mellanrum: [28, 45],  // Sekunder mellan händelserna (som minst och som mest)
+    regnTid: 12,          // Hur länge regnskuren håller på
+    brevbarare: true,     // Brevbäraren kommer springande. Hunden HATAR brevbärare.
+    regn: true,           // Regnskur! Hunden vill hem och drar som en galning.
+    brandbil: true,       // Brandbilen åker förbi och hunden sätter sig och ylar
+  },
+
   katter: ["🐈", "🐈‍⬛"],
   andraHundar: ["🐩", "🐕‍🦺", "🦮"],
 
@@ -133,7 +143,13 @@ const INSTALLNINGAR = {
     // I stan
     lattepappa: [t("Tredje latten idag. Barnet sover.", "Third latte today. The baby's asleep."), t("Föräldraledig. Som semester, fast tvärtom.", "Parental leave. Like a vacation, but the opposite.")],
     musikant: [t("Den här har jag skrivit själv. Den heter Wonderwall.", "I wrote this one myself. It's called Wonderwall."), t("Swish går bra!", "I take tips!")],
-    brevbarare: [t("Bara räkningar idag!", "Only bills today!"), t("Han hatar mig. Det är okej.", "He hates me. It's fine.")],
+    brevbarare: [t("Bara räkningar idag!", "Only bills today!"), t("Han hatar mig. Det är okej.", "He hates me. It's fine."), t("Tack! Ni är de första i år som inte jagat mig.", "Thanks! You're the first this year who didn't chase me.")],
+    brevbarareHandelse: [t("Ett paket till… nej, inte till er.", "A package for… no, not for you.")], // När han kommer som en oväntad händelse
+    regn: [ // Det som står när regnskuren kommer, och vad folk säger
+      t("Det var väl skönt med lite friskluft?", "Isn't it nice with some fresh air?"),
+      t("Mitt hår!!", "My hair!!"),                  // Influencern
+      t("Vi skulle ha tagit paraply.", "We should have brought an umbrella."), // Barnet
+    ],
     cykelbud: [t("Akta! Matleverans!", "Watch out! Food delivery!"), t("Ge mig fem stjärnor!", "Give me five stars!")],
 
     // På stranden
@@ -194,6 +210,8 @@ const INSTALLNINGAR = {
     vardagslyx: { namn: t("Vardagslyx", "Treat yourself"), text: t("Korv till dig själv. Inte till hunden.", "A hot dog for you. Not for the dog.") },
     vuxenpoang: { namn: t("Vuxenpoäng", "Grown-up points"), text: t("Du har sagt \"Fot!\" 25 gånger.", "You've said \"Heel!\" 25 times.") },
     hogskolepoang: { namn: t("Högskolepoäng", "College credit"), text: t("Du har nu en högskolepoäng i hundägande.", "You now have a college credit in dog care.") },
+    postvan: { namn: t("Brevbärarens vän", "Mail carrier's friend"), text: t("Hunden lät brevbäraren vara. För en gångs skull.", "The dog left the mail carrier alone. For once.") },
+    friskluft: { namn: t("Friskluft", "Fresh air"), text: t("Ute i hela regnskuren. Det var väl skönt?", "Out in the whole rain shower. Wasn't that nice?") },
     kattmanniska: { namn: t("Kattmänniska", "Cat person"), text: t("Du gick hela vägen hem med en katt. I koppel.", "You walked a cat all the way home. On a leash.") },
     viral: { namn: t("Viral", "Viral"), text: t("Du blev viral. Tyvärr för fel sak.", "You went viral. For the wrong reason.") },
     masad: { namn: t("Måsad", "Gulled"), text: t("En mås tog din glass. Som alltid.", "A seagull took your ice cream. As always.") },
@@ -304,6 +322,10 @@ let kikare = null;   // Någon som tittar ut genom gardinen
 let banStartPoang = 0; // Poängen när banan började (om man försöker igen)
 let bilar = [];      // Bilarna på gatan i stan
 let masOm = 0;       // Tid tills måsen tar glassen
+let nastaHandelse = 0; // Tid tills nästa oväntade händelse
+let regn = 0;        // Tid kvar av regnskuren
+let regnStyrka = 0;  // 0–1, hur mycket det syns och hörs att det regnar
+let brandbil = null; // Brandbilen som åker förbi
 let slapTid = 0;
 let plockadeTotalt = 0;
 let senastWii = -10;
@@ -698,6 +720,12 @@ function nyPerson(sort, x, v, extra) {
   } else if (sort === "musikant") {
     p.bild = "🕺";
     p.gitarr = true;
+  } else if (sort === "brevbarare" && p.handelse) {
+    // Kommer springande med ett paket. Hunden ser honom på jättelångt håll.
+    p.bild = "🏃";
+    p.fart = -1.8;
+    p.lockar = 6;
+    p.paket = true;
   } else if (sort === "brevbarare") {
     p.bild = "🚶‍♂️";
     p.fart = -0.8;
@@ -1078,6 +1106,10 @@ function byggBana() {
   satGrans();
   bilar = [];
   masOm = 0;
+  regn = 0;
+  regnStyrka = 0;
+  brandbil = null;
+  nastaHandelse = INSTALLNINGAR.handelser.forstaEfter;
   banStartPoang = poang;
   const typ = banTyp();
   if (typ === "kvarter") byggKvarteret();
@@ -1358,7 +1390,9 @@ function hindra(f, arBarn) {
       const q = ((f.x - s.x) / rx) ** 2 + ((f.v - s.v) / rv) ** 2;
       if (q < 1) {
         const k = 1 / Math.sqrt(Math.max(q, 0.0001));
-        f.x = s.x + (f.x - s.x) * k;
+        // Går man rakt in i den glider man av åt sidan
+        const dx = Math.abs(f.x - s.x) < 0.04 ? (f.x >= s.x ? 0.04 : -0.04) : f.x - s.x;
+        f.x = s.x + dx * k;
         f.v = s.v + (f.v - s.v) * k;
       }
     }
@@ -1393,7 +1427,8 @@ function grundDrag() {
   const tristBonus = humor < 20 ? 0.1 : 0;
   switch (hund.lage) {
     case "fot": return 0;
-    case "gar": return 0.25;
+    case "gar": return regn > 0 ? 0.75 : 0.25; // I regnet drar hunden som en galning
+    case "ylar": return 0.9;
     case "spand": return 0.5;
     case "nosar":
     case "halsar":
@@ -1659,13 +1694,20 @@ function uppdateraHund(dt) {
         h.ox = slumpMellan(-1.6, 1.6);
         h.ov = barn.ror ? slumpMellan(1, 2.2) : slumpMellan(-0.8, 1.2);
       }
+      if (regn > 0) {
+        // Hunden vill hem NU och drar framåt
+        h.ox = begr(h.ox, -0.6, 0.6);
+        h.ov = 3;
+      }
       h.malX = begr(barn.x + h.ox, -vandraGrans, vandraGrans);
       h.malV = barn.v + h.ov;
       const damm = saker.find((s) => s.typ === "damm" && iDammen({ x: h.malX, v: h.malV }, s, 1.3));
       if (damm) h.malX = damm.x - Math.sign(damm.x) * (damm.rx + 0.6);
       if (banTyp() === "strand") h.malX = Math.min(h.malX, strandlinje(h.malV) - 0.7);
-      gaMot(h, h.malX, h.malV, hundFart(), dt);
-      if (!hittaFrestelse(dt) && h.bajsTid <= 0) borjaBajsa();
+      gaMot(h, h.malX, h.malV, hundFart() * (regn > 0 ? 1.5 : 1), dt);
+      if (regn > 0) {
+        if (h.bajsTid <= 0) borjaBajsa(); // Bara bajsa, inget annat är viktigt i regnet
+      } else if (!hittaFrestelse(dt) && h.bajsTid <= 0) borjaBajsa();
       else if (h.lage === "gar" && hundTyp.katt && Math.random() < dt * 0.05) {
         h.lage = "vilar";
         h.tid = 2.5;
@@ -1674,6 +1716,17 @@ function uppdateraHund(dt) {
       break;
     }
     case "vilar":
+      if (h.tid <= 0) tillbaka();
+      break;
+    case "ylar":
+      // Sitter och ylar med brandbilen
+      h.skall -= dt;
+      if (h.skall <= 0) {
+        h.skall = 1;
+        visaText(t("Auuuuu!", "Awoooo!"), h.x, h.v + 1.1, "#ffffff", true, 0.9);
+        spelaTon(450, 750, 0.5, "sine", 0.06);
+        spelaTon(750, 520, 0.5, "sine", 0.06, 0.5);
+      }
       if (h.tid <= 0) tillbaka();
       break;
     case "spand":
@@ -2196,6 +2249,115 @@ function uppdateraSaker(dt) {
   if (nagonBorta) saker = saker.filter((s) => !s.borta);
 }
 
+// ---------- Oväntade händelser ----------
+
+const HA = INSTALLNINGAR.handelser;
+let forraHandelse = "";
+
+function uppdateraHandelser(dt) {
+  // Regnet
+  if (regn > 0) {
+    regn -= dt;
+    if (regn <= 0) {
+      regn = 0;
+      hund.blot = Math.max(hund.blot, 8); // En blöt hund som skakar sig på folk
+      visaText(t("Regnet slutade. Hunden är blöt.", "The rain stopped. The dog is wet."), barn.x, barn.v + 1.8, "#cfe8ff", true, 2.2);
+      utmarkelse("friskluft");
+    }
+  }
+  regnStyrka += ((regn > 0 ? 1 : 0) - regnStyrka) * Math.min(1, dt * 1.5);
+
+  // Brandbilen
+  if (brandbil) {
+    brandbil.x += brandbil.fart * dt;
+    brandbil.kvar -= dt;
+    brandbil.siren -= dt;
+    if (brandbil.siren <= 0) {
+      brandbil.siren = 0.5;
+      brandbil.hog = !brandbil.hog;
+      spelaTon(brandbil.hog ? 960 : 720, brandbil.hog ? 960 : 720, 0.45, "square", 0.035);
+    }
+    if (brandbil.kvar <= 0) brandbil = null;
+  }
+
+  // Dags för något oväntat?
+  const pagar = regn > 0 || brandbil || saker.some((p) => p.handelse && !p.borta);
+  if (pagar || hund.los || barn.v > langd - 15) return;
+  nastaHandelse -= dt;
+  if (nastaHandelse > 0) return;
+  nastaHandelse = slumpMellan(HA.mellanrum[0], HA.mellanrum[1]);
+  const val = ["brevbarare", "regn", "brandbil"].filter((h) => HA[h] && h !== forraHandelse);
+  if (!val.length) return;
+  startaHandelse(slumpa(val));
+}
+
+// Något oväntat händer! Först ett ❗ och ett ljud.
+function startaHandelse(typ) {
+  forraHandelse = typ;
+  spelaTon(880, 1320, 0.12, "square", 0.07);
+  spelaTon(1320, 880, 0.12, "square", 0.07, 0.14);
+  if (typ === "brevbarare") {
+    const p = nyPerson("brevbarare", slumpa([-0.7, 0.7]), barn.v + 8.5, { handelse: true });
+    saker.push(p);
+    visaText(t("❗ Brevbäraren kommer!", "❗ The mail carrier!"), barn.x, barn.v + 2, "#ffe14d", true, 2);
+    visaTips(t("Brevbäraren! Säg Fot innan hunden får syn på honom!", "The mail carrier! Say Heel before the dog sees him!"), 4);
+  } else if (typ === "regn") {
+    regn = HA.regnTid;
+    visaText(t("❗ Regnskur! 🌧️", "❗ Rain shower! 🌧️"), barn.x, barn.v + 2, "#cfe8ff", true, 2);
+    visaTips(PRAT.regn[0], 4);
+    saga(barn, PRAT.regn[2], 2.5);
+    // Influencern i närheten bryr sig mest om håret
+    const inf = saker.find((p) => p.sort === "influencer" && avst(p, barn) < 8);
+    if (inf) saga(inf, PRAT.regn[1], 2.5);
+    // Det blir nya pölar längre fram
+    for (let i = 0; i < 3; i++) laggPol(slumpMellan(-1, 1), barn.v + 4 + i * slumpMellan(2.5, 4));
+  } else {
+    // Brandbilen kör förbi högst upp på skärmen
+    const fran = slumpSida();
+    brandbil = { x: fran * -(bredd / 2 / u + 2), fart: fran * 7, kvar: 4.5, siren: 0, hog: false };
+    visaText(t("❗ Brandbilen!", "❗ Fire truck!"), barn.x, barn.v + 2, "#ff8a7a", true, 2);
+    if (hundTyp.katt) {
+      visaText(t("Katten bryr sig inte.", "The cat doesn't care."), hund.x, hund.v + 1.3, "#ffe9b3", true, 2);
+    } else if (!hund.los && !["bajsar", "trasslad", "apport"].includes(hund.lage)) {
+      if (hund.lage === "halsar" && hund.mal) hund.mal.vantar = false;
+      hund.lage = "ylar";
+      hund.mal = null;
+      hund.tid = 3.5;
+      hund.skall = 0;
+      humor = Math.min(100, humor + 5);
+    }
+  }
+}
+
+function ritaRegn() {
+  if (regnStyrka < 0.02) return;
+  ctx.fillStyle = `rgba(40, 60, 90, ${0.28 * regnStyrka})`;
+  ctx.fillRect(0, 0, bredd, hojd);
+  ctx.strokeStyle = `rgba(200, 220, 255, ${0.6 * regnStyrka})`;
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  const antal = Math.round(90 * regnStyrka);
+  for (let i = 0; i < antal; i++) {
+    const x = (slumpTal(i * 3.1) * (bredd + 100) + tid * 120) % (bredd + 100) - 50;
+    const y = (slumpTal(i * 7.7) * hojd + tid * (700 + slumpTal(i) * 300)) % hojd;
+    ctx.moveTo(x, y);
+    ctx.lineTo(x - 6, y + 18);
+  }
+  ctx.stroke();
+}
+
+function ritaBrandbil() {
+  if (!brandbil) return;
+  const x = SX(brandbil.x);
+  const y = panelH + u * 1.1;
+  ctx.save();
+  ctx.translate(x, y);
+  if (brandbil.fart > 0) ctx.scale(-1, 1); // Emojin pekar åt vänster
+  ritaEmoji("🚒", 0, 0, u * 1.4);
+  ctx.restore();
+  if (brandbil.hog) ritaEmoji("🚨", x, y - u * 0.75, u * 0.4);
+}
+
 // Säger första repliken när man kommer nära och den andra när man gått förbi
 function tvaRepliker(p, rep, d, nara) {
   if (!p.sagt && d < nara) {
@@ -2356,9 +2518,15 @@ function uppdateraPerson(p, dt) {
       tvaRepliker(p, rep, d, 5);
       break;
     case "brevbarare":
-      if (!p.sagt && d < 5) {
+      if (!p.sagt && d < 6) {
         p.sagt = 1;
-        saga(p, rep[0], 3);
+        saga(p, p.handelse ? PRAT.brevbarareHandelse[0] : rep[0], 3);
+      } else if (p.sagt === 1 && !p.jagad && barn.v - p.v > 1.5) {
+        // Han kom förbi utan att bli jagad!
+        p.sagt = 2;
+        saga(p, rep[2], 3);
+        ge(t("Snällt!", "Nice!"), 20, p.x, p.v + 1.6, "#b6f09c");
+        utmarkelse("postvan");
       }
       break;
     case "detektor":
@@ -2523,7 +2691,7 @@ function uppdateraHumor(dt) {
   const fore = humor;
   let f = 0;
   switch (hund.lage) {
-    case "gar": f = barn.stilla > 1.5 ? H.tristStilla : H.tristGa; break;
+    case "gar": f = regn > 0 ? 0 : barn.stilla > 1.5 ? H.tristStilla : H.tristGa; break;
     case "nosar": f = humor < 65 ? H.nosa : -4; break;
     case "halsar": f = H.halsa; break;
     case "jagar":
@@ -2613,6 +2781,7 @@ function uppdatera(dt) {
   uppdateraTrassel();
   uppdateraSaker(dt);
   uppdateraBilar(dt);
+  uppdateraHandelser(dt);
   if (masOm > 0) {
     masOm -= dt;
     if (masOm <= 0 && barn.korv > 0) {
@@ -3650,6 +3819,7 @@ function ritaPerson(p) {
     }
   }
   if (p.post) ritaEmoji("✉️", x + st * 0.28, y - st * 0.42 - studs, st * 0.28);
+  if (p.paket) ritaEmoji("📦", x + st * 0.25, y - st * 0.55 - studs, st * 0.38);
   if (p.matlada) ritaEmoji("📦", x - st * 0.18, y - st * 0.8 - studs, st * 0.34);
   if (p.hink) ritaEmoji("🪣", x + st * 0.38, y - st * 0.12, st * 0.3);
   if (p.detektor) {
@@ -3857,6 +4027,9 @@ function ritaHund() {
   let vrid = 0;
   if (h.lage === "vilar") {
     sy = 0.75;
+  } else if (h.lage === "ylar") {
+    sy = 0.88;
+    vrid = h.riktning * 0.3; // Nosen upp mot himlen
   } else if (h.lage === "bajsar") {
     sx = 1.08;
     sy = 0.84;
@@ -4437,6 +4610,8 @@ function rita() {
     if (s.typ === "masattack") ritaMasattack(s); // Måsen flyger över allt
   }
   ritaKoppel();
+  ritaRegn();
+  ritaBrandbil();
   ritaTexter();
   for (const b of bubblor) {
     const a = b.agare;
@@ -4465,6 +4640,7 @@ function loop(nu) {
   uppdatera(dt);
   rita();
   schemalaggMusik();
+  uppdateraRegnljud();
   requestAnimationFrame(loop);
 }
 requestAnimationFrame(loop);
@@ -4502,6 +4678,42 @@ function spelaTon(fran, till, langd, typ, volym, sen = 0) {
     ton.stop(t + langd);
   } catch (e) {
     // Inget ljud – spelet fungerar ändå
+  }
+}
+
+// Regnet låter som ett mjukt brus
+let regnLjud = null;
+function uppdateraRegnljud() {
+  if (!ljudmotor) return;
+  const mal = lage === "spelar" ? regnStyrka * 0.05 : 0;
+  try {
+    if (!regnLjud && mal > 0.002) {
+      const buffert = ljudmotor.createBuffer(1, ljudmotor.sampleRate, ljudmotor.sampleRate);
+      const data = buffert.getChannelData(0);
+      for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+      const kalla = ljudmotor.createBufferSource();
+      kalla.buffer = buffert;
+      kalla.loop = true;
+      const filter = ljudmotor.createBiquadFilter();
+      filter.type = "lowpass";
+      filter.frequency.value = 1400;
+      const styrka = ljudmotor.createGain();
+      styrka.gain.value = 0;
+      kalla.connect(filter);
+      filter.connect(styrka);
+      styrka.connect(ljudmotor.destination);
+      kalla.start();
+      regnLjud = { kalla, styrka };
+    }
+    if (regnLjud) {
+      regnLjud.styrka.gain.value = mal;
+      if (regnStyrka < 0.01 && regn <= 0) {
+        regnLjud.kalla.stop();
+        regnLjud = null;
+      }
+    }
+  } catch (e) {
+    regnLjud = null; // Inget regnljud – spelet fungerar ändå
   }
 }
 
