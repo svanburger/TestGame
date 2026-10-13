@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="sv">
+<head>
+  <meta charset="utf-8">
+  <!-- Gör att spelet fyller skärmen på iPad/telefon och inte går att zooma -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <!-- Gör att spelet startar i helskärm när man lagt det på hemskärmen -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Bordsplaceringen" data-en-content="The Seating Plan">
+  <meta name="theme-color" content="#f7e9cd">
+  <title data-en="The Seating Plan">Bordsplaceringen</title>
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="../favicon.png" sizes="64x64" type="image/png">
+  <link rel="apple-touch-icon" href="../apple-touch-icon.png">
+  <link rel="stylesheet" href="../spel.css">
+</head>
+<body>
+  <canvas id="spel"></canvas>
+  <div class="knappar">
+    <a id="hem" class="rund-knapp" href="../" aria-label="Till menyn" data-en-aria-label="Back to the menu">🏠</a>
+    <button id="paus" class="rund-knapp" type="button" aria-label="Pausa" data-en-aria-label="Pause" hidden>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="4" width="5" height="16" rx="1.5"/><rect x="14" y="4" width="5" height="16" rx="1.5"/></svg>
+    </button>
+  </div>
+  <div id="pausmeny" class="pausmeny" hidden>
+    <div class="pausruta" role="dialog" aria-labelledby="paustitel">
+      <h2 id="paustitel" data-en="Paused">Paus</h2>
+      <button id="fortsatt" class="menyknapp" type="button" data-en="▶ Continue">▶ Fortsätt</button>
+      <button id="borjaOm" class="menyknapp sekundar" type="button" data-en="↻ Start the level over">↻ Börja om banan</button>
+      <button id="valjBana" class="menyknapp sekundar" type="button" data-en="☰ Choose level">☰ Välj bana</button>
+      <button id="ljudKnapp" class="menyknapp sekundar" type="button">🔊 Ljud: på</button>
+      <a class="menyknapp sekundar" href="../" data-en="🏠 Back to menu">🏠 Till menyn</a>
+    </div>
+  </div>
+  <script src="../sprak.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>

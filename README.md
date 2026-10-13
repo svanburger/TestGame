@@ -14,6 +14,7 @@ inget att installera. Startsidan är en meny där man väljer spel.
 | `pappa/`     | Spelet "Låt pappa vila".                                  |
 | `hund/`      | Spelet "Hundpromenaden".                                  |
 | `fis/`       | Spelet "Lagom tryck".                                     |
+| `bord/`      | Spelet "Bordsplaceringen".                                |
 
 Varje spel är en egen mapp med en `index.html` och en `game.js`. Det mesta
 man vill ändra finns i `INSTALLNINGAR` högst upp i `game.js`. Spara filen
@@ -357,6 +358,58 @@ Testa att ändra i `fis/game.js`:
   det låter och när. Man kan också göra en helt egen bana.
 - musiken: längst ner i `game.js` finns `MUSIK`
 
+## Bordsplaceringen 🍽️
+
+Ett pusselspel. Mormor fyller 80 och hela släkten kommer. Placera gästerna
+runt bordet så att alla blir nöjda.
+
+- **Dra en gäst** från bänken till en stol. Man kan också **trycka på en
+  gäst och sedan på en stol**. Sitter någon redan där byter de plats. Drar
+  man en gäst tillbaka till bänken reser hen sig.
+- **Lapparna** visar vad gästerna vill, med bilder så att man inte behöver
+  kunna läsa:
+  - 💕 vill sitta **bredvid** någon
+  - 🚫 vill **inte** sitta bredvid någon
+  - ↕️ vill sitta **mittemot** någon
+  - ➡️ ska sitta vid en **stol med en bild**, till exempel 👑 (hedersplatsen),
+    🪟 (fönstret), 🚪 (dörren), 🎤 (talarplatsen) eller 📶 (wifi:n)
+
+  Lapparna blir gröna när det stämmer och röda när det inte gör det.
+- **Tryck på en gäst eller en lapp** så får man veta mer. Här finns
+  skämten för de vuxna.
+- **👵 Fråga mormor** om man kör fast. Då flyttar mormor en gäst till rätt
+  plats.
+- **🍽️ Servera!** när alla sitter. Då spelas middagen upp, och gästerna
+  säger vad de tycker. Stämningsmätaren visar hur det går.
+- Stjärnor:
+  - ⭐ Alla sitter vid bordet (då kan man gå vidare till nästa bana).
+  - ⭐⭐ Alla lappar stämmer.
+  - ⭐⭐⭐ Någon har dessutom en **hemlig önskan**. Den står inte på någon
+    lapp, men då och då syns en 💭 tankebubbla ovanför gästen.
+- Fem banor: ☕ Fikat, 🥗 Förrätten, 🍖 Varmrätten, 🎤 Talet och 🎂 Tårtan.
+  Det blir fler gäster och fler lappar för varje bana.
+
+**Om skämten:** Spelet ska gå att spela för barn, men det finns lite extra
+för de vuxna i det gästerna säger. De vuxna skämten handlar om vuxnas
+fåniga vanor (morbror Bengts pärmar, kusinens surdeg Göran, tant Gunnel
+som ger råd om allt), aldrig om vuxna saker. Allt som står ska gå att
+läsa högt för en sjuåring vid middagsbordet.
+
+Testa att ändra i `bord/game.js`:
+
+- gästerna (`folk`): namn, ansikte, sak, färg och vad de säger. Är det en
+  pojke som spelar kan "Du" få ansiktet `"👦"`.
+- banorna (`banor`): hur stort bordet är (`bord`), bilderna vid stolarna
+  (`markeringar`), vilka gäster som är med (`gaster`), lapparna (`regler`),
+  den hemliga önskan (`hemlig`) och vad som händer på middagen (`middag`)
+- vad mormor säger när man frågar henne (`mormorSager`)
+- titlarna man får efter sista banan (`titlar`)
+- `visaGrona: false` gör spelet svårare: då blir lapparna inte gröna
+  förrän man serverar
+
+Hur man skriver en egen bana står längst upp i `game.js`. Går en bana inte
+att lösa kan mormor inte hjälpa till, så prova att lösa den själv först.
+
 ## Lägga till ett nytt spel
 
 1. Kopiera en av spelmapparna, till exempel `stjarnor/`, och ge den ett nytt namn.
@@ -369,7 +422,7 @@ Testa att ändra i `fis/game.js`:
 
 ### På datorn
 
-Dubbelklicka på `index.html` i någon av spelmapparna, till exempel `stjarnor/index.html` eller `fis/index.html`.
+Dubbelklicka på `index.html` i någon av spelmapparna, till exempel `stjarnor/index.html` eller `bord/index.html`.
 
 Menyn länkar till mappar, och det fungerar bara när sidan ligger på en
 webbserver. Vill du testa menyn på datorn, kör `python3 -m http.server 8000`
