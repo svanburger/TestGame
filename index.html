@@ -9,6 +9,9 @@
   <meta name="apple-mobile-web-app-title" content="Bajskorv Studios">
   <meta name="theme-color" content="#1b2a4a">
   <title data-en="Bajskorv Studios – Our Games">Bajskorv Studios – Våra spel</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="favicon.png" sizes="64x64" type="image/png">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <style>
     /* Menyn: en rubrik och ett stort kort per spel. Lägg till fler kort längre ner. */
     :root {
@@ -182,13 +185,11 @@
       max-width: 30ch;
     }
 
-    /* Knappen för att byta språk, längst ner */
-    .sprakval {
-      display: flex;
-      justify-content: center;
-    }
-
+    /* Knappen för att byta språk, uppe till höger */
     .sprakknapp {
+      position: absolute;
+      top: calc(env(safe-area-inset-top, 0px) + 12px);
+      right: max(12px, env(safe-area-inset-right, 0px));
       padding: 10px 18px;
       border: 2px solid rgba(255, 255, 255, 0.5);
       border-radius: 999px;
@@ -206,6 +207,13 @@
       outline-offset: 4px;
     }
 
+    /* På smala skärmar flyttas loggan ner lite, så att språkknappen inte hamnar ovanpå den */
+    @media (max-width: 560px) {
+      body {
+        padding-block-start: calc(env(safe-area-inset-top, 0px) + 64px);
+      }
+    }
+
     @media (prefers-reduced-motion: reduce) {
       .kort { transition: none; }
       .bage { animation: none; stroke-dashoffset: 0; }
@@ -215,6 +223,7 @@
   </style>
 </head>
 <body>
+  <button id="sprakKnapp" class="sprakknapp" type="button"></button>
   <main>
     <header class="logga">
       <svg viewBox="0 0 600 260" role="img" aria-labelledby="loggaNamn">
@@ -244,7 +253,7 @@
             <path d="M 276 90 q 24 8 50 0" fill="none"/>
             <path d="M 262 116 q 38 10 76 0" fill="none"/>
           </g>
-          <ellipse cx="286" cy="66" rx="6" ry="3" fill="#ffffff" opacity="0.45"/>
+          <ellipse cx="288" cy="81" rx="6" ry="3" fill="#ffffff" opacity="0.45"/>
           <ellipse cx="270" cy="104" rx="9" ry="4" fill="#ffffff" opacity="0.35"/>
           <g class="ogon">
             <circle cx="288" cy="101" r="7" fill="#ffffff" stroke="#4a2a12" stroke-width="2"/>
@@ -298,9 +307,6 @@
         <span class="beskrivning" data-en="Fart as much as you can – but don't push too hard!">Fisa så mycket du kan – men tryck inte för hårt!</span>
       </a>
     </nav>
-    <footer class="sprakval">
-      <button id="sprakKnapp" class="sprakknapp" type="button"></button>
-    </footer>
   </main>
   <script src="sprak.js"></script>
   <script>
