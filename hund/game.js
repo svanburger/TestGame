@@ -535,7 +535,7 @@ function anpassaStorlek() {
 
   u = Math.min(bredd, hojd) / 10;
   panelH = marginal.topp + Math.max(110, u * 1.4);
-  ankare = panelH + (hojd - panelH - marginal.botten) * 0.68;
+  ankare = panelH + (hojd - panelH - marginal.botten) * 0.74; // Långt ner, så att man ser mer framåt
   satGrans();
   uppdateraKamera(0, true);
   emojiMinne.clear();
@@ -2941,7 +2941,7 @@ function uppdateraBajs(dt) {
         kika(b.x, b.v);
       }
     }
-    if (b.v < botten - 0.7) lamna(b);
+    if (b.v < botten - 2.5) lamna(b);
   }
   bajsen = bajsen.filter((b) => !b.borta);
 }
@@ -3075,16 +3075,19 @@ function uppdateraHumor(dt) {
 // ---------- Kameran ----------
 
 // Kameran följer med när barnet går för långt upp eller ner på skärmen
+// Kameran tittar framåt. Den följer en punkt mellan barnet och hunden (som
+// oftast går före), och den punkten ligger långt ner på skärmen. Då syns
+// mest av det som kommer.
 function uppdateraKamera(dt, direkt) {
-  const spelH = hojd - panelH - marginal.botten;
-  const topp = panelH + spelH * 0.45;
-  const botten = panelH + spelH * 0.85;
-  const y = SY(barn.v);
-  let mal = kamera;
-  if (direkt) mal = barn.v;
-  else if (y < topp) mal = kamera + (topp - y) / u;
-  else if (y > botten) mal = kamera - (y - botten) / u;
-  kamera = direkt ? mal : kamera + (mal - kamera) * Math.min(1, dt * 8);
+  let fokus = barn.v + 1.5;
+  if (!hund.los) fokus = barn.v + 0.8 + begr(hund.v - barn.v, -1, 2.6) * 0.3;
+  kamera = direkt ? fokus : kamera + (fokus - kamera) * Math.min(1, dt * 3);
+  // Barnet (och hunden, om den inte smitit) ska alltid synas helt
+  const nedersta = hojd - marginal.botten - u * 0.35;
+  const overst = panelH + u * 1.5;
+  let syns = barn.v + (nedersta - ankare) / u;
+  if (!hund.los) syns = Math.min(syns, hund.v + (nedersta - ankare) / u);
+  kamera = begr(kamera, barn.v - (ankare - overst) / u, syns);
   const minst = (hojd - ankare) / u - 1.5;
   const mest = langd + 5 - (ankare - panelH) / u; // Så att man ser hela huset eller grinden i slutet
   kamera = begr(kamera, minst, Math.max(minst, mest));
@@ -4993,6 +4996,19 @@ function rita() {
   ritaRegn();
   ritaBrandbil();
   ritaTexter();
+  if (lage === "spelar") {
+    for (const b of bajsen) {
+      const y = SY(b.v);
+      if (y < hojd - marginal.botten) continue;
+      // Bajset är bakom en, nedanför skärmen. Gå tillbaka och plocka upp!
+      const x = begr(SX(b.x), 30, bredd - 30);
+      const py = hojd - marginal.botten - u * 0.45 - Math.abs(Math.sin(tid * 5)) * u * 0.12;
+      ctx.globalAlpha = 0.6 + Math.sin(tid * 8) * 0.3;
+      ritaEmoji("💩", x, py, u * 0.4);
+      ritaText("⬇", x + u * 0.38, py, u * 0.35, "#ffe14d");
+      ctx.globalAlpha = 1;
+    }
+  }
   for (const b of bubblor) {
     const a = b.agare;
     const hojdUpp = a === barn ? 1.25 : a.typ === "glassbil" ? 2.3 : a.sort === "pappa" ? 1.3 : 1.45;
