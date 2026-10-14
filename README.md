@@ -360,8 +360,14 @@ Testa att ändra i `fis/game.js`:
 
 ## Bordsplaceringen 🍽️
 
-Ett pusselspel. Mormor fyller 80 och hela släkten kommer. Placera gästerna
-runt bordet så att alla blir nöjda.
+Ett pusselspel. Släkten ska på fest. Placera gästerna runt borden så att
+alla blir nöjda. Det finns två fester:
+
+- **🎂 Mormor fyller 80:** ett långt bord, fem banor.
+- **💒 Bröllopet:** kusin Linnea gifter sig med Viktor. Brudparet sitter
+  vid brudbordet, och gästerna sitter vid runda bord. Fyra banor, från ett
+  runt bord till två. Brudens surdeg Göran ska förstås sitta bredvid
+  bruden.
 
 - **Dra en gäst** från bänken till en stol. Man kan också **trycka på en
   gäst och sedan på en stol**. Sitter någon redan där byter de plats. Drar
@@ -374,7 +380,14 @@ runt bordet så att alla blir nöjda.
   - 🚫 vill **inte** sitta bredvid någon
   - ↕️ vill sitta **mittemot** någon
   - ➡️ ska sitta vid en **stol med en bild**, till exempel 👑 (hedersplatsen),
-    🪟 (fönstret), 🚪 (dörren), 🎤 (talarplatsen) eller 📶 (wifi:n)
+    🪟 (fönstret), 🚪 (dörren), 🎤 (talarplatsen), 📶 (wifi:n) eller 💍
+    (brudparets platser)
+  - 🤝 vill sitta vid **samma bord** som någon
+  - 🙅 vill sitta vid ett **annat bord** än någon
+
+  Vid ett runt bord sitter alla i en ring. Man sitter bredvid de två på
+  var sida, och har bordet ett jämnt antal stolar sitter man mittemot den
+  på andra sidan.
 
   Önskemålen blir gröna när det stämmer och röda när det inte gör det. Vid
   bordet har varje gäst ett litet 😊 eller 😟, och 💢 syns mellan två som
@@ -392,8 +405,13 @@ runt bordet så att alla blir nöjda.
   - ⭐⭐⭐ Någon har dessutom en **hemlig önskan**. Den dyker upp när man
     har klarat banan en gång. Den står inte i listan, men då och då syns en
     💭 tankebubbla ovanför gästen.
-- Fem banor: ☕ Fikat, 🥗 Förrätten, 🍖 Varmrätten, 🎤 Talet och 🎂 Tårtan.
-  Det blir fler gäster och fler önskemål för varje bana.
+- Banorna:
+  - 🎂 Mormor fyller 80: ☕ Fikat, 🥗 Förrätten, 🍖 Varmrätten, 🎤 Talet
+    och 🎂 Tårtan.
+  - 💒 Bröllopet: 💍 Brudbordet, 🍝 Middagen, 🎤 Talen och 🎂 Bröllopstårtan.
+
+  Det blir fler gäster, bord och önskemål för varje bana. Varje fest börjar
+  med sin första bana öppen.
 
 **Om skämten:** Spelet ska gå att spela för barn, men det finns lite extra
 för de vuxna i det gästerna säger. De vuxna skämten handlar om vuxnas
@@ -405,12 +423,14 @@ Testa att ändra i `bord/game.js`:
 
 - gästerna (`folk`): namn, ansikte, sak, färg och vad de säger. Är det en
   pojke som spelar kan "Du" få ansiktet `"👦"`.
-- banorna (`banor`): hur stort bordet är (`bord`), bilderna vid stolarna
+- banorna (`banor`): borden (`bord`, ett långbord eller en lista med flera
+  bord, både långa och runda), bilderna vid stolarna
   (`markeringar`), vilka gäster som är med (`gaster`), önskemålen (`regler`)
   och den hemliga önskan (`hemlig`)
 - vad mormor säger när man frågar henne (`mormorSager`) och hur många
   gånger man får fråga på varje bana (`mormorFragor`)
-- titlarna man får efter sista banan (`titlar`)
+- titlarna man får efter sista banan på en fest (`titlar`)
+- festerna (`fester`): man kan lägga till en helt egen fest med egna banor
 - `guide: true` på en bana gör att handen visar hur man gör med det första önskemålet
 - `visaGrona: false` gör spelet svårare: då blir önskemålen inte gröna
   förrän man serverar
