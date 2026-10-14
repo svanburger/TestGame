@@ -5,7 +5,7 @@
 //  så att alla blir nöjda. Listan "Gästernas önskemål" visar vad gästerna
 //  vill, och önskemålen blir gröna när det stämmer. Vid bordet syns 😊
 //  eller 😟 på varje gäst. Tryck på "Servera!" när alla sitter, så får
-//  man se hur middagen går.
+//  man se hur många stjärnor det blev.
 //
 //  ⭐     Alla sitter vid bordet.
 //  ⭐⭐   Alla önskemål stämmer.
@@ -31,6 +31,7 @@ const INSTALLNINGAR = {
   ljud: true,
   visaGrona: true,      // Önskemålen blir gröna (eller röda) direkt. Sätt till false för ett svårare spel.
   tankeVarje: 6,        // Sekunder mellan tankebubblorna som visar den hemliga önskan
+  mormorFragor: 2,      // Hur många gånger man får fråga mormor på varje bana
 
   // ---------------------------------------------------------------
   //  GÄSTERNA
@@ -187,16 +188,12 @@ const INSTALLNINGAR = {
   //  Till varje regel kan man skriva:
   //    text  = vad önskemålet betyder (visas när man trycker på det)
   //    sager = vad någon säger om det (vem = vem som säger det, annars a)
-  //    bra   = vad som sägs på middagen om det stämmer (braVem, braIkon)
-  //    dalig = vad som sägs om det inte stämmer (daligVem, daligIkon)
   //  Har man skrivit en regel en gång behöver man inte skriva texterna
   //  igen. Samma regel på en senare bana lånar dem.
   //
   //  hemlig: ett önskemål som inte syns i listan. Den som vill något
   //  får en tankebubbla då och då. "tanke" är det som syns i bubblan.
-  //
-  //  middag: annat som händer på middagen. "vid" är var bilden syns.
-  //  ratter: vad som serveras (en bild för varje del av middagen)
+
   // ---------------------------------------------------------------
   fester: [
     {
@@ -211,30 +208,23 @@ const INSTALLNINGAR = {
           bord: { perSida: 2, gavlar: "v" },
           markeringar: { v: "👑", u0: "🪟", n1: "🪟" },
           gaster: ["mormor", "morfar", "mamma", "bebis"],
-          ratter: [{ ikon: "☕", namn: t("Kaffe", "Coffee") }, { ikon: "🍰", namn: t("Kaka", "Cake") }],
           regler: [
             {
               typ: "plats", a: "mormor", ikon: "👑",
               text: t("Mormor ska sitta på hedersplatsen.", "Grandma sits in the seat of honour."),
               vem: "mamma",
               sager: t("Mormor har suttit där sedan 1987. Ingen har vågat fråga.", "Grandma has sat there since 1987. Nobody has dared to ask."),
-              bra: t("Här sitter jag bra. Som vanligt.", "I'm comfortable here. As usual."), braIkon: "👑",
-              dalig: t("Jaså, här ska jag sitta. Det går bra. Jag säger inget.", "Oh, so I'm sitting here. That's fine. I won't say a thing."), daligIkon: "😒",
             },
             {
               typ: "bredvid", a: "bebis", b: "mamma",
               text: t("Lillasyster vill sitta bredvid mamma.", "Baby sister wants to sit next to Mum."),
               vem: "mamma",
               sager: t("Hon äter själv nu. Det är bra för motoriken.", "She feeds herself now. It's good for her motor skills."),
-              bra: t("Titta, hon äter själv!", "Look, she's feeding herself!"), braVem: "mamma", braIkon: "🫛",
-              dalig: t("BUAAAAA!", "WAAAAAH!"), daligIkon: "😭",
             },
             {
               typ: "plats", a: "morfar", ikon: "🪟",
               text: t("Morfar vill sitta vid fönstret.", "Grandpa wants to sit by the window."),
               sager: t("Jag tittar efter fåglar. Inte på grannens nya bil.", "I'm looking for birds. Not at the neighbour's new car."),
-              bra: t("Där! En talgoxe!", "Look! A robin!"), braIkon: "🐦",
-              dalig: t("Jag ska bara gå och titta ut lite…", "I'll just go and look outside for a bit…"), daligIkon: "🔭",
             },
           ],
           hemlig: {
@@ -242,9 +232,6 @@ const INSTALLNINGAR = {
             text: t("Morfar ville sitta bredvid mormor.", "Grandpa wanted to sit next to Grandma."),
             sager: t("Efter 55 år vill jag fortfarande sitta bredvid henne.", "After 55 years I still want to sit next to her."),
           },
-          middag: [
-            { vem: "mormor", text: t("Jag sa ju att jag inte ville ha något kalas.", "I said I didn't want a party."), ikon: "🎉" },
-          ],
         },
         {
           namn: t("Förrätten", "The Starter"),
@@ -261,8 +248,6 @@ const INSTALLNINGAR = {
               typ: "inteBredvid", a: "bengt", b: "kerstin",
               text: t("Morbror Bengt och grannen Kerstin ska inte sitta bredvid varandra.", "Uncle Bengt and Kerstin next door should not sit together."),
               sager: t("Har du läst om batterierna? Jag har en pärm.", "Have you read about the batteries? I have a binder."),
-              bra: t("Jag har en pärm om sill också.", "I have a binder about herring too."), braIkon: "📁",
-              dalig: t("Den laddar sig själv på natten. Nästan.", "It charges itself overnight. Almost."), daligVem: "kerstin", daligIkon: "📄",
             },
           ],
           hemlig: {
@@ -270,9 +255,6 @@ const INSTALLNINGAR = {
             text: t("Morbror Bengt ville sitta bredvid mormor.", "Uncle Bengt wanted to sit next to Grandma."),
             sager: t("Jag är mammas favorit. Det vet alla.", "I'm Mum's favourite. Everybody knows."),
           },
-          middag: [
-            { vem: "bengt", text: t("Jag har gjort en tabell över alla som kom.", "I made a spreadsheet of everyone who came."), ikon: "📊" },
-          ],
         },
         {
           namn: t("Varmrätten", "The Main Course"),
@@ -287,16 +269,12 @@ const INSTALLNINGAR = {
               typ: "plats", a: "pappa", ikon: "🚪",
               text: t("Pappa vill sitta nära dörren.", "Dad wants to sit near the door."),
               sager: t("Jag åt bönor till lunch. Det är bäst så.", "I had beans for lunch. It's better this way."),
-              bra: t("Jag ska bara… gå ut en liten sväng.", "I'll just… pop outside for a bit."), braIkon: "💨",
-              dalig: t("Det var inte jag. Det var hunden!", "It wasn't me. It was the dog!"), daligIkon: "💨",
             },
             {
               typ: "bredvid", a: "du", b: ["mamma", "pappa"],
               text: t("Du vill sitta bredvid mamma eller pappa. Någon måste skära köttet!", "You want to sit next to Mum or Dad. Someone has to cut your meat!"),
               vem: "mamma",
               sager: t("Små bitar. Inte större än en ärta.", "Small pieces. No bigger than a pea."),
-              bra: t("Mmm, köttbullar!", "Mmm, meatballs!"), braIkon: "🍖",
-              dalig: t("Kan någon skära min köttbulle? Den rullade iväg!", "Can someone cut my meatball? It rolled away!"), daligIkon: "🧆",
             },
             { typ: "bredvid", a: "bebis", b: "mamma" },
             {
@@ -304,8 +282,6 @@ const INSTALLNINGAR = {
               text: t("Morbror Bengt och morfar vill sitta mittemot varandra och prata om fiske.", "Uncle Bengt and Grandpa want to sit across from each other and talk about fishing."),
               vem: "morfar",
               sager: t("Bengt har en pärm om gäddor. Den är tjock.", "Bengt has a binder about pike. It's a thick one."),
-              bra: t("Gäddan var SÅ här stor!", "The pike was THIS big!"), braIkon: "🐟",
-              dalig: t("VA? JAG HÖR INTE VAD DU SÄGER!", "WHAT? I CAN'T HEAR YOU!"), daligVem: "morfar", daligIkon: "🐟",
             },
             { typ: "inteBredvid", a: "bengt", b: "kerstin" },
           ],
@@ -314,9 +290,6 @@ const INSTALLNINGAR = {
             text: t("Grannen Kerstin ville sitta vid fönstret.", "Kerstin next door wanted to sit by the window."),
             sager: t("Jag vill bara se att bilen laddar.", "I just want to check the car is charging."),
           },
-          middag: [
-            { vem: "mamma", text: t("Hunden får egentligen ingen mat från bordet.", "The dog doesn't actually get food from the table."), ikon: "🐕", vid: "du" },
-          ],
         },
         {
           namn: t("Talet", "The Speech"),
@@ -331,22 +304,16 @@ const INSTALLNINGAR = {
               typ: "plats", a: "bengt", ikon: "🎤",
               text: t("Morbror Bengt ska hålla tal. Han ska sitta på talarplatsen.", "Uncle Bengt is giving a speech. He sits in the speaker's seat."),
               sager: t("Talet är 14 sidor. Det här är bara del 1.", "The speech is 14 pages. This is just part 1."),
-              bra: t("Mamma, du är som en fin ost. Bättre med åren!", "Mum, you're like a fine cheese. Better with age!"), braIkon: "🧀",
-              dalig: t("Vänta, var är sidan 7?", "Wait, where's page 7?"), daligIkon: "📄",
             },
             {
               typ: "inteBredvid", a: "eva", b: "bengt",
               text: t("Moster Eva och morbror Bengt bråkar alltid om vem som är mormors favorit.", "Aunt Eva and Uncle Bengt always argue about who is Grandma's favourite."),
               sager: t("Det handlar inte om det. Det handlar om principen.", "It's not about that. It's the principle."),
-              bra: t("Fint tal, Bengt. Lite långt bara.", "Nice speech, Bengt. Just a bit long."), braIkon: "👏",
-              dalig: t("Mamma gillar MIG mest!", "Mum likes ME best!"), daligIkon: "💢",
             },
             {
               typ: "inteBredvid", a: "gunnel", b: "mamma",
               text: t("Tant Gunnel ger mamma råd hela tiden. De ska inte sitta bredvid varandra.", "Auntie Gunnel keeps giving Mum advice. They should not sit together."),
               sager: t("Låt bebisen sova ute. Det gjorde vi. Även i januari.", "Let the baby nap outside. We did. Even in January."),
-              bra: t("Vad skönt att få äta i lugn och ro.", "How nice to eat in peace and quiet."), braVem: "mamma", braIkon: "😌",
-              dalig: t("Ska inte bebisen ha mössa? Och vantar? Och…", "Shouldn't the baby wear a hat? And mittens? And…"), daligIkon: "🧶",
             },
             { typ: "bredvid", a: "bebis", b: "mamma" },
             { typ: "plats", a: "pappa", ikon: "🚪" },
@@ -358,9 +325,6 @@ const INSTALLNINGAR = {
             text: t("Moster Eva ville sitta bredvid dig.", "Aunt Eva wanted to sit next to you."),
             sager: t("Jag är ju den roliga mostern.", "I'm the fun aunt, after all."),
           },
-          middag: [
-            { vem: "morfar", text: t("Där! En talgoxe!", "Look! A robin!"), ikon: "🐦" },
-          ],
         },
         {
           namn: t("Tårtan", "The Cake"),
@@ -369,30 +333,23 @@ const INSTALLNINGAR = {
           bord: { perSida: 5, gavlar: "vh" },
           markeringar: { v: "👑", h: "🎤", u2: "🪟", u4: "🚪", n4: "📶" },
           gaster: ["mormor", "morfar", "mamma", "pappa", "bebis", "du", "bengt", "eva", "gunnel", "sven", "linnea", "max"],
-          ratter: [{ ikon: "🥗", namn: t("Förrätt", "Starter") }, { ikon: "🍖", namn: t("Varmrätt", "Main course") }, { ikon: "🎂", namn: t("Tårta!", "Cake!") }],
           regler: [
             { typ: "plats", a: "mormor", ikon: "👑" },
             {
               typ: "plats", a: "eva", ikon: "🎤",
               text: t("Nu ska moster Eva hålla tal! Hon ska sitta på talarplatsen.", "Now Aunt Eva is giving a speech! She sits in the speaker's seat."),
               sager: t("Mitt tal är kortare än Bengts. Det är inte en tävling.", "My speech is shorter than Bengt's. It's not a competition."),
-              bra: t("Grattis, mamma! Och mitt tal var kortare.", "Happy birthday, Mum! And my speech was shorter."), braIkon: "🎤",
-              dalig: t("Kan någon flytta på sig? Jag ska hålla tal!", "Can someone move? I'm giving a speech!"), daligIkon: "🎤",
             },
             { typ: "inteBredvid", a: "eva", b: "bengt" },
             {
               typ: "plats", a: "linnea", ikon: "🪟",
               text: t("Kusin Linnea vill sitta vid fönstret.", "Cousin Linnea wants to sit by the window."),
               sager: t("Göran behöver ljus. Göran är min surdeg.", "Gerald needs light. Gerald is my sourdough."),
-              bra: t("Göran mår så bra här.", "Gerald is so happy here."), braIkon: "🥖",
-              dalig: t("Göran blir ledsen i mörkret.", "Gerald gets sad in the dark."), daligIkon: "🥖",
             },
             {
               typ: "plats", a: "max", ikon: "📶",
               text: t("Kusin Max vill sitta närmast wifi:n.", "Cousin Max wants to sit closest to the wifi."),
               sager: t("Jag är inte på mobilen. Jag kollar bara en sak.", "I'm not on my phone. I'm just checking something."),
-              bra: t("Mm.", "Mm."), braIkon: "📱",
-              dalig: t("Det laddar inte! Värsta dagen i mitt liv.", "It won't load! Worst day of my life."), daligIkon: "📶",
             },
             { typ: "plats", a: "pappa", ikon: "🚪" },
             { typ: "bredvid", a: "bebis", b: "mamma" },
@@ -403,8 +360,6 @@ const INSTALLNINGAR = {
               text: t("Tant Gunnel frågar alltid Max vad han ska bli när han blir stor.", "Auntie Gunnel always asks Max what he wants to be when he grows up."),
               vem: "max",
               sager: t("Jag vet inte. Jag är 15.", "I don't know. I'm 15."),
-              bra: t("Vad roligt att alla är här!", "How lovely that everyone is here!"), braVem: "gunnel", braIkon: "🧶",
-              dalig: t("Och vad ska DU bli när du blir stor?", "And what do YOU want to be when you grow up?"), daligVem: "gunnel", daligIkon: "🧶",
             },
           ],
           hemlig: {
@@ -412,10 +367,6 @@ const INSTALLNINGAR = {
             text: t("Tant Gunnel ville sitta bredvid grannen Sven.", "Auntie Gunnel wanted to sit next to Sven next door."),
             sager: t("Sven har så fina… rosor.", "Sven has such lovely… roses."),
           },
-          middag: [
-            { vem: "sven", text: t("Det är bajs som gör rosorna fina.", "It's the poop that makes the roses pretty."), ikon: "🌹" },
-            { vem: "mormor", text: t("Jag sa ju att jag inte ville ha någon tårta. Men en liten bit då.", "I said I didn't want any cake. Well, just a small piece."), ikon: "🎂" },
-          ],
         },
       ],
     },
@@ -450,7 +401,7 @@ let marginal = { topp: 0, vanster: 0, hoger: 0, botten: 0 };
 let pixelSkala = Math.min(window.devicePixelRatio || 1, 2);
 const emojiMinne = new Map(); // Färdigritade emojis
 
-let lage = "meny"; // "meny", "intro", "placera", "middag", "resultat" eller "paus"
+let lage = "meny"; // "meny", "intro", "placera", "resultat" eller "paus"
 let lageForePaus = "placera";
 let lageTid = 0;
 let tid = 0;
@@ -469,6 +420,7 @@ let vald = null;       // Gästen man har tryckt på
 let info = null;       // Rutan med text som visas när man trycker på något
 let skak = {};         // Saker som skakar en stund
 let mormorLosning = null;
+let mormorKvar = 0;    // Hur många frågor till mormor som finns kvar på banan
 let hemligHittad = false;
 let tankeKlocka = 0;
 let guideLosning = null; // På den guidade banan: en lösning som handen visar
@@ -476,13 +428,6 @@ let guideKlar = false;    // Handen visar bara det första önskemålet, sedan f
 let guideKlarTid = 0;     // Hur länge "Nu får du klura själv" syns
 let markerade = null;     // Gäster som lyser en stund när man tryckt på ett önskemål
 
-let scen = [];         // Middagen: allt som händer, i tur och ordning
-let scenNr = 0;
-let scenTid = 0;
-let stamning = 0.5;
-let stamningMal = 0.5;
-let rattNr = -1;
-let partiklar = [];
 let resultat = null;
 let menyKnappar = [];
 let resultatKnappar = [];
@@ -650,12 +595,6 @@ function forbered(fNr, bNr) {
     gaster: def.gaster,
     regler: (def.regler || []).map(fyllI),
     hemlig: def.hemlig ? fyllI(def.hemlig) : null,
-    ratter: def.ratter || [
-      { ikon: "🥗", namn: t("Förrätt", "Starter") },
-      { ikon: "🍖", namn: t("Varmrätt", "Main course") },
-      { ikon: "🍰", namn: t("Efterrätt", "Dessert") },
-    ],
-    middag: def.middag || [],
   };
 }
 
@@ -884,13 +823,13 @@ function startaBana(fNr, bNr) {
   info = null;
   skak = {};
   mormorLosning = null;
+  mormorKvar = S.mormorFragor;
   hemligHittad = bastaStjarnor(fNr, bNr) >= 3;
   tankeKlocka = 0;
   markerade = null;
   guideLosning = null;
   guideKlar = false;
   guideKlarTid = 0;
-  partiklar = [];
   resultat = null;
   gorLayout();
   const bp = bankPositioner();
@@ -1011,15 +950,21 @@ function infoOmRegel(i) {
 
 // Mormor flyttar en gäst till rätt plats
 function fragaMormor() {
+  const m = L.mormor;
+  if (mormorKvar <= 0) {
+    effekt("fel");
+    visaInfo([[t("👵 Nu vilar mormor. Du får klura själv!", "👵 Grandma is resting now. You'll have to figure it out!"), "rubrik"]], m.x + m.w / 2, m.y);
+    return;
+  }
   if (!mormorLosning) mormorLosning = losa(B, plats);
   const los = mormorLosning;
   if (!los) return;
   const fel = B.gaster.filter((id) => plats[id] !== los[id]);
-  const m = L.mormor;
   if (fel.length === 0) {
     visaInfo([[t("👵 Det ser väl fint ut? Servera!", "👵 Looks lovely to me. Serve!"), "rubrik"]], m.x + m.w / 2, m.y);
     return;
   }
+  mormorKvar -= 1;
   // Helst någon som sitter fel, annars någon som inte sitter än
   const sitterFel = fel.filter((id) => plats[id] && B.regler.some((r, i) => status[i] === false && regelGaster(r).includes(id)));
   const id = sitterFel[0] || fel.find((g) => !plats[g]) || fel[0];
@@ -1042,115 +987,7 @@ function servera() {
   uppdateraStatus(false);
   info = null;
   vald = null;
-  scen = byggScen();
-  scenNr = -1;
-  rattNr = -1;
-  stamning = 0.5;
-  stamningMal = 0.5;
-  partiklar = [];
-  bytLage("middag");
-  nastaScen();
-}
-
-// Bygger ihop middagen: rätterna, alla regler och annat som händer
-function byggScen() {
-  const handelser = [];
-  B.regler.forEach((r, i) => handelser.push({ typ: "regel", i }));
-  B.middag.forEach((m) => {
-    if (B.gaster.includes(m.vem) && (!m.vid || B.gaster.includes(m.vid))) handelser.push({ typ: "extra", m });
-  });
-  if (B.hemlig) handelser.push({ typ: "hemlig" });
-  const delar = B.ratter.length;
-  const lista = [];
-  const perDel = Math.ceil(handelser.length / delar);
-  for (let d = 0; d < delar; d++) {
-    lista.push({ typ: "ratt", nr: d });
-    lista.push(...handelser.slice(d * perDel, (d + 1) * perDel));
-  }
-  lista.push({ typ: "slut" });
-  return lista;
-}
-
-function generellBra() {
-  return slumpa([t("Mmm, vad gott!", "Mmm, delicious!"), t("Så trevligt!", "How lovely!"), t("Vilken fin fest!", "What a nice party!")]);
-}
-
-function generellDalig(r) {
-  if (r.typ === "inteBredvid") return t("Nu börjar det igen…", "Here we go again…");
-  if (r.typ === "bredvid") return t("Jag ville sitta bredvid någon annan…", "I wanted to sit next to someone else…");
-  if (r.typ === "mittemot") return t("Jag ser dig inte!", "I can't see you!");
-  return t("Det här är fel plats!", "This is the wrong seat!");
-}
-
-function stolPos(id) {
-  return L.stolar[plats[id]];
-}
-
-function nastaScen() {
-  scenNr += 1;
-  scenTid = 0;
-  const h = scen[scenNr];
-  if (!h) return;
-  h.tid = 2.6;
-  if (h.typ === "ratt") {
-    rattNr = h.nr;
-    h.tid = 1.3;
-    effekt("klirr");
-    return;
-  }
-  if (h.typ === "slut") {
-    visaResultat();
-    return;
-  }
-  if (h.typ === "extra") {
-    h.vem = h.m.vem;
-    h.text = h.m.text;
-    h.ikon = h.m.ikon;
-    h.ikonVid = h.m.vid || h.m.vem;
-    h.bra = null;
-  } else {
-    const r = h.typ === "hemlig" ? B.hemlig : B.regler[h.i];
-    const ok = stammer(r, plats, B) === true;
-    if (h.typ === "hemlig") {
-      if (!ok) {
-        // Uppfylls inte den hemliga önskan märks det inte på middagen
-        nastaScen();
-        return;
-      }
-      h.vem = r.vem || r.a;
-      h.text = r.sager;
-      h.ikon = "💗";
-    } else if (ok) {
-      h.vem = r.braVem || r.a;
-      h.text = r.bra || generellBra();
-      h.ikon = r.braIkon || "😊";
-    } else {
-      h.vem = r.daligVem || r.a;
-      h.text = r.dalig || generellDalig(r);
-      h.ikon = r.daligIkon || (r.typ === "inteBredvid" ? "💢" : "😕");
-    }
-    h.bra = ok;
-    h.par = regelGaster(r);
-    h.ikonVid = h.vem;
-    stamningMal = begr(stamningMal + (ok ? 0.1 : -0.16), 0, 1);
-    effekt(ok ? "glad" : "krasch");
-  }
-  h.tid = begr(1.4 + h.text.length * 0.045, 2.2, 4.5);
-  const p = stolPos(h.ikonVid);
-  if (p) {
-    if (h.bra === false) {
-      const mat = ["🍝", "🥔", "🫛", "🍖", "🥄"];
-      for (let i = 0; i < 4; i++) {
-        partiklar.push({ bild: slumpa(mat), x: p.x, y: p.y, vx: (Math.random() - 0.5) * L.sp * 4, vy: -L.sp * (2 + Math.random() * 2), tid: 1.4, snurr: Math.random() * 6 });
-      }
-    }
-    if (h.bra === true || h.typ === "hemlig") {
-      for (let i = 0; i < 3; i++) {
-        partiklar.push({ bild: h.typ === "hemlig" ? "💗" : "✨", x: p.x + (Math.random() - 0.5) * L.r * 2, y: p.y, vx: 0, vy: -L.sp * (0.8 + Math.random() * 0.6), tid: 1.4, flyt: true });
-      }
-    }
-    partiklar.push({ bild: h.ikon, x: p.x, y: p.y - L.r * 0.6, vx: 0, vy: -L.sp * 0.45, tid: h.tid, flyt: true, stor: true });
-  }
+  visaResultat();
 }
 
 function visaResultat() {
@@ -1174,8 +1011,6 @@ function visaResultat() {
 
 function forsokIgen() {
   resultat = null;
-  partiklar = [];
-  rattNr = -1;
   mormorLosning = null;
   // Önskemålen som inte stämde skakar, så att man ser vad som blev fel
   status.forEach((s, i) => {
@@ -1222,10 +1057,6 @@ canvas.addEventListener("pointerdown", (e) => {
   }
   if (lage === "intro") {
     if (lageTid > 0.5) bytLage("placera");
-    return;
-  }
-  if (lage === "middag") {
-    if (scenTid > 0.3) nastaScen();
     return;
   }
   if (lage === "resultat") {
@@ -1340,7 +1171,6 @@ window.addEventListener("keydown", (e) => {
   if (e.key !== " " && e.key !== "Enter") return;
   startaLjud();
   if (lage === "intro") bytLage("placera");
-  else if (lage === "middag") nastaScen();
   else if (lage === "placera" && allaSitter()) servera();
   else if (lage === "resultat" && resultatKnappar.length) resultatKnappar[resultatKnappar.length - 1].gor();
 });
@@ -1429,20 +1259,6 @@ function uppdatera(dt) {
     if (markerade.tid <= 0) markerade = null;
   }
 
-  if (lage === "middag") {
-    scenTid += dt;
-    const h = scen[scenNr];
-    if (h && scenTid >= h.tid) nastaScen();
-  }
-  stamning += (stamningMal - stamning) * (1 - Math.exp(-dt * 4));
-
-  for (const p of partiklar) {
-    p.tid -= dt;
-    p.x += p.vx * dt;
-    p.y += p.vy * dt;
-    if (!p.flyt) p.vy += L.sp * 7 * dt;
-  }
-  partiklar = partiklar.filter((p) => p.tid > 0);
 }
 
 // ---------- Rita: hjälpfunktioner ----------
@@ -1558,15 +1374,14 @@ function ritaBord() {
   ctx.fillRect(bx, by + bh / 2 - sp * 0.12, bw, sp * 0.24);
 
   // Mitt på bordet: blommor, och tårta när den serveras
-  const ratt = lage === "middag" || lage === "resultat" ? B.ratter[Math.max(0, rattNr)] : null;
-  const tarta = ratt && ratt.ikon === "🎂";
+  const tarta = lage === "resultat";
   ritaEmoji(tarta ? "🎂" : "💐", bx + bw / 2, by + bh / 2, sp * (tarta ? 0.6 : 0.45));
   if (B.bord.perSida >= 4) {
     ritaEmoji("🕯️", bx + bw * 0.22, by + bh / 2, sp * 0.3);
     ritaEmoji("🕯️", bx + bw * 0.78, by + bh / 2, sp * 0.3);
   }
 
-  // Tallrikarna, med mat på när det är middag
+  // Tallrikarna, med tårta på när man har serverat
   for (const [id, s] of Object.entries(L.stolar)) {
     let px = s.x;
     let py = s.y;
@@ -1580,7 +1395,7 @@ function ritaBord() {
     cirkel(px, py, sp * 0.17);
     ctx.fill();
     ctx.stroke();
-    if (ratt && B.gaster.some((g) => plats[g] === id)) ritaEmoji(ratt.ikon, px, py, sp * 0.24);
+    if (tarta && B.gaster.some((g) => plats[g] === id)) ritaEmoji("🍰", px, py, sp * 0.24);
   }
 }
 
@@ -1656,7 +1471,6 @@ function ritaGast(id, x, y, r, val = {}) {
 
 function ritaGaster() {
   const { r } = L;
-  const h = lage === "middag" ? scen[scenNr] : null;
   for (const id of B.gaster) {
     if (drag && drag.flyttat && drag.id === id) continue;
     const p = ritadPos[id];
@@ -1670,8 +1484,6 @@ function ritaGaster() {
       ring = `rgba(255, 190, 0, ${0.6 + Math.sin(tid * 10) * 0.4})`;
       y -= Math.abs(Math.sin(tid * 7)) * r * 0.2;
     }
-    if (h && h.par && h.par.includes(id)) ring = h.bra ? "#3fbf5a" : "#e0503c";
-    if (h && h.vem === id && h.text) y -= Math.abs(Math.sin(scenTid * 9)) * r * 0.18;
     ritaGast(id, x, y, r, { ring });
     // Sitter gästen visar ett litet ansikte om hen är nöjd eller inte
     const humor = plats[id] && (S.visaGrona || lage !== "placera") ? gastHumor(id) : null;
@@ -1746,7 +1558,7 @@ function ritaKort(i) {
   const c = L.c;
   const arHemlig = i === B.regler.length;
   const r = arHemlig ? B.hemlig : B.regler[i];
-  const visa = S.visaGrona || lage === "middag" || lage === "resultat";
+  const visa = S.visaGrona || lage === "resultat";
   const s = arHemlig ? null : status[i];
   const dx = skak["kort-" + i] ? Math.sin(tid * 45) * c * 0.35 : 0;
   const x = k.x + dx;
@@ -1820,7 +1632,7 @@ function ritaKnapp(rekt, text, farg, aktiv = true, liten = "") {
   const storlek = Math.min(rekt.h * 0.38, 26);
   if (liten) {
     skriv(text, rekt.x + rekt.w / 2, rekt.y + rekt.h * 0.4, storlek, aktiv ? "#2b1d0e" : "#857a6b", "center", "bold", rekt.w - 16);
-    skriv(liten, rekt.x + rekt.w / 2, rekt.y + rekt.h * 0.76, storlek * 0.62, "#857a6b", "center", "bold", rekt.w - 16);
+    skriv(liten, rekt.x + rekt.w / 2, rekt.y + rekt.h * 0.76, storlek * 0.62, aktiv ? "#6b5a45" : "#857a6b", "center", "bold", rekt.w - 16);
   } else {
     skriv(text, rekt.x + rekt.w / 2, rekt.y + rekt.h / 2, storlek, aktiv ? "#2b1d0e" : "#857a6b", "center", "bold", rekt.w - 16);
   }
@@ -1828,7 +1640,12 @@ function ritaKnapp(rekt, text, farg, aktiv = true, liten = "") {
 
 function ritaKnappar() {
   if (lage !== "placera" && lage !== "intro") return;
-  ritaKnapp(L.mormor, t("👵 Fråga mormor", "👵 Ask Grandma"), "#ffd95e");
+  if (mormorKvar > 0) {
+    const kvarText = mormorKvar === 1 ? t("1 fråga kvar", "1 question left") : t(`${mormorKvar} frågor kvar`, `${mormorKvar} questions left`);
+    ritaKnapp(L.mormor, t("👵 Fråga mormor", "👵 Ask Grandma"), "#ffd95e", true, kvarText);
+  } else {
+    ritaKnapp(L.mormor, t("👵 Mormor vilar", "👵 Grandma is resting"), "#ffd95e", false, t("Inga frågor kvar", "No questions left"));
+  }
   const kvar = B.gaster.filter((id) => !plats[id]).length;
   if (kvar === 0) {
     const puls = 1 + Math.sin(tid * 5) * 0.03;
@@ -2031,108 +1848,10 @@ function rubrikOmrade() {
 function ritaRubrik() {
   const o = rubrikOmrade();
   const y = marginal.topp + 40;
-  if (lage === "middag" || lage === "resultat") {
-    ritaStamning(o, y);
-    return;
-  }
   const fest = S.fester[festNr];
   const storlek = begr(L.ts * 1.5, 18, 32);
   skriv(`${B.ikon} ${B.namn}`, o.x, y - storlek * 0.25, storlek, "#4a3220", "center", "bold", o.w);
   skriv(t(`${fest.namn} · bana ${banNr + 1} av ${fest.banor.length}`, `${fest.namn} · level ${banNr + 1} of ${fest.banor.length}`), o.x, y + storlek * 0.75, storlek * 0.5, "#7a6a55", "center", "bold", o.w);
-}
-
-function ritaStamning(o, y) {
-  const w = Math.min(o.w, 420);
-  const h = 18;
-  const x = o.x - w / 2;
-  ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
-  rundRekt(ctx, x, y - h / 2, w, h, h / 2);
-  ctx.fill();
-  const g = ctx.createLinearGradient(x, 0, x + w, 0);
-  g.addColorStop(0, "#e0503c");
-  g.addColorStop(0.5, "#f1c40f");
-  g.addColorStop(1, "#3fbf5a");
-  ctx.fillStyle = g;
-  rundRekt(ctx, x + 3, y - h / 2 + 3, Math.max(h - 6, (w - 6) * stamning), h - 6, (h - 6) / 2);
-  ctx.fill();
-  const ansikte = stamning < 0.25 ? "😡" : stamning < 0.45 ? "😕" : stamning < 0.65 ? "🙂" : "😄";
-  ritaEmoji(ansikte, x + 3 + (w - 6) * stamning, y, 30);
-  skriv(t("Stämningen", "The mood"), o.x, y + 24, 13, "#7a6a55");
-}
-
-// ---------- Rita: middagen ----------
-
-function ritaPratbubbla(text, x, ovan, under) {
-  const ts = L.ts * 1.05;
-  ctx.font = `bold ${ts}px ${TYPSNITT}`;
-  const rader = radbryt(text, Math.min(bredd * 0.6, ts * 16));
-  const w = Math.max(...rader.map((r) => ctx.measureText(r).width)) + ts * 1.2;
-  const h = rader.length * ts * 1.3 + ts * 0.9;
-  const vx = begr(x - w / 2, 8, bredd - w - 8);
-  let y = ovan - h - ts * 0.6;
-  const upp = y < marginal.topp + 70;
-  if (upp) y = under + ts * 0.6;
-  ctx.fillStyle = "#ffffff";
-  ctx.strokeStyle = "#2b1d0e";
-  ctx.lineWidth = 2.5;
-  rundRekt(ctx, vx, y, w, h, ts * 0.7);
-  ctx.fill();
-  ctx.stroke();
-  const px = begr(x, vx + ts, vx + w - ts);
-  ctx.beginPath();
-  if (upp) {
-    ctx.moveTo(px - ts * 0.35, y + 1.5);
-    ctx.lineTo(px, y - ts * 0.5);
-    ctx.lineTo(px + ts * 0.35, y + 1.5);
-  } else {
-    ctx.moveTo(px - ts * 0.35, y + h - 1.5);
-    ctx.lineTo(px, y + h + ts * 0.5);
-    ctx.lineTo(px + ts * 0.35, y + h - 1.5);
-  }
-  ctx.fill();
-  ctx.stroke();
-  ctx.fillStyle = "#2b1d0e";
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  rader.forEach((rad, i) => ctx.fillText(rad, vx + w / 2, y + ts * 0.45 + (i + 0.5) * ts * 1.3));
-}
-
-function ritaPartiklar() {
-  for (const p of partiklar) {
-    ctx.globalAlpha = begr(p.tid * 2, 0, 1);
-    if (p.snurr) {
-      ctx.save();
-      ctx.translate(p.x, p.y);
-      ctx.rotate(p.snurr * (1.4 - p.tid));
-      ritaEmoji(p.bild, 0, 0, L.r * 0.7);
-      ctx.restore();
-    } else {
-      ritaEmoji(p.bild, p.x, p.y, L.r * (p.stor ? 1.0 : 0.6));
-    }
-  }
-  ctx.globalAlpha = 1;
-}
-
-function ritaMiddag() {
-  if (lage !== "middag") return;
-  const h = scen[scenNr];
-  if (!h) return;
-  if (h.typ === "ratt") {
-    const ratt = B.ratter[h.nr];
-    const a = begr(Math.min(scenTid * 4, (h.tid - scenTid) * 4), 0, 1);
-    ctx.globalAlpha = a;
-    const storlek = begr(L.ts * 2.4, 30, 56);
-    ctx.fillStyle = "rgba(255, 253, 246, 0.85)";
-    rundRekt(ctx, bredd / 2 - storlek * 4, L.cy - storlek * 1.1, storlek * 8, storlek * 2.2, storlek * 0.5);
-    ctx.fill();
-    ritaEmoji(ratt.ikon, bredd / 2 - storlek * 2.2, L.cy, storlek * 1.3);
-    skriv(ratt.namn, bredd / 2 + storlek * 0.6, L.cy, storlek * 0.8, "#4a3220", "center", "bold", storlek * 4.5);
-    ctx.globalAlpha = 1;
-  } else if (h.text && h.vem) {
-    const p = ritadPos[h.vem];
-    ritaPratbubbla(h.text, p.x, p.y - L.r * 1.2, p.y + L.r * 1.2);
-  }
-  skriv(t("Tryck för att gå vidare ▶", "Tap to continue ▶"), L.bank.x + L.bank.w / 2, L.bank.y + L.bank.h - L.ts, L.ts * 0.85, "#7a6a55");
 }
 
 // ---------- Rita: rutor och skärmar ----------
@@ -2198,7 +1917,6 @@ function ritaResultat() {
     rader.push([t("💭 Någon hade en hemlig önskan…", "💭 Someone had a secret wish…"), "#e3d4ff"]);
   } else if (resultat.hemligOk) {
     rader.push([`💗 ${B.hemlig.text}`, "#ffe3f0"]);
-    if (B.hemlig.sager) rader.push([`”${B.hemlig.sager}”`, "#d5def0"]);
   }
   if (sista) rader.push([t("Du är nu: ", "You are now: ") + titel(totalaStjarnor(festNr)), "#9dffb0"]);
 
@@ -2324,8 +2042,6 @@ function rita() {
   ritaKnappar();
   ritaGuide();
   ritaTanke();
-  ritaPartiklar();
-  ritaMiddag();
   ritaDragen();
   ritaRubrik();
   ritaInfo();
@@ -2403,14 +2119,7 @@ function effekt(namn) {
       ton(1320, 1320, 0.25, "triangle", 0.12);
       ton(1760, 1760, 0.35, "triangle", 0.1, 0.08);
     } else if (namn === "fel") ton(240, 170, 0.22, "square", 0.05);
-    else if (namn === "klirr") {
-      ton(2600, 2500, 0.15, "sine", 0.07);
-      ton(3200, 3100, 0.2, "sine", 0.06, 0.07);
-    } else if (namn === "glad") ton(660, 990, 0.18, "triangle", 0.1);
-    else if (namn === "krasch") {
-      ton(300, 90, 0.35, "sawtooth", 0.06);
-      ton(180, 60, 0.3, "square", 0.04, 0.05);
-    } else if (namn === "magi") {
+    else if (namn === "magi") {
       [784, 988, 1175, 1568].forEach((f, i) => ton(f, f, 0.18, "triangle", 0.08, i * 0.06));
     } else if (namn === "fanfar") {
       [523, 659, 784, 1047].forEach((f, i) => ton(f, f, i === 3 ? 0.5 : 0.16, "triangle", 0.13, i * 0.13));
