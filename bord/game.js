@@ -49,6 +49,8 @@ const INSTALLNINGAR = {
       prat: [
         t("Jag sa ju att jag inte ville ha några presenter.", "I said I didn't want any presents."),
         t("Ät nu, det finns mer i köket!", "Eat up, there's more in the kitchen!"),
+        t("Jag sa ju att jag inte ville ha något kalas.", "I said I didn't want a party."),
+        t("Jag ville inte ha någon tårta. Men en liten bit då.", "I didn't want any cake. Well, just a small piece."),
       ],
     },
     morfar: {
@@ -57,6 +59,7 @@ const INSTALLNINGAR = {
       prat: [
         t("Där! En talgoxe!", "Look! A robin!"),
         t("Jag vilar bara ögonen.", "I'm just resting my eyes."),
+        t("VA? JAG HÖR INTE VAD DU SÄGER!", "WHAT? I CAN'T HEAR YOU!"),
       ],
     },
     bengt: {
@@ -65,6 +68,10 @@ const INSTALLNINGAR = {
       prat: [
         t("Jag har gjort en tabell.", "I've made a spreadsheet."),
         t("Det finns en pärm om det.", "There's a binder about that."),
+        t("Jag har en pärm om sill också.", "I have a binder about herring too."),
+        t("Gäddan var SÅ här stor!", "The pike was THIS big!"),
+        t("Mamma, du är som en fin ost. Bättre med åren!", "Mum, you're like a fine cheese. Better with age!"),
+        t("Vänta, var är sidan 7?", "Wait, where's page 7?"),
       ],
     },
     eva: {
@@ -73,6 +80,9 @@ const INSTALLNINGAR = {
       prat: [
         t("Jag sprang hit. Det var bara tre mil.", "I ran here. It was only twenty miles."),
         t("Har ni provat att bada i is?", "Have you tried ice baths?"),
+        t("Fint tal, Bengt. Lite långt bara.", "Nice speech, Bengt. Just a bit long."),
+        t("Mamma gillar MIG mest!", "Mum likes ME best!"),
+        t("Mitt tal blir kortare än Bengts. Det är inte en tävling.", "My speech will be shorter than Bengt's. It's not a competition."),
       ],
     },
     kerstin: {
@@ -81,6 +91,7 @@ const INSTALLNINGAR = {
       prat: [
         t("Den är tyst som en mus.", "It's quiet as a mouse."),
         t("Har jag berättat att jag har elbil?", "Did I mention I have an electric car?"),
+        t("Den laddar sig själv på natten. Nästan.", "It charges itself overnight. Almost."),
       ],
     },
     sven: {
@@ -97,6 +108,8 @@ const INSTALLNINGAR = {
       prat: [
         t("Ta på dig en mössa!", "Put a hat on!"),
         t("Så där gjorde vi aldrig på min tid.", "We never did that in my day."),
+        t("Ska inte bebisen ha mössa? Och vantar? Och…", "Shouldn't the baby wear a hat? And mittens? And…"),
+        t("Och vad ska DU bli när du blir stor?", "And what do YOU want to be when you grow up?"),
       ],
     },
     mamma: {
@@ -105,6 +118,8 @@ const INSTALLNINGAR = {
       prat: [
         t("Står det inte på listan händer det inte.", "If it's not on the list, it doesn't happen."),
         t("Inga mobiler vid bordet. Utom min.", "No phones at the table. Except mine."),
+        t("Hunden får egentligen ingen mat från bordet.", "The dog doesn't actually get food from the table."),
+        t("Vad skönt att få äta i lugn och ro.", "How nice to eat in peace and quiet."),
       ],
     },
     pappa: {
@@ -113,6 +128,7 @@ const INSTALLNINGAR = {
       prat: [
         t("Jag mår bra. Tror jag.", "I'm fine. I think."),
         t("Det var inte jag. Det var hunden.", "It wasn't me. It was the dog."),
+        t("Jag ska bara… gå ut en liten sväng.", "I'll just… pop outside for a bit."),
       ],
     },
     bebis: {
@@ -126,6 +142,7 @@ const INSTALLNINGAR = {
       prat: [
         t("När kommer tårtan?", "When is the cake coming?"),
         t("Får hunden också tårta?", "Does the dog get cake too?"),
+        t("Min köttbulle rullade iväg!", "My meatball rolled away!"),
       ],
     },
     linnea: {
@@ -134,12 +151,17 @@ const INSTALLNINGAR = {
       prat: [
         t("Göran är tre år gammal.", "Gerald is three years old."),
         t("Säg hej till Göran!", "Say hi to Gerald!"),
+        t("Göran blir ledsen i mörkret.", "Gerald gets sad in the dark."),
       ],
     },
     max: {
       namn: t("Kusin Max", "Cousin Max"), ansikte: "🧑", sak: "🎧", troja: "#34495e",
       om: t("Är 15 år.", "Is 15 years old."),
-      prat: [t("Mm.", "Mm."), t("Jag kollar bara en sak.", "I'm just checking something.")],
+      prat: [
+        t("Mm.", "Mm."),
+        t("Jag kollar bara en sak.", "I'm just checking something."),
+        t("Det laddar inte! Värsta dagen i mitt liv.", "It won't load! Worst day of my life."),
+      ],
     },
   },
 
@@ -913,6 +935,16 @@ function visaInfo(rader, x, y) {
   info = { rader, x, y, tid: 7 };
 }
 
+// En slumpad replik, men aldrig samma två gånger i rad
+const senastPrat = {};
+function nastaPrat(id) {
+  const lista = gast(id).prat;
+  let nr = Math.floor(Math.random() * lista.length);
+  if (lista.length > 1 && nr === senastPrat[id]) nr = (nr + 1) % lista.length;
+  senastPrat[id] = nr;
+  return lista[nr];
+}
+
 function infoOmGast(id) {
   const g = gast(id);
   const p = ritadPos[id];
@@ -923,7 +955,7 @@ function infoOmGast(id) {
     const s = status[i];
     rader.push([`${s === true ? "✅" : s === false ? "❌" : "⬜"} ${r.text}`, "vanlig"]);
   });
-  if (g.prat.length) rader.push([`”${slumpa(g.prat)}”`, "citat"]);
+  if (g.prat.length) rader.push([`”${nastaPrat(id)}”`, "citat"]);
   visaInfo(rader, p.x, p.y - L.r);
 }
 
