@@ -201,6 +201,15 @@ const INSTALLNINGAR = {
         t("Det rimmar inte. Det är meningen.", "It doesn't rhyme. That's on purpose."),
       ],
     },
+    fotograf: {
+      namn: t("Fotografen Fia", "Fia the photographer"), ansikte: "👩‍🎤", sak: "📸", troja: "#16a085",
+      om: t("Tar 4 000 bilder. Nästan alla på bruden.", "Takes 4,000 photos. Nearly all of the bride."),
+      prat: [
+        t("Alla säger omelett!", "Everybody say cheese!"),
+        t("Bara en bild till. Och en till.", "Just one more photo. And another."),
+        t("Kan alla gå ut i regnet? Det blir så fint ljus.", "Can everyone go out in the rain? The light is so nice."),
+      ],
+    },
     goran: {
       namn: t("Göran", "Gerald"), ansikte: "🥖", sak: "🎀", troja: "#f5cba7",
       om: t("Brudens surdeg. Är tre år.", "The bride's sourdough. Is three years old."),
@@ -501,6 +510,38 @@ const INSTALLNINGAR = {
           },
         },
         {
+          namn: t("Fotografen", "The Photographer"),
+          ikon: "📸",
+          tips: t("Nu är det fullt vid det runda bordet.", "The round table is full now."),
+          bord: [{ perSida: 3, enSida: true }, { typ: "rund", stolar: 6 }],
+          markeringar: { au1: "💍", au2: "💍", b3: "🚪" },
+          gaster: ["brud", "viktor", "goran", "mormor", "morfar", "du", "fotograf", "mamma", "bebis"],
+          regler: [
+            { typ: "plats", a: "brud", ikon: "💍" },
+            { typ: "plats", a: "viktor", ikon: "💍" },
+            { typ: "bredvid", a: "goran", b: "brud" },
+            {
+              typ: "plats", a: "fotograf", ikon: "🚪",
+              text: t("Fotografen vill sitta nära dörren, så att hon kan springa ut och ta bilder.", "The photographer wants to sit near the door so she can run out and take photos."),
+              sager: t("Bara en bild till. Och en till.", "Just one more photo. And another."),
+            },
+            {
+              typ: "inteBredvid", a: "fotograf", b: "mormor",
+              text: t("Fotografen ska inte sitta bredvid mormor. Mormor blundar på alla bilder.", "The photographer should not sit next to Grandma. Grandma blinks in every photo."),
+              sager: t("Mormor har blundat på 312 bilder. Jag har räknat.", "Grandma has blinked in 312 photos. I counted."),
+            },
+            { typ: "mittemot", a: "morfar", b: "mormor" },
+            { typ: "bredvid", a: "du", b: "mormor" },
+            { typ: "bredvid", a: "bebis", b: "mamma" },
+          ],
+          hemlig: {
+            typ: "mittemot", a: "bebis", b: "fotograf", tanke: "👀📸",
+            text: t("Lillasyster ville sitta mittemot fotografen, så att hon kommer med på bild.", "Baby sister wanted to sit across from the photographer so she'd be in the photos."),
+            vem: "fotograf",
+            sager: t("Hon är den enda som tittar in i kameran.", "She's the only one who looks at the camera."),
+          },
+        },
+        {
           namn: t("Middagen", "The Dinner"),
           ikon: "🍝",
           tips: t("Nytt: 🤝 vid samma bord och 🙅 vid olika bord.", "New: 🤝 at the same table and 🙅 at different tables."),
@@ -544,6 +585,38 @@ const INSTALLNINGAR = {
             typ: "bredvid", a: "birgitta", b: "bebis",
             text: t("Birgitta ville sitta bredvid lillasyster.", "Birgitta wanted to sit next to baby sister."),
             sager: t("Viktor var också en så söt bebis. Jag har bilder. 400 stycken.", "Viktor was such a cute baby too. I have pictures. 400 of them."),
+          },
+        },
+        {
+          namn: t("Bestmannens låt", "The Best Man's Song"),
+          ikon: "🎸",
+          tips: t("Bestman Kalle ska spela. Vem vill höra, och vem vill inte?", "Best man Kalle is going to play. Who wants to listen, and who doesn't?"),
+          bord: [{ perSida: 3, enSida: true }, { typ: "rund", stolar: 5 }, { typ: "rund", stolar: 4 }],
+          markeringar: { au1: "💍", au2: "💍", b0: "🎤" },
+          gaster: ["brud", "viktor", "goran", "kalle", "mormor", "morfar", "birgitta", "mamma", "bebis", "du", "eva"],
+          regler: [
+            { typ: "plats", a: "brud", ikon: "💍" },
+            { typ: "plats", a: "viktor", ikon: "💍" },
+            { typ: "bredvid", a: "goran", b: "brud" },
+            {
+              typ: "plats", a: "kalle", ikon: "🎤",
+              text: t("Bestman Kalle ska spela sin låt. Han ska sitta vid mikrofonen.", "Best man Kalle is playing his song. He sits by the microphone."),
+              sager: t("Den har tre refränger. Och ett gitarrsolo.", "It has three choruses. And a guitar solo."),
+            },
+            { typ: "annatBord", a: "kalle", b: "bebis" },
+            {
+              typ: "sammaBord", a: "eva", b: "kalle",
+              text: t("Moster Eva vill sitta vid samma bord som Kalle. Hon vill sjunga med.", "Aunt Eva wants to sit at the same table as Kalle. She wants to sing along."),
+              sager: t("Jag kan alla tre refrängerna.", "I know all three choruses."),
+            },
+            { typ: "bredvid", a: "bebis", b: "mamma" },
+            { typ: "annatBord", a: "birgitta", b: "mormor" },
+            { typ: "sammaBord", a: "du", b: "mamma" },
+          ],
+          hemlig: {
+            typ: "inteBredvid", a: "morfar", b: "kalle", tanke: "🙉🎸",
+            text: t("Morfar ville inte sitta bredvid Kalle.", "Grandpa didn't want to sit next to Kalle."),
+            sager: t("Jag har hört låten. Två gånger.", "I've heard the song. Twice."),
           },
         },
         {
@@ -594,6 +667,39 @@ const INSTALLNINGAR = {
           },
         },
         {
+          namn: t("Dansen", "The Dance"),
+          ikon: "💃",
+          tips: t("Nu ska det dansas! Någon vill sitta nära dansgolvet 💃.", "Time to dance! Someone wants to sit near the dance floor 💃."),
+          bord: [{ perSida: 4, enSida: true }, { typ: "rund", stolar: 6 }, { typ: "rund", stolar: 5 }],
+          markeringar: { au1: "💍", au2: "💍", au3: "🎤", c2: "💃" },
+          gaster: ["brud", "viktor", "goran", "kalle", "mormor", "morfar", "birgitta", "bengt", "eva", "gunnel", "sven", "mamma", "pappa", "du"],
+          regler: [
+            { typ: "plats", a: "brud", ikon: "💍" },
+            { typ: "plats", a: "viktor", ikon: "💍" },
+            { typ: "bredvid", a: "goran", b: "brud" },
+            { typ: "plats", a: "kalle", ikon: "🎤" },
+            { typ: "bredvid", a: "gunnel", b: "sven" },
+            {
+              typ: "plats", a: "sven", ikon: "💃",
+              text: t("Grannen Sven vill sitta närmast dansgolvet.", "Sven next door wants to sit closest to the dance floor."),
+              sager: t("Mina knän är 78 år. Mina fötter är 25.", "My knees are 78. My feet are 25."),
+            },
+            { typ: "annatBord", a: "eva", b: "bengt" },
+            { typ: "annatBord", a: "birgitta", b: "mormor" },
+            {
+              typ: "mittemot", a: "pappa", b: "mamma",
+              text: t("Pappa vill sitta mittemot mamma, så att han kan bjuda upp henne.", "Dad wants to sit across from Mum so he can ask her to dance."),
+              sager: t("Jag har övat. I köket.", "I've been practising. In the kitchen."),
+            },
+            { typ: "sammaBord", a: "du", b: ["mamma", "pappa"] },
+          ],
+          hemlig: {
+            typ: "bredvid", a: "mormor", b: "morfar",
+            text: t("Mormor ville sitta bredvid morfar.", "Grandma wanted to sit next to Grandpa."),
+            sager: t("Vi ska dansa samma vals som på vårt bröllop.", "We're going to dance the same waltz as at our wedding."),
+          },
+        },
+        {
           namn: t("Bröllopstårtan", "The Wedding Cake"),
           ikon: "🎂",
           tips: t("Alla är här! Nu blir det fullt vid alla bord.", "Everyone is here! Every table will be full."),
@@ -632,6 +738,38 @@ const INSTALLNINGAR = {
             typ: "bredvid", a: "birgitta", b: "bengt", tanke: "💗📁",
             text: t("Birgitta ville sitta bredvid morbror Bengt.", "Birgitta wanted to sit next to Uncle Bengt."),
             sager: t("Har du också en pärm? Vilken fin pärm.", "You have a binder too? What a lovely binder."),
+          },
+        },
+        {
+          namn: t("Nattkorven", "The Midnight Hot Dogs"),
+          ikon: "🌭",
+          tips: t("Sista banan! Alla är hungriga igen. Fyra bord!", "The last level! Everyone is hungry again. Four tables!"),
+          bord: [{ perSida: 4, enSida: true }, { typ: "rund", stolar: 6 }, { typ: "rund", stolar: 6 }, { typ: "rund", stolar: 5 }],
+          markeringar: { au1: "💍", au2: "💍", au3: "🎤", b3: "🚪", c0: "📶", d2: "💃" },
+          gaster: ["brud", "viktor", "goran", "kalle", "mormor", "morfar", "birgitta", "bengt", "eva", "gunnel", "sven", "kerstin", "mamma", "pappa", "bebis", "du", "max", "fotograf"],
+          regler: [
+            { typ: "plats", a: "brud", ikon: "💍" },
+            { typ: "plats", a: "viktor", ikon: "💍" },
+            { typ: "bredvid", a: "goran", b: "brud" },
+            { typ: "plats", a: "kalle", ikon: "🎤" },
+            { typ: "plats", a: "max", ikon: "📶" },
+            { typ: "plats", a: "pappa", ikon: "🚪" },
+            { typ: "plats", a: "sven", ikon: "💃" },
+            { typ: "bredvid", a: "gunnel", b: "sven" },
+            { typ: "inteBredvid", a: "fotograf", b: "mormor" },
+            {
+              typ: "inteBredvid", a: "bengt", b: "kerstin",
+              text: t("Morbror Bengt och grannen Kerstin ska inte sitta bredvid varandra.", "Uncle Bengt and Kerstin next door should not sit together."),
+              sager: t("Har du läst om batterierna? Jag har en pärm.", "Have you read about the batteries? I have a binder."),
+            },
+            { typ: "annatBord", a: "birgitta", b: "mormor" },
+            { typ: "bredvid", a: "bebis", b: "mamma" },
+            { typ: "sammaBord", a: "du", b: ["mamma", "pappa"] },
+          ],
+          hemlig: {
+            typ: "bredvid", a: "fotograf", b: "du",
+            text: t("Fotografen ville sitta bredvid dig.", "The photographer wanted to sit next to you."),
+            sager: t("Du är den enda som inte blundar på bilderna.", "You're the only one who doesn't blink in the photos."),
           },
         },
       ],
@@ -844,15 +982,25 @@ function stammer(r, plac, bana) {
 // stolen de redan sitter på i "forst", så att lösningen blir lik den man har.
 function losa(bana, forst = {}, regler = bana.regler) {
   const antalRegler = (id) => regler.filter((r) => regelGaster(r).includes(id)).length;
-  const ordning = [...bana.gaster].sort((x, y) => antalRegler(y) - antalRegler(x));
+  // Vilka stolar varje gäst kan sitta på. Ska gästen sitta vid en bild är det bara de stolarna.
   const allaStolar = bana.bord.platser.map((p) => p.id);
+  const mojliga = {};
+  for (const id of bana.gaster) {
+    mojliga[id] = allaStolar;
+    for (const r of regler) {
+      if (r.typ === "plats" && r.a === id) mojliga[id] = mojliga[id].filter((p) => bana.markeringar[p] === r.ikon);
+    }
+  }
+  // Gäster med få möjliga stolar och många önskemål placeras först. Då hittas en lösning snabbare.
+  const ordning = [...bana.gaster].sort((x, y) => mojliga[x].length - mojliga[y].length || antalRegler(y) - antalRegler(x));
   const plac = {};
   const upptagen = {};
   const funkar = (id) => regler.every((r) => !regelGaster(r).includes(id) || stammer(r, plac, bana) !== false);
   const prova = (k) => {
     if (k === ordning.length) return true;
     const id = ordning[k];
-    const val = forst[id] ? [forst[id], ...allaStolar.filter((p) => p !== forst[id])] : allaStolar;
+    const egna = mojliga[id];
+    const val = forst[id] && egna.includes(forst[id]) ? [forst[id], ...egna.filter((p) => p !== forst[id])] : egna;
     for (const p of val) {
       if (upptagen[p]) continue;
       plac[id] = p;
@@ -2373,24 +2521,44 @@ function ritaMeny() {
   y += ts * 1.25;
   skriv(t("Placera släkten runt bordet så att alla blir nöjda!", "Seat the family around the table so everyone is happy!"), bredd / 2, y, ts * 0.6, "#7a6a55", "center", "bold", hk - vk);
   y += ts * 1.3;
-  const ansikten = ["👵", "👴", "👨‍🦳", "👩‍🦰", "👱‍♀️", "👨", "👩", "👶", "👧"];
-  const steg = Math.min(ts * 1.5, (hk - vk) / ansikten.length);
-  ansikten.forEach((a, i) => {
-    const studs = Math.abs(Math.sin(tid * 3 + i * 0.7)) * steg * 0.12;
-    ritaEmoji(a, bredd / 2 + (i - (ansikten.length - 1) / 2) * steg, y - studs, steg * 0.8);
+  // Ansiktena får bara plats om skärmen är hög nog
+  if (hojd > 640) {
+    const ansikten = ["👵", "👴", "👨‍🦳", "👩‍🦰", "👱‍♀️", "👰", "🤵", "👶", "👧"];
+    const steg = Math.min(ts * 1.5, (hk - vk) / ansikten.length);
+    ansikten.forEach((a, i) => {
+      const studs = Math.abs(Math.sin(tid * 3 + i * 0.7)) * steg * 0.12;
+      ritaEmoji(a, bredd / 2 + (i - (ansikten.length - 1) / 2) * steg, y - studs, steg * 0.8);
+    });
+    y += ts * 1.6;
+  } else {
+    y += ts * 0.4;
+  }
+
+  // Högst 5 banor per rad. Har en fest fler delas de lika på flera rader.
+  const mellan = ts * 0.4;
+  const rubrikH = ts * 0.9;
+  const festMellan = ts * 0.7;
+  const rader = S.fester.map((fest) => {
+    const antalRader = Math.ceil(fest.banor.length / 5);
+    return { antalRader, perRad: Math.ceil(fest.banor.length / antalRader) };
   });
-  y += ts * 1.6;
+  // Så stora knappar som får plats, både på bredden och på höjden
+  let sida = Math.min(ts * 3.6, ...rader.map((r) => (hk - vk - mellan * (r.perRad - 1)) / r.perRad));
+  const behov = (sd) => rader.reduce((summa, r) => summa + rubrikH + r.antalRader * (sd * 1.15 + mellan) + festMellan, 0);
+  const finns = hojd - marginal.botten - ts * 1.4 - y;
+  while (sida > 36 && behov(sida) > finns) sida *= 0.95;
 
   S.fester.forEach((fest, f) => {
     const max = fest.banor.length * 3;
-    skriv(`${fest.ikon} ${fest.namn}  ·  ⭐ ${totalaStjarnor(f)}/${max}`, bredd / 2, y, ts * 0.75, "#4a3220", "center", "bold", hk - vk);
-    y += ts * 0.9;
+    skriv(`${fest.ikon} ${fest.namn}  ·  ⭐ ${totalaStjarnor(f)}/${max}`, bredd / 2, y, Math.min(ts * 0.75, sida * 0.3), "#4a3220", "center", "bold", hk - vk);
+    y += rubrikH;
+    const { perRad } = rader[f];
     const antal = fest.banor.length;
-    const mellan = ts * 0.4;
-    const sida = Math.min(ts * 3.6, (hk - vk - mellan * (antal - 1)) / antal);
-    const start = bredd / 2 - (antal * sida + (antal - 1) * mellan) / 2;
     fest.banor.forEach((bana, b) => {
-      const k = { x: start + b * (sida + mellan), y, w: sida, h: sida * 1.15, fest: f, bana: b };
+      const rad = Math.floor(b / perRad);
+      const iRaden = Math.min(perRad, antal - rad * perRad);
+      const start = bredd / 2 - (iRaden * sida + (iRaden - 1) * mellan) / 2;
+      const k = { x: start + (b % perRad) * (sida + mellan), y: y + rad * (sida * 1.15 + mellan), w: sida, h: sida * 1.15, fest: f, bana: b };
       const oppen = upplast(f, b);
       ctx.fillStyle = "rgba(60, 30, 10, 0.2)";
       rundRekt(ctx, k.x, k.y + 4, k.w, k.h, sida * 0.18);
@@ -2418,9 +2586,9 @@ function ritaMeny() {
       }
       menyKnappar.push(k);
     });
-    y += sida * 1.15 + ts * 1.0;
+    y += rader[f].antalRader * (sida * 1.15 + mellan) + festMellan;
   });
-  skriv(t("Tryck på en bana för att börja", "Tap a level to start"), bredd / 2, Math.min(y, hojd - marginal.botten - ts), ts * 0.6, "#7a6a55");
+  skriv(t("Tryck på en bana för att börja", "Tap a level to start"), bredd / 2, Math.min(y, hojd - marginal.botten - ts * 0.7), ts * 0.55, "#7a6a55");
 }
 
 function rita() {

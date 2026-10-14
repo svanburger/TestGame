@@ -365,8 +365,8 @@ alla blir nöjda. Det finns två fester:
 
 - **🎂 Mormor fyller 80:** ett långt bord, fem banor.
 - **💒 Bröllopet:** kusin Linnea gifter sig med Viktor. Brudparet sitter
-  vid brudbordet, och gästerna sitter vid runda bord. Fyra banor, från ett
-  runt bord till två. Brudens surdeg Göran ska förstås sitta bredvid
+  vid brudbordet, och gästerna sitter vid runda bord. Åtta banor, från ett
+  runt bord till tre. Brudens surdeg Göran ska förstås sitta bredvid
   bruden.
 
 - **Dra en gäst** från bänken till en stol. Man kan också **trycka på en
@@ -408,7 +408,8 @@ alla blir nöjda. Det finns två fester:
 - Banorna:
   - 🎂 Mormor fyller 80: ☕ Fikat, 🥗 Förrätten, 🍖 Varmrätten, 🎤 Talet
     och 🎂 Tårtan.
-  - 💒 Bröllopet: 💍 Brudbordet, 🍝 Middagen, 🎤 Talen och 🎂 Bröllopstårtan.
+  - 💒 Bröllopet: 💍 Brudbordet, 📸 Fotografen, 🍝 Middagen, 🎸 Bestmannens
+    låt, 🎤 Talen, 💃 Dansen, 🎂 Bröllopstårtan och 🌭 Nattkorven.
 
   Det blir fler gäster, bord och önskemål för varje bana. Varje fest börjar
   med sin första bana öppen.
