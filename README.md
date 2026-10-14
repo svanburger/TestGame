@@ -383,9 +383,9 @@ runt bordet så att alla blir nöjda.
   **Tryck på ett önskemål** så lyser gästerna det gäller. Här finns också
   skämten för de vuxna.
 - **👵 Fråga mormor** om man kör fast. Då flyttar mormor en gäst till rätt
-  plats.
-- **🍽️ Servera!** när alla sitter. Då spelas middagen upp, och gästerna
-  säger vad de tycker. Stämningsmätaren visar hur det går.
+  plats. Man får fråga 2 gånger på varje bana.
+- **🍽️ Servera!** när alla sitter. Då ser man direkt hur många stjärnor det
+  blev.
 - Stjärnor:
   - ⭐ Alla sitter vid bordet (då kan man gå vidare till nästa bana).
   - ⭐⭐ Alla önskemål stämmer.
@@ -406,9 +406,10 @@ Testa att ändra i `bord/game.js`:
 - gästerna (`folk`): namn, ansikte, sak, färg och vad de säger. Är det en
   pojke som spelar kan "Du" få ansiktet `"👦"`.
 - banorna (`banor`): hur stort bordet är (`bord`), bilderna vid stolarna
-  (`markeringar`), vilka gäster som är med (`gaster`), önskemålen (`regler`),
-  den hemliga önskan (`hemlig`) och vad som händer på middagen (`middag`)
-- vad mormor säger när man frågar henne (`mormorSager`)
+  (`markeringar`), vilka gäster som är med (`gaster`), önskemålen (`regler`)
+  och den hemliga önskan (`hemlig`)
+- vad mormor säger när man frågar henne (`mormorSager`) och hur många
+  gånger man får fråga på varje bana (`mormorFragor`)
 - titlarna man får efter sista banan (`titlar`)
 - `guide: true` på en bana gör att handen visar hur man gör med det första önskemålet
 - `visaGrona: false` gör spelet svårare: då blir önskemålen inte gröna
