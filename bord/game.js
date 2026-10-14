@@ -174,7 +174,8 @@ const INSTALLNINGAR = {
   //
   //  gaster: vilka som är med (från folk här ovanför)
   //
-  //  guide: true betyder att en hand visar vad man ska göra (bra på första banan)
+  //  guide: true betyder att en hand visar hur man gör med det första
+  //         önskemålet (bra på första banan). Resten klurar man ut själv.
   //
   //  regler: gästernas önskemål. Det finns fyra sorter:
   //    { typ: "bredvid", a: "mamma", b: "bebis" }      a vill sitta bredvid b
@@ -471,6 +472,8 @@ let mormorLosning = null;
 let hemligHittad = false;
 let tankeKlocka = 0;
 let guideLosning = null; // På den guidade banan: en lösning som handen visar
+let guideKlar = false;    // Handen visar bara det första önskemålet, sedan får man klura själv
+let guideKlarTid = 0;     // Hur länge "Nu får du klura själv" syns
 let markerade = null;     // Gäster som lyser en stund när man tryckt på ett önskemål
 
 let scen = [];         // Middagen: allt som händer, i tur och ordning
@@ -885,6 +888,8 @@ function startaBana(fNr, bNr) {
   tankeKlocka = 0;
   markerade = null;
   guideLosning = null;
+  guideKlar = false;
+  guideKlarTid = 0;
   partiklar = [];
   resultat = null;
   gorLayout();
@@ -912,7 +917,13 @@ function allaSitter() {
 function uppdateraStatus(medLjud = true) {
   const forra = status;
   status = B.regler.map((r) => stammer(r, plats, B));
-  if (B.def.guide) guideLosning = losa(B, plats);
+  if (B.def.guide) {
+    guideLosning = losa(B, plats);
+    if (!guideKlar && status[0] === true) {
+      guideKlar = true;
+      guideKlarTid = 4;
+    }
+  }
   if (!medLjud || !S.visaGrona) return;
   if (status.some((s, i) => s === true && forra[i] !== true)) effekt("ding");
   else if (status.some((s, i) => s === false && forra[i] !== false)) effekt("fel");
@@ -1412,6 +1423,7 @@ function uppdatera(dt) {
   }
 
   if (lage === "placera") tankeKlocka += dt;
+  if (lage === "placera" && guideKlar) guideKlarTid = Math.max(0, guideKlarTid - dt);
   if (markerade) {
     markerade.tid -= dt;
     if (markerade.tid <= 0) markerade = null;
@@ -1833,19 +1845,18 @@ function ritaKnappar() {
 
 // ---------- Guiden på första banan: en hand visar vad man ska göra ----------
 
+// Handen visar bara hur man gör med det första önskemålet. Resten får man klura ut själv.
 function guideSteg() {
   if (!B.def.guide || lage !== "placera" || !guideLosning) return null;
-  const i = status.findIndex((x) => x !== true);
-  if (i >= 0) {
-    const r = B.regler[i];
-    // Flytta helst en av gästerna som inte sitter alls
-    const fel = regelGaster(r).filter((id) => plats[id] !== guideLosning[id]);
-    const id = fel.find((g) => !plats[g]) || fel[0];
-    return { text: r.text, kort: i, id, stol: id ? guideLosning[id] : null };
+  if (guideKlar) {
+    if (guideKlarTid <= 0) return null;
+    return { text: t("Bra! Nu får du klura själv 🧩", "Well done! Now it's your turn to figure it out 🧩"), ingenPil: true };
   }
-  const kvar = B.gaster.find((g) => !plats[g]);
-  if (kvar) return { text: t("Bra! Sätt de andra också.", "Good! Seat the others too."), id: kvar, stol: guideLosning[kvar] };
-  return { text: t("Alla är nöjda! Tryck på Servera.", "Everyone is happy! Tap Serve."), knapp: true };
+  const r = B.regler[0];
+  // Flytta helst en av gästerna som inte sitter alls
+  const fel = regelGaster(r).filter((id) => plats[id] !== guideLosning[id]);
+  const id = fel.find((g) => !plats[g]) || fel[0];
+  return { text: r.text, kort: 0, id, stol: id ? guideLosning[id] : null };
 }
 
 function ritaGuide() {
@@ -1884,28 +1895,26 @@ function ritaGuide() {
     ritaEmoji("👆", x + r * 0.2, y + r * 0.75, r * 1.1);
     ctx.globalAlpha = 1;
   }
-  if (g.knapp) {
-    const s = L.servera;
-    ritaEmoji("👇", s.x + s.w / 2, s.y - r * 0.7 - Math.abs(Math.sin(tid * 5)) * r * 0.4, r * 1.1);
-  }
 
   // Texten högst upp
   const ts = L.ts * 1.1;
   ctx.font = `bold ${ts}px ${TYPSNITT}`;
-  const text = (g.knapp ? "" : "👆 ") + g.text;
+  const text = (g.ingenPil ? "" : "👆 ") + g.text;
   const maxW = L.bank.w - 10;
   const rader = radbryt(text, maxW - ts * 1.6);
   const w = Math.min(maxW, Math.max(...rader.map((x) => ctx.measureText(x).width)) + ts * 1.6);
   const h = rader.length * ts * 1.3 + ts * 0.7;
   const cx = L.bank.x + L.bank.w / 2;
   const y = L.guideY;
-  ctx.fillStyle = "#fff3b0";
-  ctx.strokeStyle = "#e0b84a";
+  ctx.globalAlpha = g.ingenPil ? begr(guideKlarTid * 2, 0, 1) : 1;
+  ctx.fillStyle = g.ingenPil ? "#c9f1c4" : "#fff3b0";
+  ctx.strokeStyle = g.ingenPil ? "#3fbf5a" : "#e0b84a";
   ctx.lineWidth = 2.5;
   rundRekt(ctx, cx - w / 2, y, w, h, Math.min(h / 2, ts));
   ctx.fill();
   ctx.stroke();
   rader.forEach((rad, i) => skriv(rad, cx, y + ts * 0.35 + (i + 0.5) * ts * 1.3, ts, "#4a3220"));
+  ctx.globalAlpha = 1;
 }
 
 // Tankebubblan som visar den hemliga önskan
@@ -2159,7 +2168,7 @@ function ritaIntro() {
   ];
   if (B.def.guide) {
     rader.push([t("Varje gäst har ett önskemål om var hen vill sitta.", "Every guest has a wish about where to sit."), 0.5, "#d5def0"]);
-    rader.push([t("Följ handen 👆", "Follow the hand 👆"), 0.6, "#ffd27a"]);
+    rader.push([t("Handen visar hur man gör. Sedan får du klura själv!", "The hand shows you how. Then it's your turn!"), 0.55, "#ffd27a"]);
   }
   if (lageTid > 0.5) rader.push([t("Tryck för att börja", "Tap to start"), 0.6]);
   ritaRuta(rader, hojd * 0.45);
