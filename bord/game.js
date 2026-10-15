@@ -16,7 +16,7 @@
 //  - Barnen löser pusslet med bilderna. Man ska aldrig behöva läsa något
 //    för att klara en bana.
 //  - De vuxna får lite extra i det gästerna säger.
-//  Skämten för vuxna handlar om vuxnas fåniga vanor (pärmar, surdegar,
+//  Skämten för vuxna handlar om vuxnas fåniga vanor (pärmar, elbilar,
 //  wifi, att ge råd om allt), aldrig om vuxna saker. Allt som står ska gå
 //  att läsa högt för en sjuåring vid middagsbordet.
 //
@@ -147,12 +147,12 @@ const INSTALLNINGAR = {
       ],
     },
     linnea: {
-      namn: t("Kusin Linnea", "Cousin Linnea"), ansikte: "👩‍🦱", sak: "🥖", troja: "#a569bd",
-      om: t("Har med sig sin surdeg Göran.", "Brought her sourdough, Gerald."),
+      namn: t("Kusin Linnea", "Cousin Linnea"), ansikte: "👩‍🦱", sak: "🐈", troja: "#a569bd",
+      om: t("Har med sig sin katt Göran. Överallt.", "Brought her cat, Gerald. She takes him everywhere."),
       prat: [
-        t("Göran är tre år gammal.", "Gerald is three years old."),
+        t("Göran äter bara lax. Och ibland en tårtbit.", "Gerald only eats salmon. And sometimes a piece of cake."),
         t("Säg hej till Göran!", "Say hi to Gerald!"),
-        t("Göran blir ledsen i mörkret.", "Gerald gets sad in the dark."),
+        t("Göran har en egen stol hemma. Och en egen soffa.", "Gerald has his own chair at home. And his own sofa."),
       ],
     },
     max: {
@@ -212,11 +212,11 @@ const INSTALLNINGAR = {
       ],
     },
     goran: {
-      namn: t("Göran", "Gerald"), ansikte: "🥖", sak: "🎀", troja: "#f5cba7",
-      om: t("Brudens surdeg. Är tre år.", "The bride's sourdough. Is three years old."),
+      namn: t("Katten Göran", "Gerald the cat"), ansikte: "🐱", sak: "🎀", troja: "#f5cba7",
+      om: t("Brudens katt. Har fluga i dag.", "The bride's cat. Wearing a bow tie today."),
       prat: [
-        t("…", "…"),
-        t("(Göran säger ingenting. Han är en surdeg.)", "(Gerald says nothing. He is a sourdough.)"),
+        t("Mjau.", "Miaow."),
+        t("(Göran spinner. Han tycker om bröllop.)", "(Gerald purrs. He likes weddings.)"),
       ],
     },
   },
@@ -441,7 +441,7 @@ const INSTALLNINGAR = {
             {
               typ: "plats", a: "linnea", ikon: "🪟",
               text: t("Kusin Linnea vill sitta vid fönstret.", "Cousin Linnea wants to sit by the window."),
-              sager: t("Göran behöver ljus. Göran är min surdeg.", "Gerald needs light. Gerald is my sourdough."),
+              sager: t("Göran vill titta på fåglarna. Göran är min katt.", "Gerald wants to watch the birds. Gerald is my cat."),
             },
             {
               typ: "plats", a: "max", ikon: "📶",
@@ -492,7 +492,7 @@ const INSTALLNINGAR = {
             },
             {
               typ: "bredvid", a: "goran", b: "brud",
-              text: t("Göran ska sitta bredvid bruden. Göran är hennes surdeg.", "Gerald sits next to the bride. Gerald is her sourdough."),
+              text: t("Katten Göran ska sitta bredvid bruden.", "Gerald the cat sits next to the bride."),
               vem: "brud",
               sager: t("Göran är min tärna. Han har varit med från början.", "Gerald is my bridesmaid. He's been there from the start."),
             },
@@ -1128,9 +1128,9 @@ function bordMatt(b) {
     return { w: ytter * 2, h: ytter * 2, ox: ytter, oy: ytter, ring };
   }
   const gavlar = b.gavlar || "";
-  // Vid en kortända behövs plats för stolen och bilden utanför den
-  const vanster = gavlar.includes("v") ? 1.4 : 0.15;
-  const hoger = gavlar.includes("h") ? 1.4 : 0.15;
+  // Vid en kortända behövs plats för stolen och bilden utanför den, annars bara för mattan
+  const vanster = gavlar.includes("v") ? 1.4 : 0.4;
+  const hoger = gavlar.includes("h") ? 1.4 : 0.4;
   const under = b.enSida ? 0.2 : 1.35;
   return { w: vanster + b.perSida + hoger, h: 1.3 + 1.2 + under, ox: vanster, oy: 1.3 };
 }

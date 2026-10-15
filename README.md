@@ -366,7 +366,7 @@ alla blir nöjda. Det finns två fester:
 - **🎂 Mormor fyller 80:** ett långt bord, fem banor.
 - **💒 Bröllopet:** kusin Linnea gifter sig med Viktor. Brudparet sitter
   vid brudbordet, och gästerna sitter vid runda bord. Åtta banor, från ett
-  runt bord till tre. Brudens surdeg Göran ska förstås sitta bredvid
+  runt bord till tre. Brudens katt Göran ska förstås sitta bredvid
   bruden.
 
 - **Dra en gäst** från bänken till en stol. Man kan också **trycka på en
@@ -420,8 +420,8 @@ alla blir nöjda. Det finns två fester:
 
 **Om skämten:** Spelet ska gå att spela för barn, men det finns lite extra
 för de vuxna i det gästerna säger. De vuxna skämten handlar om vuxnas
-fåniga vanor (morbror Bengts pärmar, kusinens surdeg Göran, tant Gunnel
-som ger råd om allt), aldrig om vuxna saker. Allt som står ska gå att
+fåniga vanor (morbror Bengts pärmar, kusinens katt Göran som är med
+överallt, tant Gunnel som ger råd om allt), aldrig om vuxna saker. Allt som står ska gå att
 läsa högt för en sjuåring vid middagsbordet.
 
 Testa att ändra i `bord/game.js`:
