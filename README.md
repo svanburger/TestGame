@@ -403,8 +403,10 @@ alla blir nöjda. Det finns två fester:
   - ⭐ Alla sitter vid bordet (då kan man gå vidare till nästa bana).
   - ⭐⭐ Alla önskemål stämmer.
   - ⭐⭐⭐ Någon har dessutom en **hemlig önskan**. Den dyker upp när man
-    har klarat banan en gång. Den står inte i listan, men då och då syns en
-    💭 tankebubbla ovanför gästen.
+    har klarat banan en gång. Gästen som har den har en liten 💭, och då
+    och då syns en tankebubbla med vad hen tänker på, till exempel 💗👵
+    (vill sitta bredvid mormor). Trycker man på kortet "en hemlig önskan"
+    eller på gästen syns tankebubblan direkt.
 - Banorna:
   - 🎂 Mormor fyller 80: ☕ Fikat, 🥗 Förrätten, 🍖 Varmrätten, 🎤 Talet
     och 🎂 Tårtan.
@@ -413,6 +415,8 @@ alla blir nöjda. Det finns två fester:
 
   Det blir fler gäster, bord och önskemål för varje bana. Varje fest börjar
   med sin första bana öppen.
+- Mysig musik spelar i bakgrunden: en vals på mormors fest och en lugn
+  melodi på bröllopet. Den kan stängas av i pausmenyn.
 
 **Om skämten:** Spelet ska gå att spela för barn, men det finns lite extra
 för de vuxna i det gästerna säger. De vuxna skämten handlar om vuxnas
@@ -435,6 +439,8 @@ Testa att ändra i `bord/game.js`:
 - `guide: true` på en bana gör att handen visar hur man gör med det första önskemålet
 - `visaGrona: false` gör spelet svårare: då blir önskemålen inte gröna
   förrän man serverar
+- musiken: längst ner i `game.js` finns `MUSIK`, där varje siffra är en
+  ton, och `ACKORD`. Varje fest väljer sin melodi med `musik`.
 
 Hur man skriver en egen bana står längst upp i `game.js`. Går en bana inte
 att lösa kan mormor inte hjälpa till, så prova att lösa den själv först.

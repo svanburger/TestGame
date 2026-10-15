@@ -29,8 +29,9 @@
 
 const INSTALLNINGAR = {
   ljud: true,
+  musik: true,          // Mysig musik i bakgrunden. Melodierna finns längst ner i game.js (MUSIK).
   visaGrona: true,      // Önskemålen blir gröna (eller röda) direkt. Sätt till false för ett svårare spel.
-  tankeVarje: 6,        // Sekunder mellan tankebubblorna som visar den hemliga önskan
+  tankeVarje: 5,        // Sekunder mellan tankebubblorna som visar den hemliga önskan
   mormorFragor: 2,      // Hur många gånger man får fråga mormor på varje bana
 
   // ---------------------------------------------------------------
@@ -284,6 +285,8 @@ const INSTALLNINGAR = {
   //  Har man skrivit en regel en gång behöver man inte skriva texterna
   //  igen. Samma regel på en senare bana lånar dem.
   //
+  //  musik: vilken melodi som spelas på festen (från MUSIK längst ner i game.js)
+  //
   //  hemlig: ett önskemål som inte syns i listan. Den som vill något
   //  får en tankebubbla då och då. "tanke" är det som syns i bubblan.
 
@@ -292,6 +295,7 @@ const INSTALLNINGAR = {
     {
       namn: t("Mormor fyller 80", "Grandma Turns 80"),
       ikon: "🎂",
+      musik: "kalas",
       banor: [
         {
           namn: t("Fikat", "Coffee"),
@@ -466,6 +470,7 @@ const INSTALLNINGAR = {
     {
       namn: t("Bröllopet", "The Wedding"),
       ikon: "💒",
+      musik: "brollop",
       banor: [
         {
           namn: t("Brudbordet", "The Top Table"),
@@ -788,6 +793,7 @@ const hemKnapp = document.getElementById("hem");
 const pausKnapp = document.getElementById("paus");
 const pausmeny = document.getElementById("pausmeny");
 const ljudKnapp = document.getElementById("ljudKnapp");
+const musikKnapp = document.getElementById("musikKnapp");
 const TYPSNITT = 'ui-rounded, system-ui, -apple-system, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif';
 
 // Bilden och orden mitt på önskemålen
@@ -829,6 +835,7 @@ let mormorLosning = null;
 let mormorKvar = 0;    // Hur många frågor till mormor som finns kvar på banan
 let hemligHittad = false;
 let tankeKlocka = 0;
+let tankeNu = 0;       // Tankebubblan syns direkt en stund, t.ex. när man trycker på den hemliga önskan
 let guideLosning = null; // På den guidade banan: en lösning som handen visar
 let guideKlar = false;    // Handen visar bara det första önskemålet, sedan får man klura själv
 let guideKlarTid = 0;     // Hur länge "Nu får du klura själv" syns
@@ -1336,6 +1343,7 @@ function startaBana(fNr, bNr) {
   mormorKvar = S.mormorFragor;
   hemligHittad = bastaStjarnor(fNr, bNr) >= 3;
   tankeKlocka = 0;
+  tankeNu = 0;
   markerade = null;
   guideLosning = null;
   guideKlar = false;
@@ -1443,6 +1451,11 @@ function infoOmGast(id) {
     const s = status[i];
     rader.push([`${s === true ? "✅" : s === false ? "❌" : "⬜"} ${r.text}`, "vanlig"]);
   });
+  if (visaHemligKort() && B.hemlig.a === id) {
+    if (hemligHittad) rader.push([`⭐ ${B.hemlig.text}`, "vanlig"]);
+    else rader.push([t(`💭 Tänker på: ${tanke(B.hemlig)}`, `💭 Is thinking of: ${tanke(B.hemlig)}`), "vanlig"]);
+    tankeNu = 4;
+  }
   if (g.prat.length) rader.push([`”${nastaPrat(id)}”`, "citat"]);
   visaInfo(rader, p.x, p.y - L.r);
 }
@@ -1456,8 +1469,10 @@ function infoOmRegel(i) {
     } else {
       visaInfo([
         [t("Någon har en hemlig önskan!", "Someone has a secret wish!"), "rubrik"],
-        [t("Titta efter tankebubblor 💭", "Look for thought bubbles 💭"), "vanlig"],
+        [t("Gästen med 💭 tänker på den. Titta på tankebubblan: vad vill hen?", "The guest with 💭 is thinking about it. Look at the thought bubble: what do they want?"), "vanlig"],
       ], k.x + k.w / 2, k.y);
+      markerade = { ids: [B.hemlig.a], tid: 2.5 };
+      tankeNu = 4;
     }
     return;
   }
@@ -1741,6 +1756,16 @@ ljudKnapp.addEventListener("click", () => {
 });
 visaLjudKnapp();
 
+function visaMusikKnapp() {
+  musikKnapp.textContent = musikPa ? t("♪ Musik: på", "♪ Music: on") : t("♪ Musik: av", "♪ Music: off");
+}
+
+musikKnapp.addEventListener("click", () => {
+  musikPa = !musikPa;
+  sparaInstallning("musik-bord", musikPa ? "pa" : "av");
+  visaMusikKnapp();
+});
+
 // Pausa av sig själv om man byter app eller flik
 document.addEventListener("visibilitychange", () => {
   if (document.hidden) pausa();
@@ -1773,6 +1798,7 @@ function uppdatera(dt) {
   }
 
   if (lage === "placera") tankeKlocka += dt;
+  tankeNu = Math.max(0, tankeNu - dt);
   if (lage === "placera" && guideKlar) guideKlarTid = Math.max(0, guideKlarTid - dt);
   if (markerade) {
     markerade.tid -= dt;
@@ -2044,6 +2070,18 @@ function ritaGaster() {
       ctx.fill();
       ritaEmoji(humor ? "😊" : "😟", hx, hy, r * 0.56);
     }
+    // Gästen med den hemliga önskan har en liten tankebubbla
+    if (lage === "placera" && visaHemligKort() && B.hemlig.a === id) {
+      const tx = x + r * 0.74;
+      const ty = y - r * 0.7 - Math.abs(Math.sin(tid * 2.5)) * r * 0.08;
+      ctx.fillStyle = "#f3ecff";
+      ctx.strokeStyle = "#a991d4";
+      ctx.lineWidth = 1.5;
+      cirkel(tx, ty, r * 0.42);
+      ctx.fill();
+      ctx.stroke();
+      ritaEmoji("💭", tx, ty, r * 0.58);
+    }
     // Namnet syns på bänken
     if (!plats[id]) skriv(gast(id).namn, x, y + r * 1.42, Math.max(10, r * 0.36), "#4a3220", "center", "bold", r * 2.6);
   }
@@ -2287,15 +2325,16 @@ function ritaGuide() {
 function ritaTanke() {
   if (!visaHemligKort() || lage !== "placera") return;
   const fas = tankeKlocka % S.tankeVarje;
-  const visas = 2.6;
-  if (tankeKlocka < 1.5 || fas > visas) return;
+  const visas = 3;
+  const iCykeln = tankeKlocka >= 1.5 && fas <= visas;
+  if (!iCykeln && tankeNu <= 0) return;
   const id = B.hemlig.a;
   if (drag && drag.flyttat && drag.id === id) return;
   const p = ritadPos[id];
   const r = L.r;
-  ctx.globalAlpha = begr(Math.min(fas * 4, (visas - fas) * 4), 0, 1);
+  ctx.globalAlpha = tankeNu > 0 ? begr(tankeNu * 4, 0, 1) : begr(Math.min(fas * 4, (visas - fas) * 4), 0, 1);
   const text = tanke(B.hemlig);
-  const storlek = Math.max(16, r * 0.75);
+  const storlek = Math.max(18, r * 0.9);
   ctx.font = `${storlek}px ${TYPSNITT}`;
   const w = ctx.measureText(text).width + storlek * 0.9;
   const h = storlek * 1.55;
@@ -2628,6 +2667,7 @@ function loop(nu) {
   forraTiden = nu;
   uppdatera(dt);
   rita();
+  schemalaggMusik();
   requestAnimationFrame(loop);
 }
 requestAnimationFrame(loop);
@@ -2697,6 +2737,143 @@ function effekt(namn) {
     }
   } catch (e) {
     // Inget ljud – spelet fungerar ändå
+  }
+}
+
+// ---------- Musiken ----------
+//
+//  Varje melodi har:
+//    steg   = sekunder per slag (lägre = snabbare)
+//    takt   = slag per takt (3 = vals)
+//    melodi = en ton per slag. 60 är mellersta C, 62 är D, 64 är E ...
+//             "-" betyder att tonen före hålls kvar, och null är paus.
+//    takter = ett ackord per takt: basen spelas på första slaget och
+//             ackordet mjukt på de andra.
+//  Ackorden finns i ACKORD. Ändra för att göra egen musik!
+
+const ACKORD = {
+  F: { bas: 41, toner: [57, 60, 65] },
+  C: { bas: 48, toner: [55, 60, 64] },
+  G: { bas: 43, toner: [55, 59, 62] },
+  D: { bas: 50, toner: [54, 57, 62] },
+  Bb: { bas: 46, toner: [53, 58, 62] },
+  Gm: { bas: 43, toner: [55, 58, 62] },
+  Em: { bas: 40, toner: [55, 59, 64] },
+  Am: { bas: 45, toner: [57, 60, 64] },
+};
+
+const MUSIK = {
+  // En mysig vals till mormors fest
+  kalas: {
+    steg: 0.4,
+    takt: 3,
+    melodi: [
+      72, "-", 69, 70, 69, 67, 65, "-", "-", 67, 69, 70,
+      72, "-", 74, 72, 70, 69, 67, "-", "-", "-", null, null,
+      72, "-", 69, 70, 69, 67, 65, "-", 69, 67, "-", 64,
+      65, "-", "-", "-", null, null, 74, "-", 72, 70, "-", 69,
+      67, "-", 69, 70, "-", null, 72, "-", 70, 69, "-", 67,
+      65, "-", "-", "-", null, null,
+    ],
+    takter: ["F", "C", "F", "C", "Bb", "F", "C", "C", "F", "C", "F", "C", "F", "F", "Bb", "Gm", "C", "Bb", "F", "C", "F", "F"],
+  },
+  // En lugn och lite högtidlig melodi till bröllopet
+  brollop: {
+    steg: 0.45,
+    takt: 4,
+    melodi: [
+      71, "-", 72, 74, 74, "-", 72, 71, 69, "-", 71, 72, 71, "-", "-", null,
+      71, "-", 72, 74, 76, "-", 74, 72, 71, "-", 69, "-", 67, "-", "-", null,
+      72, "-", 71, 72, 74, "-", 71, "-", 69, "-", 71, 72, 71, "-", 69, "-",
+      71, "-", 72, 74, 76, "-", 74, 72, 71, "-", 69, 71, 67, "-", "-", null,
+    ],
+    takter: ["G", "Em", "Am", "G", "G", "C", "D", "G", "Am", "G", "D", "G", "G", "C", "D", "G"],
+  },
+};
+
+let musikPa = S.musik && lasInstallning("musik-bord") !== "av";
+let musikNamn = null;
+let musikSteg = 0;
+let musikNastaTid = 0;
+let musikVolym = null; // Musiken har en egen volym, så att den hörs lagom under ljuden
+visaMusikKnapp();
+
+// Hur många slag en ton ska hållas (sig själv plus alla "-" efter)
+function notLangd(lista, i) {
+  let n = 1;
+  while (lista[(i + n) % lista.length] === "-" && n < lista.length) n += 1;
+  return n;
+}
+
+function frekvens(not) {
+  return 440 * Math.pow(2, (not - 69) / 12);
+}
+
+// En ton som låter som en speldosa eller ett mjukt piano: slår an och klingar ut
+function spelaTon(not, start, langd, volym, typ = "sine", overton = 0.25) {
+  const g = ljudmotor.createGain();
+  g.connect(musikVolym);
+  g.gain.setValueAtTime(0.0001, start);
+  g.gain.exponentialRampToValueAtTime(volym, start + 0.012);
+  g.gain.exponentialRampToValueAtTime(0.0001, start + langd);
+  const f = frekvens(not);
+  for (const [ton, styrka] of [[f, 1], [f * 2, overton]]) {
+    if (styrka <= 0) continue;
+    const o = ljudmotor.createOscillator();
+    const og = ljudmotor.createGain();
+    o.type = typ;
+    o.frequency.value = ton;
+    og.gain.value = styrka;
+    o.connect(og);
+    og.connect(g);
+    o.start(start);
+    o.stop(start + langd + 0.05);
+  }
+}
+
+function aktuellMelodi() {
+  const fest = S.fester[lage === "meny" || !B ? 0 : festNr];
+  return fest.musik || "kalas";
+}
+
+// Lägger ut tonerna en liten bit i förväg så att musiken inte hackar
+function schemalaggMusik() {
+  if (!ljudmotor) return;
+  const namn = musikPa && lage !== "paus" && !document.hidden ? aktuellMelodi() : null;
+  if (namn !== musikNamn) {
+    if (namn !== null && namn !== musikNamn) musikSteg = 0;
+    musikNamn = namn;
+    musikNastaTid = 0;
+  }
+  if (!namn || !MUSIK[namn]) return;
+  const latt = MUSIK[namn];
+  const nu = ljudmotor.currentTime;
+  if (musikNastaTid < nu) musikNastaTid = nu + 0.05;
+  try {
+    if (!musikVolym) {
+      musikVolym = ljudmotor.createGain();
+      musikVolym.gain.value = 0.8;
+      musikVolym.connect(huvudvolym);
+    }
+    while (musikNastaTid < nu + 0.25) {
+      const i = musikSteg % latt.melodi.length;
+      const not = latt.melodi[i];
+      if (typeof not === "number") {
+        const langd = notLangd(latt.melodi, i) * latt.steg;
+        spelaTon(not, musikNastaTid, Math.max(langd * 1.4, 0.9), 0.05, "sine", 0.3);
+      }
+      // Bas på första slaget i takten, mjuka ackord på de andra
+      const slag = musikSteg % latt.takt;
+      const ackord = ACKORD[latt.takter[Math.floor(musikSteg / latt.takt) % latt.takter.length]];
+      if (ackord) {
+        if (slag === 0) spelaTon(ackord.bas, musikNastaTid, latt.steg * latt.takt, 0.07, "triangle", 0.4);
+        else for (const ton of ackord.toner) spelaTon(ton, musikNastaTid, latt.steg * 0.9, 0.012, "triangle", 0);
+      }
+      musikNastaTid += latt.steg;
+      musikSteg += 1;
+    }
+  } catch (e) {
+    musikPa = false; // Webbläsaren klarar inte ljudet – spela vidare utan musik
   }
 }
 
