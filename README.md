@@ -15,6 +15,7 @@ inget att installera. Startsidan är en meny där man väljer spel.
 | `hund/`      | Spelet "Hundpromenaden".                                  |
 | `fis/`       | Spelet "Lagom tryck".                                     |
 | `bord/`      | Spelet "Bordsplaceringen".                                |
+| `godis/`     | Spelet "Bus eller godis".                                 |
 
 Varje spel är en egen mapp med en `index.html` och en `game.js`. Det mesta
 man vill ändra finns i `INSTALLNINGAR` högst upp i `game.js`. Spara filen
@@ -444,6 +445,53 @@ Testa att ändra i `bord/game.js`:
 
 Hur man skriver en egen bana står längst upp i `game.js`. Går en bana inte
 att lösa kan mormor inte hjälpa till, så prova att lösa den själv först.
+
+## Bus eller godis 🎃
+
+Det är Halloween! Klä ut dig och ring på hos grannarna i kvarteret. Man får
+samla godis mellan klockan 18 och 20, vilket är 5 minuter på riktigt.
+
+- **Välj dräkt** på startskärmen: spöke, häxa, pumpa eller skelett.
+- **Dra med fingret** (eller tryck någonstans, eller använd
+  piltangenterna/WASD) så går barnet dit. Man får gå vart man vill i
+  kvarteret.
+- **Gå fram till en dörr med en lysande pumpa 🎃** så ringer man på. Den som
+  öppnar säger något och ger godis (eller något konstigt). Har man varit
+  där syns en grön bock. Pumpor vid kanten av skärmen visar var de närmaste
+  husen med godis finns.
+- **Hinken** högst upp visar hur mycket godis man har. Strecken och ⭐ på
+  hinken visar hur mycket som behövs för varje stjärna.
+- **Klockan** uppe till höger visar hur dags det är. Den röda biten är
+  tiden som är kvar till 20. Vissa hus stänger tidigt (Sture lägger sig
+  kvart i sju) och pumpafamiljen öppnar först klockan 19.
+- **Man kan tappa godis:**
+  - 🍌 halkar man på ett bananskal ramlar godis ur hinken
+  - 🐕 hundarna i flexikoppel springer fram och snor godis (spring ifrån dem!)
+  - 🍂 en vindpust blåser iväg lite godis
+  - 💀 spökhuset skrämmer en så att man tappar godis (men man får mer sedan)
+- **Tappat godis** ligger kvar en stund, så man hinner plocka upp det igen.
+- **Klockan 20** (eller om man går hem efter 19:30) går man hem. Där tar
+  pappa 30 % i **föräldraskatt** "för att kontrollera att det är säkert".
+  Det som är kvar ger ⭐⭐⭐ och rekord.
+- På gatorna går folk som säger saker: bananpappan (som tappar bananskal),
+  hundägarna, tonåringen och barnen som tipsar om var det bästa godiset
+  finns. Mamma och pappa skickar sms under kvällen.
+
+Testa att ändra i `godis/game.js`:
+
+- hur lång kvällen är (`speltid`, i sekunder) och hur fort barnet går
+  (`fart`)
+- hur stor föräldraskatten är (`skatt`) och hur mycket godis som behövs för
+  stjärnorna (`stjarnor`)
+- husen (`hus`): vem som bor där, vad de säger, hur mycket godis de ger, när
+  de öppnar och stänger och vad det står på lappen på dörren
+- dräkterna (`drakter`) och vad folket på gatorna säger (`folk`)
+- hur många bananskal det finns (`bananskal`), hur länge tappat godis ligger
+  kvar (`tappatKvar`) och hur busiga hundarna är (`hundKoppel`, `hundSer`,
+  `hundJagar`, `hundVila`)
+- sms:en (`sms`), vad man säger om de konstiga sakerna (`skrap`) och vad
+  pappa säger (`pappa`)
+- musiken: längst ner i `game.js` finns `MUSIK`
 
 ## Lägga till ett nytt spel
 
