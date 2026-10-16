@@ -35,6 +35,8 @@ const INSTALLNINGAR = {
   stjarnor: [12, 25, 38], // Godis man måste ha kvar EFTER skatten för 1, 2 och 3 stjärnor
   bananskal: 9,         // Hur många bananskal som ligger på gatorna från början
   tappatKvar: 7,        // Sekunder som tappat godis ligger kvar på marken innan det är borta
+  visaGodis: 1.2,       // Sekunder som det man får syns vid dörren innan det flyger iväg
+  flygTid: 0.8,         // Sekunder som det tar för godiset att flyga in i hinken
   hundKoppel: 4,        // Hur långt hundarnas flexikoppel räcker
   hundSer: 2.6,         // Hur nära man kan gå innan hunden springer fram
   hundJagar: 2,         // Sekunder som hunden springer efter en innan den ger upp
@@ -281,7 +283,7 @@ let startKnappar = [];
 
 let godis = 0;        // Godiset i hinken
 let skrapSaker = [];  // De konstiga sakerna i hinken
-let flygande = [];    // Godis som flyger in i hinken (på skärmen)
+let flygande = [];    // Godis som flyger in i hinken, konstiga saker som flyger in i ryggsäcken, och godis som hundarna snor
 let tappat = [];      // Godis som ligger på marken
 let husLista = [];
 let trad = [];
@@ -298,6 +300,7 @@ let lapp = null;
 let tips = null;      // { text, kvar, sms }
 let toaster = [];
 let hinkStuds = 0;
+let fickStuds = 0;
 let skakning = 0;
 let vind = null;      // Vindpusten som blåser just nu
 let vindTider = [];
@@ -740,8 +743,8 @@ function slutaKvallen(hemma) {
 
 // ---------- Texter, bubblor och tips ----------
 
-function visaText(text, x, y, farg, stor = true, kvar = 1.4) {
-  texter.push({ text, x, y, farg, stor, kvar });
+function visaText(text, x, y, farg, stor = true, kvar = 1.4, stilla = false) {
+  texter.push({ text, x, y, farg, stor, kvar, stilla });
 }
 
 function saga(agare, text, langd) {
@@ -781,33 +784,70 @@ function hinkPlats() {
   return { x: bredd / 2, y: marginal.topp + (panelH - marginal.topp) * 0.5 };
 }
 
-// Godis (eller en konstig sak) flyger från en plats i kvarteret in i hinken
+// Ryggsäcken uppe till vänster, där de konstiga sakerna hamnar (i är platsen för saken, -1 är själva ryggsäcken)
+function fickPlats(i) {
+  const under = marginal.topp + 68; // Under hus- och pausknappen
+  const storlek = begr((panelH - under) * 0.85, 18, 30);
+  const x0 = marginal.vanster + 14 + storlek / 2;
+  const y = (under + panelH) / 2;
+  if (i < 0) return { x: x0, y, storlek };
+  // Får inte alla plats tränger de ihop sig
+  const antal = skrapSaker.length + flygande.filter((f) => f.mal === "ficka").length;
+  const forst = x0 + storlek * 1.15;
+  const sist = bredd / 2 - (panelH - marginal.topp) * 0.45 - storlek * 0.6;
+  const steg = Math.min(storlek * 0.95, (sist - forst) / Math.max(1, antal - 1));
+  return { x: forst + i * steg, y, storlek };
+}
+
+// Det man får visas en stund vid dörren. Sedan flyger godiset in i hinken
+// och de konstiga sakerna in i ryggsäcken.
 function geGodis(x, y, antal, saker = [], bild = "") {
-  let sen = 0;
-  for (let i = 0; i < antal; i++) {
-    flygande.push({ sx: SX(x), sy: SY(y), fas: -sen, bild: bild || slumpa(GODISBILDER), sak: false });
-    sen += 0.08;
-  }
-  for (const sak of saker) {
-    flygande.push({ sx: SX(x), sy: SY(y), fas: -sen, bild: sak, sak: true });
-    sen += 0.12;
-  }
-  if (antal > 0) visaText("+" + antal + " 🍬", x, y - 0.5, "#ffe14d");
-  else if (saker.length) visaText(saker.join(" "), x, y - 0.5, "#ffffff");
+  const alla = [];
+  for (let i = 0; i < antal; i++) alla.push({ bild: bild || slumpa(GODISBILDER), mal: "hink" });
+  for (const sak of saker) alla.push({ bild: sak, mal: "ficka" });
+  // Sakerna lägger sig på båda sidor om dörren (pratbubblan är ovanför)
+  const perSida = Math.ceil(alla.length / 2);
+  const mellan = Math.min(0.6, 1.3 / Math.max(1, perSida - 1));
+  alla.forEach((f, i) => {
+    const sida = i % 2 ? 1 : -1;
+    f.x = x + sida * (0.85 + Math.floor(i / 2) * mellan);
+    f.y = y - 0.75 - (Math.floor(i / 2) % 2) * 0.25;
+    f.vis = -i * 0.07; // Kommer fram en i taget
+    f.fas = 0;
+    flygande.push(f);
+  });
+  // Texten står under barnet, så att den inte skymmer det man får
+  if (antal > 0) visaText("+" + antal + " 🍬", x, y + 1.75, "#ffe14d", true, 2.6, true);
+  else if (saker.length) visaText(t("Inget godis!", "No candy!"), x, y + 1.75, "#ffb3b3", true, 2.6, true);
 }
 
 function landa(f) {
-  if (f.sak) skrapSaker.push(f.bild);
-  else godis += 1;
+  if (f.mal === "ficka") skrapSaker.push(f.bild);
+  else if (f.mal === "hink") godis += 1;
+  else if (f.hund) {
+    f.hund.bar = f.bild;
+    f.hund.barKvar = 4;
+  }
 }
 
 function uppdateraFlygande(dt) {
   for (const f of flygande) {
-    f.fas += dt / 0.7;
+    if (f.vis < S.visaGodis) {
+      const fore = f.vis;
+      f.vis += dt;
+      if (fore < 0 && f.vis >= 0) spelaTon(f.mal === "ficka" ? 500 : 900, f.mal === "ficka" ? 350 : 1300, 0.08, "triangle", 0.04);
+      continue;
+    }
+    f.fas += dt / S.flygTid;
     if (f.fas >= 1) {
       landa(f);
-      hinkStuds = 1;
-      if (!f.sak) spelaTon(1100 + Math.random() * 500, 1700, 0.07, "triangle", 0.05);
+      if (f.mal === "hink") {
+        hinkStuds = 1;
+        spelaTon(1100 + Math.random() * 500, 1700, 0.07, "triangle", 0.05);
+      } else if (f.mal === "ficka") {
+        fickStuds = 1;
+        spelaTon(300, 200, 0.12, "sine", 0.07);
+      }
     }
   }
   flygande = flygande.filter((f) => f.fas < 1);
@@ -1168,10 +1208,10 @@ function uppdateraHundar(dt) {
         if (godis > 0) {
           godis -= 1;
           stat.snott += 1;
-          d.bar = slumpa(GODISBILDER);
-          d.barKvar = 4;
+          // Godiset flyger ur hinken och in i munnen på hunden
+          flygande.push({ bild: slumpa(GODISBILDER), mal: "hund", hund: d, vis: S.visaGodis, fas: 0 });
           hinkStuds = 1;
-          visaText(t("Hunden snodde godis!", "The dog stole candy!"), barn.x, barn.y - 1.7, "#ffb3b3");
+          visaText(t("Hunden snodde godis!", "The dog stole candy!"), barn.x, barn.y + 0.8, "#ffb3b3", true, 2.4, true);
           saga(a, slumpa(S.folk.hundSnodde), 2.8);
           a.stannar = 2;
           spelaTon(500, 300, 0.08, "square", 0.07);
@@ -1298,6 +1338,7 @@ function uppdatera(dt) {
     if (tips.kvar <= 0) tips = null;
   }
   hinkStuds = Math.max(0, hinkStuds - dt * 4);
+  fickStuds = Math.max(0, fickStuds - dt * 4);
   skakning = Math.max(0, skakning - dt);
 
   if (lage === "slut") {
@@ -1316,7 +1357,7 @@ function uppdatera(dt) {
   }
   for (const tx of texter) {
     tx.kvar -= dt;
-    tx.y -= dt * 0.6;
+    if (!tx.stilla) tx.y -= dt * 0.6;
   }
   texter = texter.filter((tx) => tx.kvar > 0);
   for (const b of bubblor) b.kvar -= dt;
@@ -2014,14 +2055,49 @@ function ritaTappat(g) {
 }
 
 function ritaFlygande() {
-  const mal = hinkPlats();
+  const hink = hinkPlats();
+  let iFickan = skrapSaker.length;
   for (const f of flygande) {
-    if (f.fas < 0) continue;
-    const k = f.fas;
-    const x = f.sx + (mal.x - f.sx) * k;
-    const y = f.sy + (mal.y - f.sy) * k - Math.sin(k * Math.PI) * u * 1.5;
-    ritaEmoji(f.bild, x, y, u * (0.5 - k * 0.15));
+    const fickNr = f.mal === "ficka" ? iFickan++ : 0;
+    if (f.vis < 0) continue;
+    if (f.mal === "hund") {
+      // Från hinken till hundens mun
+      const d = f.hund;
+      const k = f.fas;
+      const mx = SX(d.x) - d.riktning * u * 0.32;
+      const my = SY(d.y) - u * 0.3;
+      const x = hink.x + (mx - hink.x) * k;
+      const y = hink.y + (my - hink.y) * k - Math.sin(k * Math.PI) * u * 1.2;
+      ritaEmoji(f.bild, x, y, u * (0.6 - k * 0.3));
+      continue;
+    }
+    // Först syns saken stort vid dörren, sedan flyger den iväg
+    const sx = SX(f.x);
+    const sy = SY(f.y) - Math.sin(tid * 4 + f.x * 3) * u * 0.06;
+    const stor = u * 0.8;
+    if (f.vis < S.visaGodis) {
+      const pop = Math.min(1, f.vis / 0.25);
+      const studs = pop < 1 ? Math.sin(pop * Math.PI) * 0.25 : 0;
+      ritaEmoji(f.bild, sx, sy + (1 - pop) * u * 0.8, stor * (pop * 0.9 + 0.1 + studs));
+      continue;
+    }
+    const mal = f.mal === "ficka" ? fickPlats(fickNr) : { x: hink.x, y: hink.y, storlek: u * 0.4 };
+    const k = f.fas * f.fas * (3 - 2 * f.fas); // Mjuk start och mjuk landning
+    const x = sx + (mal.x - sx) * k;
+    const y = sy + (mal.y - sy) * k - Math.sin(k * Math.PI) * u * 1.2;
+    ritaEmoji(f.bild, x, y, stor + (mal.storlek - stor) * k);
   }
+}
+
+// De konstiga sakerna man har fått ligger i ryggsäcken uppe till vänster
+function ritaFickan() {
+  if (!skrapSaker.length && !flygande.some((f) => f.mal === "ficka" && f.fas > 0)) return;
+  const p = fickPlats(-1);
+  ritaEmoji("🎒", p.x, p.y, p.storlek * (1 + fickStuds * 0.15));
+  skrapSaker.forEach((sak, i) => {
+    const q = fickPlats(i);
+    ritaEmoji(sak, q.x, q.y, q.storlek * 0.9);
+  });
 }
 
 // ---------- Mörkret och ljuset ----------
@@ -2293,6 +2369,7 @@ function ritaPanel() {
   ctx.fillRect(0, 0, bredd, panelH);
   const hink = hinkPlats();
   ritaHink(hink.x, hink.y, (panelH - marginal.topp) * 0.8);
+  ritaFickan();
   const storlek = begr(u * 0.55, 24, 40);
   ritaKlocka(bredd - marginal.hoger - 14, hink.y, storlek);
 }
