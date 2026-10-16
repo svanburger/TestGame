@@ -475,10 +475,12 @@ samla godis mellan klockan 18 och 20, vilket är 5 minuter på riktigt.
 - **Tappat godis** ligger kvar en stund, så man hinner plocka upp det igen.
 - **Klockan 20** (eller om man går hem efter 19:30) går man hem. Där tar
   pappa **pappaskatt**. Den är olika varje kväll: procenten snurrar först
-  och stannar sedan någonstans mellan 0 % (pappa somnade i soffan) och 50 %
-  ("Hälften. Det är rättvist. Jag har räknat. Själv."). Stjärnorna ⭐⭐⭐ och
-  rekordet räknas på hela hinken, så det blir inte färre stjärnor för att
-  pappa var hungrig.
+  och stannar sedan någonstans mellan 0 % (pappa somnade i soffan) och
+  30 %. På resultatsidan flyger godiset från hinken till pappas skål, en
+  stapel visar hur mycket var och en fick, och uträkningen står under
+  (till exempel 🍬 57 − 👨 17 = 😋 40). Stjärnorna ⭐⭐⭐ och rekordet
+  räknas på hela hinken, så det blir inte färre stjärnor för att pappa
+  var hungrig.
 - På gatorna går folk som säger saker: bananpappan (som tappar bananskal),
   hundägarna, tonåringen och barnen som tipsar om var det bästa godiset
   finns. Mamma och pappa skickar sms under kvällen.

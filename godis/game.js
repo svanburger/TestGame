@@ -208,12 +208,10 @@ const INSTALLNINGAR = {
   pappaskatt: [
     { procent: 0, vikt: 1, text: t("Zzz... (Pappa somnade i soffan. Ingen skatt i kväll!)", "Zzz... (Dad fell asleep on the sofa. No tax tonight!)") },
     { procent: 10, vikt: 2, text: t("Bara en liten provsmakning. Jag är på bra humör.", "Just a little taste. I'm in a good mood.") },
-    { procent: 20, vikt: 3, text: t("Jag måste bara kontrollera att det är säkert. *tugg*", "I just need to check that it's safe. *chew*") },
+    { procent: 15, vikt: 3, text: t("Den här såg misstänkt god ut. Och den.", "This one looked suspiciously tasty. And this one.") },
+    { procent: 20, vikt: 4, text: t("Jag måste bara kontrollera att det är säkert. *tugg*", "I just need to check that it's safe. *chew*") },
     { procent: 25, vikt: 3, text: t("Jag tar bara de med choklad. För din skull.", "I'm only taking the chocolate ones. For your sake.") },
-    { procent: 30, vikt: 4, text: t("Det heter föräldraskatt. Det står i lagen. Någonstans.", "It's called the parent tax. It's in the law. Somewhere.") },
-    { procent: 35, vikt: 3, text: t("Den här såg misstänkt god ut. Och den. Och den.", "This one looked suspiciously tasty. And this one. And this one.") },
-    { procent: 40, vikt: 2, text: t("Det är inflationen. Den drabbar oss alla.", "It's inflation. It affects us all.") },
-    { procent: 50, vikt: 1, text: t("Hälften. Det är rättvist. Jag har räknat. Själv.", "Half. That's fair. I did the maths. Myself.") },
+    { procent: 30, vikt: 3, text: t("Det heter föräldraskatt. Det står i lagen. Någonstans.", "It's called the parent tax. It's in the law. Somewhere.") },
   ],
 
   betyg: [
@@ -733,7 +731,21 @@ function startaSpel() {
 }
 
 // När saker händer på slutskärmen (sekunder efter att kvällen är slut)
-const SLUT = { snurra: 1.2, landar: 2.6, kvar: 3.6, klar: 4.6 };
+const SLUT = { snurra: 1.2, landar: 2.6, flytt: 1.6, kvar: 4.4, klar: 5.2 };
+
+// Hur många godis som har flugit från hinken till pappa, och de som flyger just nu (0–1)
+function pappaTar(tidpunkt) {
+  const r = resultat;
+  const per = r.skatt > 0 ? (SLUT.flytt - 0.5) / r.skatt : 0;
+  let flyttat = 0;
+  const flyger = [];
+  for (let i = 0; i < r.skatt; i++) {
+    const k = (tidpunkt - SLUT.landar - i * per) / 0.5;
+    if (k >= 1) flyttat++;
+    else if (k > 0) flyger.push({ k, i });
+  }
+  return { flyttat, flyger };
+}
 
 function slutaKvallen(hemma) {
   // Godis som fortfarande flyger hamnar i hinken
@@ -1370,6 +1382,10 @@ function uppdatera(dt) {
     tidSedanSlut += dt;
     if (tidSedanSlut > SLUT.snurra && tidSedanSlut < SLUT.landar && Math.floor(fore * 14) !== Math.floor(tidSedanSlut * 14)) {
       spelaTon(600, 600, 0.03, "square", 0.03);
+    }
+    if (resultat && pappaTar(fore).flyttat !== pappaTar(tidSedanSlut).flyttat) {
+      hinkStuds = 1;
+      spelaTon(500 + Math.random() * 200, 300, 0.06, "triangle", 0.05); // Nom
     }
     if (fore < SLUT.landar && tidSedanSlut >= SLUT.landar) {
       if (resultat && resultat.procent === 0) spelaArpeggio([784, 988, 1175, 1568]);
@@ -2265,7 +2281,7 @@ const HINK_MAX = Math.ceil(S.stjarnor[2] * 1.15);
 const HINK_STJARNOR = S.stjarnor; // Hur mycket man behöver i hinken för varje stjärna
 const GODISPRICKAR = Array.from({ length: 60 }, (_, i) => ({ x: fro(i * 3.1), y: fro(i * 7.7), f: ["#ff5fa2", "#5fd3ff", "#ffe14d", "#8be36b", "#c18bff", "#ff8a4d"][i % 6] }));
 
-function ritaHink(cx, cy, hh) {
+function ritaHink(cx, cy, hh, antal = godis, streck = true) {
   const studs = 1 + hinkStuds * 0.08;
   ctx.save();
   ctx.translate(cx, cy);
@@ -2291,7 +2307,7 @@ function ritaHink(cx, cy, hh) {
   ctx.ellipse(0, toppY, wT * 0.85, hh * 0.25, 0, Math.PI, 0);
   ctx.stroke();
   // Godiset i hinken
-  const niva = Math.min(1, godis / HINK_MAX);
+  const niva = Math.min(1, antal / HINK_MAX);
   ctx.save();
   form();
   ctx.clip();
@@ -2319,9 +2335,9 @@ function ritaHink(cx, cy, hh) {
   ctx.stroke();
   // Strecken för stjärnorna
   const stSt = Math.max(12, hh * 0.2);
-  HINK_STJARNOR.forEach((n, i) => {
+  if (streck) HINK_STJARNOR.forEach((n, i) => {
     const y = bottenY - (bottenY - toppY) * Math.min(1, n / HINK_MAX);
-    const nadd = godis >= n;
+    const nadd = antal >= n;
     ctx.strokeStyle = nadd ? "#ffe14d" : "rgba(255, 255, 255, 0.6)";
     ctx.lineWidth = 2;
     ctx.setLineDash([4, 4]);
@@ -2335,13 +2351,13 @@ function ritaHink(cx, cy, hh) {
     ctx.globalAlpha = 1;
   });
   // Full hink: godiset sticker upp över kanten
-  if (godis > HINK_MAX) {
-    const extra = Math.min(6, Math.ceil((godis - HINK_MAX) / 5));
+  if (antal > HINK_MAX) {
+    const extra = Math.min(6, Math.ceil((antal - HINK_MAX) / 5));
     for (let i = 0; i < extra; i++) ritaEmoji(GODISBILDER[i % GODISBILDER.length], -wT * 0.6 + (i % 3) * wT * 0.6, toppY - hh * 0.06 - Math.floor(i / 3) * hh * 0.16, hh * 0.24);
   }
   ctx.restore();
   // Hur mycket godis
-  ritaText(String(godis), cx, cy + hh * 0.06, Math.max(22, hh * 0.42), "#ffffff");
+  ritaText(String(antal), cx, cy + hh * 0.06, Math.max(22, hh * 0.42), "#ffffff");
 }
 
 function ritaKlocka(hoger, cy, storlek) {
@@ -2521,7 +2537,7 @@ function ritaSkarmar() {
   const mitt = bredd / 2;
   const lag = hojd < 520; // Telefon på bredden: mindre plats
 
-  ctx.fillStyle = "rgba(15, 6, 30, 0.72)";
+  ctx.fillStyle = lage === "slut" ? "rgba(15, 6, 30, 0.86)" : "rgba(15, 6, 30, 0.72)";
   ctx.fillRect(0, 0, bredd, hojd);
   let y = marginal.topp + Math.max(ts * 1.6, hojd * 0.08, 68 + ts * 0.9);
   const rad = (text, storlek, farg) => {
@@ -2561,29 +2577,173 @@ function ritaSkarmar() {
     if (rekord > 0) rad(t("Rekord: ", "High score: ") + rekord + " 🍬", ts * 0.55, "#d5def0");
   }
 
-  if (lage === "slut" && resultat) {
-    const r = resultat;
-    rad(r.hemma ? t("Hemma! 🏠", "Home! 🏠") : t("Klockan är 20! Dags att gå hem 🕗", "It's 8 o'clock! Time to go home 🕗"), ts * (lag ? 0.85 : 1.05), "#ffb347");
-    rad(t(`Du samlade ${r.samlat} godis 🍬 i ${r.hus} hus`, `You collected ${r.samlat} candies 🍬 from ${r.hus} houses`), ts * 0.75);
-    if (r.saker.length && !lag) rad(t("Och: ", "And: ") + r.saker.join(" "), ts * 0.6, "#d5def0");
-    if (!lag && hojd > 700) for (const k of r.kommentarer) rad(k, liten, "#d5def0");
-    if (tidSedanSlut > SLUT.snurra && tidSedanSlut < SLUT.landar) {
-      // Hur mycket tar pappa i kväll? Procenten snurrar...
-      const snurr = S.pappaskatt[Math.floor(tidSedanSlut * 14) % S.pappaskatt.length].procent;
-      rad(t(`👨 Pappaskatt: ${snurr} % ...`, `👨 Dad tax: ${snurr}% ...`), ts * 0.7, "#ffb3b3");
-    } else if (tidSedanSlut >= SLUT.landar) {
-      const visat = Math.min(r.skatt, Math.round(r.skatt * (tidSedanSlut - SLUT.landar) * 1.5));
-      rad(t(`👨 Pappaskatt ${r.procent} %: −${visat} 🍬`, `👨 Dad tax ${r.procent}%: −${visat} 🍬`), ts * 0.7, r.procent === 0 ? "#b3ffb8" : "#ffb3b3");
-      rad(t("Pappa: ", "Dad: ") + "\"" + r.pappa + "\"", liten, "#ffd6d6");
+  if (lage === "slut" && resultat) ritaResultat(ts, liten, lag);
+}
+
+// En hög med godis som växer uppåt. "plats" är hur många godis högen är gjord för.
+function ritaHog(cx, botten, w, antal, plats) {
+  const nedersta = Math.max(3, Math.ceil((Math.sqrt(8 * plats + 1) - 1) / 2));
+  const st = w / nedersta;
+  let i = 0;
+  for (let rad = 0; rad < nedersta && i < antal; rad++) {
+    const iRaden = nedersta - rad;
+    for (let k = 0; k < iRaden && i < antal; k++, i++) {
+      const x = cx - ((iRaden - 1) * st) / 2 + k * st;
+      ritaEmoji(GODISBILDER[i % GODISBILDER.length], x, botten - st * 0.4 - rad * st * 0.62, st * 1.05);
     }
-    if (tidSedanSlut > SLUT.kvar) {
-      rad(t(`Kvar till dig: ${r.kvar} 🍬`, `Yours to keep: ${r.kvar} 🍬`), ts * 0.9, "#ffe14d");
-      rad(stjarnor(r.stjarnor) + "  " + S.betyg[r.stjarnor], ts * 0.7);
-      rad(r.nyttRekord ? t("🏆 Nytt rekord! 🏆", "🏆 New high score! 🏆") : t("Rekord: ", "High score: ") + rekord + " 🍬", ts * 0.55, "#d5def0");
-      if (fatt.size && !lag) rad("🏆 " + [...fatt].map((k) => S.utmarkelser[k].namn).join(" · "), liten, "#d5def0");
-    }
-    if (tidSedanSlut > SLUT.klar) rad(t("Tryck för att gå ut igen", "Tap to go out again"), ts * 0.65);
   }
+}
+
+// Resultatsidan: hinken till vänster, pappa till höger. Godiset flyger från
+// hinken till pappas skål, och under syns hur mycket var och en fick.
+function ritaResultat(ts, liten, lag) {
+  const r = resultat;
+  const nu = tidSedanSlut;
+  const { flyttat, flyger } = pappaTar(nu);
+  const du = r.samlat - flyttat;
+  const bred = bredd > hojd * 1.25; // Liggande skärm: bilden till vänster, texten till höger
+
+  // Texterna skrivs i en kolumn
+  let kol = { mitt: bredd / 2, w: bredd - 40 };
+  let y = marginal.topp + Math.max(ts * 1.6, hojd * 0.07, 68 + ts * 0.7);
+  const rad = (text, storlek, farg, enRad = false) => {
+    ctx.font = `bold ${storlek}px ${TYPSNITT}`;
+    for (const rd of enRad ? [text] : radbryt(text, kol.w)) {
+      const ryms = (kol.w + 8) / ctx.measureText(rd).width;
+      ritaText(rd, kol.mitt, y, ryms < 1 ? storlek * ryms : storlek, farg);
+      y += storlek * 1.35;
+    }
+    y += storlek * 0.1;
+  };
+  const samlat = () => rad(t(`Du samlade ${r.samlat} godis 🍬 i ${r.hus} hus`, `You collected ${r.samlat} candies 🍬 from ${r.hus} houses`), ts * 0.7);
+
+  rad(r.hemma ? t("Hemma! 🏠", "Home! 🏠") : t("Klockan är 20! Dags att gå hem 🕗", "It's 8 o'clock! Time to go home 🕗"), ts * (lag ? 0.85 : 1.05), "#ffb347");
+
+  // Var bilden hamnar
+  let bild;
+  const textTopp = y;
+  if (bred) {
+    bild = { x: marginal.vanster + 8, y, w: bredd * 0.5 - marginal.vanster - 8, h: hojd - marginal.botten - y - 12 };
+    kol = { mitt: bredd * 0.75, w: bredd * 0.5 - 40 - marginal.hoger };
+  } else {
+    samlat();
+    bild = { x: 0, y, w: bredd, h: Math.min(hojd * 0.3, 280) };
+    y += bild.h;
+  }
+
+  // Hinken
+  const kidX = bild.x + bild.w * 0.28;
+  const dadX = bild.x + bild.w * 0.72;
+  const hh = Math.min(bild.h * 0.5, bild.w * 0.32);
+  const hinkY = bild.y + bild.h * 0.48;
+  ritaHink(kidX, hinkY, hh, du, false);
+  const etikett = Math.max(16, ts * 0.62);
+  const etikettY = hinkY + hh * 0.62 + etikett * 0.6;
+  ritaText("😋 " + t("Du", "You") + ": " + du, kidX, etikettY, etikett, "#ffe14d");
+  if (r.saker.length && !lag) ritaText("🎒 " + r.saker.slice(0, 6).join(""), kidX, etikettY + etikett * 1.3, etikett * 0.75);
+
+  // Pappa och hans skål
+  const pappaSt = Math.min(bild.h * 0.42, bild.w * 0.24);
+  const pappaY = bild.y + pappaSt * 0.5;
+  const skalW = Math.min(bild.w * 0.3, hh * 1.3);
+  const skalY = hinkY + hh * 0.18; // Skålens kant
+  const sover = r.procent === 0 && nu > SLUT.landar;
+  ritaEmoji(sover ? "😴" : "👨", dadX, pappaY + (flyger.length ? Math.sin(nu * 30) * 2 : 0), pappaSt);
+  ritaHog(dadX, skalY + skalW * 0.04, skalW * 0.85, flyttat, Math.max(6, r.skatt));
+  ctx.fillStyle = "#8a5a3a";
+  ctx.strokeStyle = "#1a1020";
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(dadX - skalW / 2, skalY);
+  ctx.lineTo(dadX + skalW / 2, skalY);
+  ctx.quadraticCurveTo(dadX + skalW * 0.45, skalY + skalW * 0.4, dadX, skalY + skalW * 0.4);
+  ctx.quadraticCurveTo(dadX - skalW * 0.45, skalY + skalW * 0.4, dadX - skalW / 2, skalY);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+  ritaText("👨 " + t("Pappa", "Dad") + ": " + flyttat, dadX, etikettY, etikett, "#ffb3b3");
+
+  // Hur många procent tar pappa? Först snurrar det, sedan stannar det.
+  if (nu > SLUT.snurra) {
+    const snurrar = nu < SLUT.landar;
+    const procent = snurrar ? S.pappaskatt[Math.floor(nu * 14) % S.pappaskatt.length].procent : r.procent;
+    const br = Math.max(26, pappaSt * 0.4);
+    const bx = Math.min(dadX + pappaSt * 0.62, bredd - marginal.hoger - br - 6);
+    const by = Math.max(pappaY - pappaSt * 0.3, textTopp + br);
+    const pop = snurrar ? 1 : 1 + Math.max(0, 0.3 - (nu - SLUT.landar)) * 1.5;
+    ctx.fillStyle = snurrar ? "#ffffff" : procent === 0 ? "#3bb54a" : "#e63946";
+    ctx.strokeStyle = "#1a1020";
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(bx, by, br * pop, 0, VARV);
+    ctx.fill();
+    ctx.stroke();
+    ctx.font = `bold ${br * 0.72 * pop}px ${TYPSNITT}`;
+    ctx.fillStyle = snurrar ? "#1a1020" : "#ffffff";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(procent + "%", bx, by + 1, br * 1.8);
+  }
+
+  // Godiset som flyger från hinken till pappa
+  for (const f of flyger) {
+    const fran = hinkY - hh * 0.35;
+    const fx = kidX + (dadX - kidX) * f.k;
+    const fy = fran + (skalY - fran) * f.k - Math.sin(f.k * Math.PI) * bild.h * 0.3;
+    ritaEmoji(GODISBILDER[f.i % GODISBILDER.length], fx, fy, hh * 0.28);
+  }
+
+  if (bred) {
+    y = textTopp;
+    samlat();
+  }
+
+  // Stapeln: hela hinken, delad i det man fick behålla (gult) och det pappa tog (rött)
+  if (r.samlat > 0) {
+    const sw = Math.min(kol.w, 440);
+    const sh = Math.max(28, ts * 0.85);
+    const sx = kol.mitt - sw / 2;
+    const delDu = (sw * du) / r.samlat;
+    ctx.save();
+    rundRekt(ctx, sx, y, sw, sh, sh / 2);
+    ctx.clip();
+    ctx.fillStyle = "#ffd23f";
+    ctx.fillRect(sx, y, delDu, sh);
+    ctx.fillStyle = "#e63946";
+    ctx.fillRect(sx + delDu, y, sw - delDu, sh);
+    ctx.restore();
+    rundRekt(ctx, sx, y, sw, sh, sh / 2);
+    ctx.strokeStyle = "#ffffff";
+    ctx.lineWidth = 2.5;
+    ctx.stroke();
+    ctx.font = `bold ${sh * 0.6}px ${TYPSNITT}`;
+    ctx.textBaseline = "middle";
+    ctx.textAlign = "left";
+    ctx.fillStyle = "#2b1d0e";
+    ctx.fillText("😋 " + du, sx + sh * 0.4, y + sh / 2);
+    const text = "👨 " + flyttat;
+    if (flyttat > 0 && ctx.measureText(text).width + sh * 0.6 < sw - delDu) {
+      ctx.textAlign = "right";
+      ctx.fillStyle = "#ffffff";
+      ctx.fillText(text, sx + sw - sh * 0.4, y + sh / 2);
+    }
+    y += sh + ts * 0.6;
+  }
+
+  if (nu > SLUT.kvar) {
+    // Uträkningen: det man hade − det pappa tog = det man har kvar
+    rad(`🍬 ${r.samlat}  −  👨 ${r.skatt}  =  😋 ${r.kvar}`, ts * 0.85, "#ffe14d", true);
+    rad(t("Pappa: ", "Dad: ") + "\"" + r.pappa + "\"", liten, "#ffd6d6");
+    rad("⭐".repeat(r.stjarnor) + "☆".repeat(3 - r.stjarnor) + "  " + S.betyg[r.stjarnor], ts * 0.65);
+    rad(r.nyttRekord ? t("🏆 Nytt rekord! 🏆", "🏆 New high score! 🏆") : t("Rekord: ", "High score: ") + rekord + " 🍬", liten, "#d5def0");
+    if (fatt.size && !lag && !bred) rad("🏆 " + [...fatt].map((k) => S.utmarkelser[k].namn).join(" · "), liten, "#d5def0");
+    if (!lag && !bred && hojd > 760) for (const k of r.kommentarer) rad(k, liten, "#d5def0");
+  } else if (nu > SLUT.landar) {
+    rad(t("Pappa tar ", "Dad takes ") + r.procent + " %!", ts * 0.75, r.procent === 0 ? "#b3ffb8" : "#ffb3b3");
+  } else if (nu > SLUT.snurra) {
+    rad(t("Hur mycket tar pappa i kväll?", "How much will Dad take tonight?"), ts * 0.7, "#ffffff");
+  }
+  if (nu > SLUT.klar) rad(t("Tryck för att gå ut igen", "Tap to go out again"), ts * 0.65);
 }
 
 function rita() {
