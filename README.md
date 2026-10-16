@@ -454,13 +454,19 @@ samla godis mellan klockan 18 och 20, vilket är 5 minuter på riktigt.
 - **Välj dräkt** på startskärmen: spöke, häxa, pumpa eller skelett.
 - **Dra med fingret** (eller tryck någonstans, eller använd
   piltangenterna/WASD) så går barnet dit. Man får gå vart man vill i
-  kvarteret.
+  kvarteret, som har 36 hus på fyra gator. Man hinner inte alla på en kväll.
 - **Gå fram till en dörr med en lysande pumpa 🎃** så ringer man på. Den som
   öppnar säger något och ger godis (eller något konstigt). Det man får syns
   en stund bredvid dörren. Sedan flyger godiset in i hinken och de konstiga
   sakerna (morötter, russin, tandborstar ...) in i ryggsäcken 🎒 uppe till
-  vänster. Har man varit där syns en grön bock. Pumpor vid kanten av skärmen visar var de närmaste
-  husen med godis finns.
+  vänster. Har man varit där syns en grön bock. Pumpor vid kanten av skärmen
+  visar var de närmaste husen med godis finns.
+- **Stanna vid dörren tills du får godiset!** Går man innan blir det inget
+  ("Hallå? ...Barn nu för tiden."), men pumpan lyser kvar så att man kan
+  komma tillbaka.
+- **Andra rundan:** några grannar tänder pumpan igen senare på kvällen
+  (tant Majken hittar mer i skafferiet, skämtpappan har ett nytt skämt och
+  influencern vill göra en ny video). Studenterna vaknar först halv åtta.
 - **Hinken** högst upp visar hur mycket godis man har. Strecken och ⭐ på
   hinken visar hur mycket som behövs för varje stjärna.
 - **Klockan** uppe till höger visar hur dags det är. Den röda biten är
@@ -493,7 +499,9 @@ Testa att ändra i `godis/game.js`:
   och vad pappa säger
 - hur mycket godis som behövs för stjärnorna (`stjarnor`)
 - husen (`hus`): vem som bor där, vad de säger, hur mycket godis de ger, när
-  de öppnar och stänger och vad det står på lappen på dörren
+  de öppnar och stänger, vad det står på lappen på dörren och om de tänder
+  pumpan igen senare (`igen`)
+- vad grannarna säger om man går för tidigt (`gickForTidigt`)
 - dräkterna (`drakter`) och vad folket på gatorna säger (`folk`)
 - hur länge det man får syns vid dörren (`visaGodis`) och hur fort det
   flyger iväg (`flygTid`)

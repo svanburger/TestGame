@@ -31,8 +31,8 @@ const INSTALLNINGAR = {
   musik: true,          // Läskig (men snäll) musik. Melodierna finns längst ner i game.js (MUSIK).
   speltid: 300,         // Sekunder från klockan 18 till 20. 300 = 5 minuter.
   fart: 2.9,            // Hur fort barnet går
-  stjarnor: [18, 36, 55], // Godis i hinken (före pappaskatten) för 1, 2 och 3 stjärnor
-  bananskal: 9,         // Hur många bananskal som ligger på gatorna från början
+  stjarnor: [25, 50, 75], // Godis i hinken (före pappaskatten) för 1, 2 och 3 stjärnor
+  bananskal: 13,        // Hur många bananskal som ligger på gatorna från början
   tappatKvar: 7,        // Sekunder som tappat godis ligger kvar på marken innan det är borta
   visaGodis: 1.2,       // Sekunder som det man får syns vid dörren innan det flyger iväg
   flygTid: 0.8,         // Sekunder som det tar för godiset att flyga in i hinken
@@ -59,7 +59,7 @@ const INSTALLNINGAR = {
 
   // ---------------------------------------------------------------
   //  HUSEN – i ordning från vänster till höger, rad för rad uppifrån.
-  //  Det blir 4 rader med 6 hus i varje.
+  //  Det blir 4 rader med 9 hus i varje.
   //
   //  bild    = den som öppnar dörren
   //  rep     = vad de säger. B("...") är det barnet säger.
@@ -69,6 +69,8 @@ const INSTALLNINGAR = {
   //  oppnar, stanger = när huset öppnar och stänger ("19:30")
   //  lapp    = lappen på dörren när huset är stängt
   //  special = huset gör något eget (se ringPa i koden)
+  //  igen    = huset tänder pumpan igen senare på kvällen (tidigast vid
+  //            "tid", och tidigast 10 minuter efter att man var där)
   // ---------------------------------------------------------------
   hus: [
     // Rad 1 (längst upp)
@@ -83,6 +85,12 @@ const INSTALLNINGAR = {
       rep: [t("Jag har homeopatiskt godis!", "I have homeopathic candy!"), t("En kola utspädd i tusen liter vatten. Ju mindre godis, desto starkare.", "One toffee diluted in a thousand litres of water. The less candy, the stronger it is."), t("Och en vanlig kola. Mot biverkningarna.", "And a normal toffee. For the side effects.")] },
     { namn: t("Huset med tv:n", "The house with the TV"), special: "tv", godis: 0,
       rep: [t("Vi är inte hemma!", "We're not home!"), B(t("Men ni pratar ju?", "But you're talking?")), t("Det är tv:n!", "That's the TV!")] },
+    { namn: t("Padelgrannen", "The padel neighbour"), bild: "🧑‍🦱", godis: 3, sak: ["🎾"], ger: 2,
+      rep: [t("Har du testat padel?", "Have you tried padel?"), t("Det är som tennis. Fast man pratar mer om det.", "It's like tennis. But you talk about it more."), t("Ta tre. Och en padelboll. Nu måste din pappa börja spela.", "Take three. And a padel ball. Now your dad has to start playing.")] },
+    { namn: t("Det smarta huset", "The smart house"), bild: "🤖", godis: 3, ger: 2,
+      rep: [t("Hej! Jag är husets AI-assistent.", "Hello! I am the house's AI assistant."), t("Ägarna är i Thailand. Jag har fått instruktioner.", "The owners are in Thailand. I have been given instructions."), t("Delar ut godis... Klart! Glöm inte att ge mig fem stjärnor.", "Dispensing candy... Done! Don't forget to give me five stars.")] },
+    { namn: t("Kändisen", "The celebrity"), bild: "🕺", godis: 4, sak: ["📝"], ger: 3,
+      rep: [t("Du känner säkert igen mig. Från tv.", "You probably recognise me. From TV."), B(t("Nej?", "No?")), t("En reklamfilm. För tandkräm. 2004.", "An advert. For toothpaste. 2004."), t("Ta fyra. Och en autograf.", "Take four. And an autograph.")] },
     { namn: t("Chokladkakehuset", "The chocolate bar house"), bild: "🧓", godis: 10, special: "choklad", ger: 1,
       rep: [t("Oj, ett barn! Ingen brukar hitta hit.", "Oh, a child! Nobody ever finds us up here."), t("Vi köpte fel och har bara hela chokladkakor. Ta massor!", "We bought the wrong thing and only have full-size chocolate bars. Take loads!")] },
 
@@ -91,7 +99,9 @@ const INSTALLNINGAR = {
       rep: [t("Välkommen. I kväll serverar vi en kola.", "Welcome. Tonight we are serving a toffee."), t("Toner av karamell, rök och en gnutta besvikelse.", "Notes of caramel, smoke and a hint of disappointment."), t("Fyra gafflar av fem. Ta tre.", "Four forks out of five. Take three.")] },
     { namn: t("Skålen", "The bowl"), special: "skal", godis: 1 },
     { namn: t("Influencern", "The influencer"), bild: "💁‍♀️", godis: 5, ger: 3,
-      rep: [t("Vänta! Jag ska bara filma.", "Wait! I just need to film this."), t("Säg 'spöke' till följarna!", "Say 'spooky' to my followers!"), B(t("...Spöke?", "...Spooky?")), t("Perfekt! #halloween #äkta #inteallsregisserat", "Perfect! #halloween #authentic #notstagedatall")] },
+      rep: [t("Vänta! Jag ska bara filma.", "Wait! I just need to film this."), t("Säg 'spöke' till följarna!", "Say 'spooky' to my followers!"), B(t("...Spöke?", "...Spooky?")), t("Perfekt! #halloween #äkta #inteallsregisserat", "Perfect! #halloween #authentic #notstagedatall")],
+      igen: { tid: "19:30", godis: 4, ger: 3,
+        rep: [t("Du igen! Följarna älskade dig!", "You again! My followers loved you!"), t("Säg 'godis' till kameran!", "Say 'candy' to the camera!"), B(t("...Godis?", "...Candy?")), t("Viralt! Ta fyra!", "Viral! Take four!")] } },
     { namn: t("Ordföranden i föreningen", "The housing board chairman"), bild: "👨‍💼", godis: 1, sak: ["📋"], ger: 2,
       rep: [t("Enligt föreningens stadgar, paragraf 14...", "According to the association's bylaws, section 14..."), t("...får godis bara delas ut till boende.", "...candy may only be given to residents."), t("Nåja. EN. Men det protokollförs.", "Oh well. ONE. But it goes in the minutes.")] },
     { namn: t("Alfahannen", "The alpha male"), bild: "🏋️‍♂️", godis: 2, sak: ["🧱"], ger: 1,
@@ -99,6 +109,13 @@ const INSTALLNINGAR = {
     { namn: t("Pumpafamiljen", "The pumpkin family"), bild: "👨‍👩‍👧", godis: 6, special: "pumpa", oppnar: "19:00", ger: 2,
       rep: [t("Välkommen! Vi har skurit fjorton pumpor.", "Welcome! We've carved fourteen pumpkins."), t("Vi har inte sovit sedan i tisdags.", "We haven't slept since Tuesday."), t("Ta sex!", "Take six!")],
       lapp: t("Kom tillbaka klockan 19! Vi skär pumpor. (Pumpa nr 14)", "Come back at 7! We're carving pumpkins. (Pumpkin no. 14)") },
+    { namn: t("Hon som jobbar hemifrån", "The one who works from home"), bild: "👩‍💻", godis: 2, ger: 2,
+      rep: [t("Vänta, jag sitter i ett möte. Du är på mute.", "Hang on, I'm in a meeting. You're on mute."), t("Nej, vänta. JAG är på mute.", "No, wait. I'M on mute."), t("Ta två. Kameran är av. Ingen ser.", "Take two. My camera's off. Nobody can see.")] },
+    { namn: t("Surdegsbagaren", "The sourdough baker"), bild: "👩‍🍳", godis: 2, sak: ["🍞"], ger: 2,
+      rep: [t("Jag har inget godis. Men här är en bit av min surdeg, Bengt.", "I don't have candy. But here is a piece of my sourdough, Brian."), t("Mata honom varje dag. Han är min bästa vän.", "Feed him every day. He's my best friend."), t("Okej. Och två godis.", "Fine. And two candies.")] },
+    { namn: t("Studenterna", "The students"), bild: "🧑‍🎓", godis: 5, oppnar: "19:30", ger: 1,
+      rep: [t("Oj, är det kväll redan? Vi har precis vaknat.", "Oh, is it evening already? We just woke up."), t("Vi har bara godis och nudlar. Ta fem!", "All we have is candy and noodles. Take five!")],
+      lapp: t("Sover. Kom tillbaka efter halv åtta. (Typ.)", "Asleep. Come back after half past seven. (Ish.)") },
 
     // Rad 3
     { namn: t("Psykologen", "The psychologist"), bild: "🧑‍🦳", godis: 2, stanger: "19:30", ger: 1,
@@ -113,6 +130,13 @@ const INSTALLNINGAR = {
       rep: [t("Vi firar inte Halloween. Det är amerikanskt.", "We don't celebrate Halloween. It's too commercial."), t("Men vi köpte ju godis?", "But we bought candy?"), t("Det var till OSS.", "That was for US."), t("...Okej, ta två.", "...Fine, take two.")] },
     { namn: t("Ordningsvakten", "The security guard"), bild: "👮", godis: 1, sak: ["🦺"], ger: 2,
       rep: [t("Halt! Har du reflex?", "Halt! Do you have a reflector?"), t("Ingen reflex, inget godis. Det är reglerna.", "No reflector, no candy. Those are the rules."), t("...Här. En reflex. Och EN godis. Gå säkert.", "...Here. A reflector. And ONE candy. Walk safely.")] },
+    { namn: t("Grannen som renoverar", "The neighbour who is renovating"), bild: "👷", godis: 2, ger: 2,
+      rep: [t("Ursäkta röran. Vi renoverar köket.", "Sorry about the mess. We're redoing the kitchen."), t("Sedan 2019.", "Since 2019."), t("Ta två. De låg bakom en vägg.", "Take two. They were behind a wall.")] },
+    { namn: t("Löparen", "The runner"), bild: "🏃‍♀️", godis: 1, stanger: "19:00", ger: 1,
+      rep: [t("Jag springer maraton i morgon. Godiset är min kolhydratladdning.", "I'm running a marathon tomorrow. The candy is my carb loading."), t("Du får ett. Resten är mina.", "You can have one. The rest are mine.")],
+      lapp: t("Har lagt mig. Maraton i morgon. 42 km. Bara så att du vet.", "Gone to bed. Marathon tomorrow. 26 miles. Just so you know.") },
+    { namn: t("Han med gräsmattan", "The lawn guy"), bild: "👨‍🌾", godis: 2, ger: 2,
+      rep: [t("GÅ INTE PÅ GRÄSMATTAN!", "KEEP OFF THE GRASS!"), t("Den är klippt med sax. Varje strå.", "It's cut with scissors. Every blade."), t("...Bra, du gick på gången. Ta två.", "...Good, you stayed on the path. Take two.")] },
 
     // Rad 4 (längst ner, där man bor)
     { namn: t("Sture", "Stanley"), bild: "👴", godis: 4, stanger: "18:45", special: "sture",
@@ -120,13 +144,30 @@ const INSTALLNINGAR = {
       lapp: t("Sover. Godis nästa år. /Sture", "Asleep. Candy next year. /Stanley") },
     { namn: t("Hemma", "Home"), bild: "👩", special: "hem" },
     { namn: t("Tant Majken", "Auntie Maggie"), bild: "👵", godis: 8, special: "majken",
-      rep: [t("Men så fint! Ta mer, ta mer!", "Oh, how lovely! Take more, take more!"), B(t("Tack!", "Thank you!")), t("Du är ju alldeles för smal. Ta mer!", "You're far too skinny. Take more!")] },
+      rep: [t("Men så fint! Ta mer, ta mer!", "Oh, how lovely! Take more, take more!"), B(t("Tack!", "Thank you!")), t("Du är ju alldeles för smal. Ta mer!", "You're far too skinny. Take more!")],
+      igen: { tid: "19:15", godis: 5,
+        rep: [t("Där är du ju! Jag hittade mer i skafferiet.", "There you are! I found more in the pantry."), t("Ta, ta! Det är från i påskas.", "Take it, take it! It's from Easter.")] } },
     { namn: t("Hälsofamiljen", "The health family"), bild: "🧑‍🌾", godis: 0, sak: ["🥕", "🍇"],
       rep: [t("Vi har naturens eget godis!", "We have nature's own candy!"), t("Russin och morötter. Lika gott! Nästan.", "Raisins and carrots. Just as good! Almost."), B(t("...Tack?", "...Thanks?"))] },
     { namn: t("Skämtpappan", "The dad who jokes"), bild: "🧔‍♂️", godis: 3, ger: 2,
-      rep: [t("Varför är spöken så dåliga på att ljuga?", "Why are ghosts such bad liars?"), t("Man ser rakt igenom dem! HAHAHA!", "You can see right through them! HAHAHA!"), t("...Ta tre. Snälla, skratta.", "...Take three. Please laugh.")] },
+      rep: [t("Varför är spöken så dåliga på att ljuga?", "Why are ghosts such bad liars?"), t("Man ser rakt igenom dem! HAHAHA!", "You can see right through them! HAHAHA!"), t("...Ta tre. Snälla, skratta.", "...Take three. Please laugh.")],
+      igen: { tid: "19:20", godis: 2, ger: 2,
+        rep: [t("Jag har ett till! Vad äter spöken till middag?", "I've got another one! What do ghosts eat for dinner?"), t("Spöketti! HAHAHA!", "Spookghetti! HAHAHA!"), t("...Ta två till. Det var mitt bästa.", "...Take two more. That was my best one.")] } },
     { namn: t("Läraren", "The teacher"), bild: "👩‍🏫", godis: 2, ger: 1,
       rep: [t("Hej! Här får alla lika mycket. Det är vår värdegrund.", "Hello! Here everyone gets the same. Those are our core values."), t("Även de som inte ringde på. Så du får två.", "Even the ones who didn't knock. So you get two."), t("Och en fråga att fundera på: Vad ÄR godis?", "And a question to reflect on: What IS candy?")] },
+    { namn: t("Elbilsgrannen", "The electric car neighbour"), bild: "👨‍🦲", godis: 3, ger: 2,
+      rep: [t("Har du sett min elbil? Den laddar.", "Have you seen my electric car? It's charging."), t("Den har gått 4 000 mil. Jag har räknat varje.", "It's done 25,000 miles. I've counted every one."), t("Godiset är också fossilfritt. Ta tre.", "The candy is fossil-free too. Take three.")] },
+    { namn: t("Småbarnsföräldern", "The parent of toddlers"), bild: "👩‍🍼", godis: 2, ger: 2,
+      rep: [t("Är det Halloween redan? Vilken dag är det?", "Is it Halloween already? What day is it?"), t("Jag har inte sovit sedan i mars.", "I haven't slept since March."), t("Ta två. Och ser du min andra sko, säg till.", "Take two. And if you see my other shoe, let me know.")] },
+    { namn: t("Kryssningsparet", "The cruise couple"), bild: "👨‍🦳", godis: 6, ger: 2,
+      rep: [t("Vi har precis kommit hem från en kryssning!", "We've just come home from a cruise!"), t("Vi köpte allt godis i taxfreen. Allt.", "We bought all the candy in duty-free. All of it."), t("Ta sex. Vi har fyrtio kilo.", "Take six. We have forty kilos.")] },
+  ],
+
+  // Vad grannarna säger om man går innan man har fått godiset
+  gickForTidigt: [
+    t("Hallå? ...Barn nu för tiden.", "Hello? ...Kids these days."),
+    t("Vänta! Du glömde godiset!", "Wait! You forgot the candy!"),
+    t("Jaha. Då äter jag upp det själv.", "Oh well. I'll eat it myself then."),
   ],
 
   // Vad mamma säger om man kommer hem för tidigt (före hemTid)
@@ -167,6 +208,8 @@ const INSTALLNINGAR = {
       t("Gå inte till tandläkaren. Lita på mig.", "Don't go to the dentist. Trust me."),
       t("Akta bananskalen. Min kompis tappade allt!", "Watch out for banana peels. My friend dropped everything!"),
       t("Sture lägger sig kvart i sju. Skynda!", "Stanley goes to bed at quarter to seven. Hurry!"),
+      t("Studenterna vaknar halv åtta. De har massor!", "The students wake up at half seven. They have loads!"),
+      t("Tant Majken hittar alltid mer godis. Gå dit igen sen!", "Auntie Maggie always finds more candy. Go back later!"),
     ],
     tonaring: [
       t("Jag är utklädd till trött tonåring.", "I'm dressed up as a tired teenager."),
@@ -197,6 +240,9 @@ const INSTALLNINGAR = {
     "🦺": t("Reflexen – mamma blir glad.", "Reflector – Mum will be pleased."),
     "🥕": t("Moroten – pappa: \"Den får du behålla!\"", "Carrot – Dad: \"You can keep that one!\""),
     "🍇": t("Russinen – ingen vill ha dem. Inte ens pappa.", "Raisins – nobody wants them. Not even Dad."),
+    "🎾": t("Padelbollen – nu måste pappa börja spela padel.", "Padel ball – now Dad has to take up padel."),
+    "📝": t("Autografen – ingen vet vems det är.", "Autograph – nobody knows whose it is."),
+    "🍞": t("Surdegen Bengt – nu måste någon mata honom varje dag.", "Brian the sourdough – now someone has to feed him every day."),
   },
 
   // ---------------------------------------------------------------
@@ -226,7 +272,7 @@ const INSTALLNINGAR = {
     modig: { namn: t("Modig", "Brave"), text: t("Ringde på hos spökhuset.", "Knocked at the haunted house.") },
     sture: { namn: t("I sista stund", "Just in time"), text: t("Hann till Sture innan han la sig.", "Got to Stanley before bedtime.") },
     pumpa: { namn: t("Värt att vänta på", "Worth the wait"), text: t("Kom tillbaka till pumpafamiljen.", "Came back for the pumpkin family.") },
-    allaHus: { namn: t("Hela kvarteret", "The whole street"), text: t("Ringde på i alla hus!", "Knocked on every door!") },
+    allaHus: { namn: t("Hela kvarteret", "The whole street"), text: t("Ringde på i 30 hus på en kväll!", "Knocked on 30 doors in one evening!") },
     banan: { namn: t("Bananproffs", "Banana pro"), text: t("Halkade inte en enda gång.", "Didn't slip once.") },
     hund: { namn: t("Hundviskare", "Dog whisperer"), text: t("Ingen hund snodde något.", "No dog stole anything.") },
     plock: { namn: t("Snabba fingrar", "Quick fingers"), text: t("Plockade upp 10 tappade godis.", "Picked up 10 dropped candies.") },
@@ -255,9 +301,9 @@ const VARV = Math.PI * 2;
 // Kvarteret: fyra gator bredvid varandra, och tre tvärgator.
 // x går åt höger och y nedåt (som på skärmen). 1 = ungefär ett barn högt.
 const GATOR_Y = [0, 9, 18, 27];
-const TVARGATOR_X = [0, 21, 42];
-const HUS_X = [4.5, 10.5, 16.5, 25.5, 31.5, 37.5];
-const VARLD = { x0: -2.6, x1: 44.6, y0: -7.6, y1: 29.8 };
+const TVARGATOR_X = [0, 21, 42, 63];
+const HUS_X = [4.5, 10.5, 16.5, 25.5, 31.5, 37.5, 46.5, 52.5, 58.5];
+const VARLD = { x0: -2.6, x1: 65.6, y0: -7.6, y1: 29.8 };
 const GATA = 0.8;     // Halva bredden på asfalten
 const TROTTOAR = 1.3; // Halva bredden på gatan med trottoarer
 const HUS_B = 4.6;    // Hur brett ett hus är
@@ -621,7 +667,7 @@ function byggKvarteret() {
 
   // Gatlyktor längs trottoarerna
   for (const gy of GATOR_Y) {
-    for (let x = 3.5; x < 42; x += 7) {
+    for (let x = 3.5; x < TVARGATOR_X[TVARGATOR_X.length - 1]; x += 7) {
       if (TVARGATOR_X.some((gx) => Math.abs(x - gx) < 2)) continue;
       lyktor.push({ x, y: gy + TROTTOAR - 0.15 });
     }
@@ -652,10 +698,10 @@ function byggKvarteret() {
   const k = (xi, yi) => ({ x: TVARGATOR_X[xi], y: GATOR_Y[yi] });
   folk.push(nyttFolk("banan", [k(0, 1), k(1, 1), k(1, 3), k(0, 3)], 1.1));
   const agare1 = nyttFolk("hund", [k(1, 0), k(2, 0), k(2, 2), k(1, 2)], 0.8);
-  const agare2 = nyttFolk("pudel", [k(2, 1), k(2, 3), k(1, 3), k(1, 1)], 0.7);
+  const agare2 = nyttFolk("pudel", [k(2, 1), k(3, 1), k(3, 3), k(2, 3)], 0.7);
   folk.push(agare1, agare2);
   hundar.push(nyHund(agare1, "🐕"), nyHund(agare2, "🐩"));
-  const grupp = nyttFolk("barn", [k(0, 0), k(2, 0), k(2, 3), k(0, 3)], 1.4);
+  const grupp = nyttFolk("barn", [k(0, 0), k(3, 0), k(3, 3), k(0, 3)], 1.4);
   grupp.drakter = ["skelett", "pumpa"];
   folk.push(grupp);
   folk.push(nyttFolk("tonaring", [{ x: 22, y: 4.6 }], 0));
@@ -665,7 +711,7 @@ function byggKvarteret() {
 function laggBananskal(x, y) {
   for (let forsok = 0; forsok < 30 && x === undefined; forsok++) {
     const vagrat = Math.random() < 0.65;
-    const nx = vagrat ? slumpMellan(-1, 43) : slumpa(TVARGATOR_X) + slumpMellan(-1.1, 1.1);
+    const nx = vagrat ? slumpMellan(-1, TVARGATOR_X[TVARGATOR_X.length - 1] + 1) : slumpa(TVARGATOR_X) + slumpMellan(-1.1, 1.1);
     const ny = vagrat ? slumpa(GATOR_Y) + slumpMellan(-1.1, 1.1) : slumpMellan(0, 27);
     const hem = husLista.find((h) => h.def.special === "hem");
     if (hem && Math.hypot(nx - hem.x, ny - hem.fram) < 4) continue;
@@ -1093,9 +1139,11 @@ function ringPa(h) {
     return;
   }
 
-  let rader = def.rep.map(rad);
-  if (sp === "majken") rader = rader.concat([rad(drakt.ata)]);
-  samtal = { h, rader, i: -1, vanta: 1.0, godis: def.godis || 0, sak: def.sak || [], ger: def.ger || 0, dorr: true };
+  // Andra gången (när huset har tänt pumpan igen) säger de något nytt
+  const omg = h.igenGjort ? def.igen : def;
+  let rader = omg.rep.map(rad);
+  if (sp === "majken" && !h.igenGjort) rader = rader.concat([rad(drakt.ata)]);
+  samtal = { h, rader, i: -1, vanta: 1.0, godis: omg.godis || 0, sak: omg.sak || [], ger: omg.ger || 0, dorr: true };
   saga(barn, t("Bus eller godis!", "Trick or treat!"), 1.2);
   spelaRingklocka();
   backa(h);
@@ -1137,14 +1185,26 @@ function uppdateraSamtal(dt) {
   }
   // Har barnet gått vidare får det godiset ändå, och samtalet tar slut
   const gattVidare = Math.hypot(barn.x - h.x, barn.y - h.fram) > 3.5 && h.skrammer <= 0;
+  if (gattVidare && !s.gett && s.ger < 99) {
+    // Barnet gick innan det fick godiset. Pumpan lyser kvar, så man kan komma tillbaka.
+    saga(h, slumpa(S.gickForTidigt), 2.8);
+    h.oppen = 1.5;
+    samtal = null;
+    visaTipsEnGang("vanta", t("Stanna vid dörren tills du får godiset!", "Stay at the door until you get the candy!"), 4);
+    return;
+  }
   s.vanta -= dt;
   if (s.dorr) h.oppen = Math.max(h.oppen, 1.2);
   if (s.vanta > 0 && !gattVidare) return;
   s.i += 1;
-  if (s.i >= s.ger || gattVidare) geHusetsGodis(s);
+  if (s.i >= s.ger) geHusetsGodis(s);
   if (s.i >= s.rader.length || gattVidare) {
     h.besokt = true;
-    stat.besokta += 1;
+    if (!h.igenGjort) {
+      stat.besokta += 1;
+      // Vissa hus tänder pumpan igen senare
+      if (h.def.igen) h.igenFran = Math.max(minuter(h.def.igen.tid), klocka + 10);
+    }
     samtal = null;
     kollaAllaHus();
     return;
@@ -1166,12 +1226,19 @@ function geHusetsGodis(s) {
 }
 
 function kollaAllaHus() {
-  if (husLista.every((h) => h.besokt || h.def.special === "hem")) utmarkelse("allaHus");
+  if (stat.besokta >= 30) utmarkelse("allaHus");
 }
 
 function uppdateraHus(dt) {
   for (const h of husLista) {
     h.oppen = Math.max(0, h.oppen - dt);
+    if (h.igenFran && !h.igenGjort && h.besokt && klocka >= h.igenFran) {
+      // Huset tänder pumpan igen: där finns mer godis!
+      h.igenGjort = true;
+      h.besokt = false;
+      visaTips(t("🎃 " + h.def.namn + " har tänt pumpan igen!", "🎃 " + h.def.namn + " has lit the pumpkin again!"), 3.5);
+      spelaArpeggio([523, 659, 784]);
+    }
     // Huset med pumpafamiljen får fler pumpor när de har skurit klart
     if (h.def.special === "pumpa" && klocka >= h.oppnar && !h.meddelat) {
       h.meddelat = true;
