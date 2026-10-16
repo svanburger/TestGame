@@ -456,8 +456,10 @@ samla godis mellan klockan 18 och 20, vilket är 5 minuter på riktigt.
   piltangenterna/WASD) så går barnet dit. Man får gå vart man vill i
   kvarteret.
 - **Gå fram till en dörr med en lysande pumpa 🎃** så ringer man på. Den som
-  öppnar säger något och ger godis (eller något konstigt). Har man varit
-  där syns en grön bock. Pumpor vid kanten av skärmen visar var de närmaste
+  öppnar säger något och ger godis (eller något konstigt). Det man får syns
+  en stund bredvid dörren. Sedan flyger godiset in i hinken och de konstiga
+  sakerna (morötter, russin, tandborstar ...) in i ryggsäcken 🎒 uppe till
+  vänster. Har man varit där syns en grön bock. Pumpor vid kanten av skärmen visar var de närmaste
   husen med godis finns.
 - **Hinken** högst upp visar hur mycket godis man har. Strecken och ⭐ på
   hinken visar hur mycket som behövs för varje stjärna.
@@ -466,13 +468,19 @@ samla godis mellan klockan 18 och 20, vilket är 5 minuter på riktigt.
   kvart i sju) och pumpafamiljen öppnar först klockan 19.
 - **Man kan tappa godis:**
   - 🍌 halkar man på ett bananskal ramlar godis ur hinken
-  - 🐕 hundarna i flexikoppel springer fram och snor godis (spring ifrån dem!)
+  - 🐕 hundarna i flexikoppel springer fram och snor godis (spring ifrån dem!).
+    Man ser godiset flyga ur hinken och in i munnen på hunden.
   - 🍂 en vindpust blåser iväg lite godis
   - 💀 spökhuset skrämmer en så att man tappar godis (men man får mer sedan)
 - **Tappat godis** ligger kvar en stund, så man hinner plocka upp det igen.
 - **Klockan 20** (eller om man går hem efter 19:30) går man hem. Där tar
-  pappa 30 % i **föräldraskatt** "för att kontrollera att det är säkert".
-  Det som är kvar ger ⭐⭐⭐ och rekord.
+  pappa **pappaskatt**. Den är olika varje kväll: procenten snurrar först
+  och stannar sedan någonstans mellan 0 % (pappa somnade i soffan) och
+  30 %. På resultatsidan flyger godiset från hinken till pappas skål, en
+  stapel visar hur mycket var och en fick, och uträkningen står under
+  (till exempel 🍬 57 − 👨 17 = 😋 40). Stjärnorna ⭐⭐⭐ och rekordet
+  räknas på hela hinken, så det blir inte färre stjärnor för att pappa
+  var hungrig.
 - På gatorna går folk som säger saker: bananpappan (som tappar bananskal),
   hundägarna, tonåringen och barnen som tipsar om var det bästa godiset
   finns. Mamma och pappa skickar sms under kvällen.
@@ -481,11 +489,14 @@ Testa att ändra i `godis/game.js`:
 
 - hur lång kvällen är (`speltid`, i sekunder) och hur fort barnet går
   (`fart`)
-- hur stor föräldraskatten är (`skatt`) och hur mycket godis som behövs för
-  stjärnorna (`stjarnor`)
+- pappaskatten (`pappaskatt`): vilka procent det kan bli, hur ofta (`vikt`)
+  och vad pappa säger
+- hur mycket godis som behövs för stjärnorna (`stjarnor`)
 - husen (`hus`): vem som bor där, vad de säger, hur mycket godis de ger, när
   de öppnar och stänger och vad det står på lappen på dörren
 - dräkterna (`drakter`) och vad folket på gatorna säger (`folk`)
+- hur länge det man får syns vid dörren (`visaGodis`) och hur fort det
+  flyger iväg (`flygTid`)
 - hur många bananskal det finns (`bananskal`), hur länge tappat godis ligger
   kvar (`tappatKvar`) och hur busiga hundarna är (`hundKoppel`, `hundSer`,
   `hundJagar`, `hundVila`)
