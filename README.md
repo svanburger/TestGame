@@ -474,8 +474,11 @@ samla godis mellan klockan 18 och 20, vilket är 5 minuter på riktigt.
   - 💀 spökhuset skrämmer en så att man tappar godis (men man får mer sedan)
 - **Tappat godis** ligger kvar en stund, så man hinner plocka upp det igen.
 - **Klockan 20** (eller om man går hem efter 19:30) går man hem. Där tar
-  pappa 30 % i **föräldraskatt** "för att kontrollera att det är säkert".
-  Det som är kvar ger ⭐⭐⭐ och rekord.
+  pappa **pappaskatt**. Den är olika varje kväll: procenten snurrar först
+  och stannar sedan någonstans mellan 0 % (pappa somnade i soffan) och 50 %
+  ("Hälften. Det är rättvist. Jag har räknat. Själv."). Stjärnorna ⭐⭐⭐ och
+  rekordet räknas på hela hinken, så det blir inte färre stjärnor för att
+  pappa var hungrig.
 - På gatorna går folk som säger saker: bananpappan (som tappar bananskal),
   hundägarna, tonåringen och barnen som tipsar om var det bästa godiset
   finns. Mamma och pappa skickar sms under kvällen.
@@ -484,8 +487,9 @@ Testa att ändra i `godis/game.js`:
 
 - hur lång kvällen är (`speltid`, i sekunder) och hur fort barnet går
   (`fart`)
-- hur stor föräldraskatten är (`skatt`) och hur mycket godis som behövs för
-  stjärnorna (`stjarnor`)
+- pappaskatten (`pappaskatt`): vilka procent det kan bli, hur ofta (`vikt`)
+  och vad pappa säger
+- hur mycket godis som behövs för stjärnorna (`stjarnor`)
 - husen (`hus`): vem som bor där, vad de säger, hur mycket godis de ger, när
   de öppnar och stänger och vad det står på lappen på dörren
 - dräkterna (`drakter`) och vad folket på gatorna säger (`folk`)

@@ -31,8 +31,7 @@ const INSTALLNINGAR = {
   musik: true,          // Läskig (men snäll) musik. Melodierna finns längst ner i game.js (MUSIK).
   speltid: 300,         // Sekunder från klockan 18 till 20. 300 = 5 minuter.
   fart: 2.9,            // Hur fort barnet går
-  skatt: 0.3,           // Föräldraskatten: hur mycket pappa tar (0.3 = 30 %)
-  stjarnor: [12, 25, 38], // Godis man måste ha kvar EFTER skatten för 1, 2 och 3 stjärnor
+  stjarnor: [18, 36, 55], // Godis i hinken (före pappaskatten) för 1, 2 och 3 stjärnor
   bananskal: 9,         // Hur många bananskal som ligger på gatorna från början
   tappatKvar: 7,        // Sekunder som tappat godis ligger kvar på marken innan det är borta
   visaGodis: 1.2,       // Sekunder som det man får syns vid dörren innan det flyger iväg
@@ -200,12 +199,21 @@ const INSTALLNINGAR = {
     "🍇": t("Russinen – ingen vill ha dem. Inte ens pappa.", "Raisins – nobody wants them. Not even Dad."),
   },
 
-  // Vad pappa säger när han tar föräldraskatt
-  pappa: [
-    t("Jag måste bara kontrollera att det är säkert. *tugg*", "I just need to check that it's safe. *chew*"),
-    t("Det heter föräldraskatt. Det står i lagen. Någonstans.", "It's called the parent tax. It's in the law. Somewhere."),
-    t("Den här såg misstänkt god ut. Den tar jag.", "This one looked suspiciously tasty. I'll take it."),
-    t("Jag tar bara de med choklad. För din skull.", "I'm only taking the chocolate ones. For your sake."),
+  // ---------------------------------------------------------------
+  //  PAPPASKATTEN – hur mycket pappa tar när man kommer hem.
+  //  Den är olika varje kväll. På slutskärmen snurrar procenten först.
+  //  vikt = hur ofta det blir just den (högre = oftare)
+  //  text = vad pappa säger
+  // ---------------------------------------------------------------
+  pappaskatt: [
+    { procent: 0, vikt: 1, text: t("Zzz... (Pappa somnade i soffan. Ingen skatt i kväll!)", "Zzz... (Dad fell asleep on the sofa. No tax tonight!)") },
+    { procent: 10, vikt: 2, text: t("Bara en liten provsmakning. Jag är på bra humör.", "Just a little taste. I'm in a good mood.") },
+    { procent: 20, vikt: 3, text: t("Jag måste bara kontrollera att det är säkert. *tugg*", "I just need to check that it's safe. *chew*") },
+    { procent: 25, vikt: 3, text: t("Jag tar bara de med choklad. För din skull.", "I'm only taking the chocolate ones. For your sake.") },
+    { procent: 30, vikt: 4, text: t("Det heter föräldraskatt. Det står i lagen. Någonstans.", "It's called the parent tax. It's in the law. Somewhere.") },
+    { procent: 35, vikt: 3, text: t("Den här såg misstänkt god ut. Och den. Och den.", "This one looked suspiciously tasty. And this one. And this one.") },
+    { procent: 40, vikt: 2, text: t("Det är inflationen. Den drabbar oss alla.", "It's inflation. It affects us all.") },
+    { procent: 50, vikt: 1, text: t("Hälften. Det är rättvist. Jag har räknat. Själv.", "Half. That's fair. I did the maths. Myself.") },
   ],
 
   betyg: [
@@ -325,6 +333,16 @@ function nyStatistik() {
 
 function slumpa(lista) {
   return lista[Math.floor(Math.random() * lista.length)];
+}
+
+// Väljer något ur en lista där allt har en vikt (högre vikt = oftare)
+function slumpViktat(lista) {
+  let kvar = Math.random() * lista.reduce((summa, x) => summa + x.vikt, 0);
+  for (const x of lista) {
+    kvar -= x.vikt;
+    if (kvar < 0) return x;
+  }
+  return lista[lista.length - 1];
 }
 
 function slumpMellan(a, b) {
@@ -453,7 +471,7 @@ canvas.addEventListener("pointerdown", (e) => {
     return;
   }
   if (lage === "slut") {
-    if (tidSedanSlut > 3.5) visaStart();
+    if (tidSedanSlut > SLUT.klar) visaStart();
     return;
   }
   if (lage !== "spelar") return;
@@ -498,7 +516,7 @@ window.addEventListener("keydown", (e) => {
   if (e.key === " " || e.key === "Enter") {
     startaLjud();
     if (lage === "start") startaSpel();
-    else if (lage === "slut" && tidSedanSlut > 3.5) visaStart();
+    else if (lage === "slut" && tidSedanSlut > SLUT.klar) visaStart();
     e.preventDefault();
     return;
   }
@@ -714,6 +732,9 @@ function startaSpel() {
   visaTips(t("Gå till husen med 🎃 och ring på!", "Walk to the houses with a 🎃 and knock!"), 5);
 }
 
+// När saker händer på slutskärmen (sekunder efter att kvällen är slut)
+const SLUT = { snurra: 1.2, landar: 2.6, kvar: 3.6, klar: 4.6 };
+
 function slutaKvallen(hemma) {
   // Godis som fortfarande flyger hamnar i hinken
   for (const f of flygande) landa(f);
@@ -721,20 +742,23 @@ function slutaKvallen(hemma) {
   samtal = null;
   if (stat.halkat === 0 && godis >= 10) utmarkelse("banan");
   if (stat.snott === 0 && godis >= 10) utmarkelse("hund");
-  const skatt = Math.round(godis * S.skatt);
+  // Pappaskatten är olika varje kväll. Stjärnorna och rekordet räknas på
+  // hela hinken, så att det inte blir färre stjärnor för att pappa var hungrig.
+  const pappa = slumpViktat(S.pappaskatt);
+  const skatt = Math.round((godis * pappa.procent) / 100);
   const kvar = godis - skatt;
   let stjarnor = 0;
-  while (stjarnor < 3 && kvar >= S.stjarnor[stjarnor]) stjarnor++;
-  const nyttRekord = kvar > rekord;
+  while (stjarnor < 3 && godis >= S.stjarnor[stjarnor]) stjarnor++;
+  const nyttRekord = godis > rekord;
   if (nyttRekord) {
-    rekord = kvar;
+    rekord = godis;
     sparaRekord(rekord);
   }
   // Två av de konstiga sakerna får en kommentar
   const olika = [...new Set(skrapSaker)];
   const kommentarer = [];
   while (olika.length && kommentarer.length < 2) kommentarer.push(S.skrap[olika.splice(Math.floor(Math.random() * olika.length), 1)[0]]);
-  resultat = { hemma, samlat: godis, hus: stat.besokta, skatt, kvar, stjarnor, nyttRekord, kommentarer, pappa: slumpa(S.pappa), saker: skrapSaker.slice() };
+  resultat = { hemma, samlat: godis, hus: stat.besokta, skatt, kvar, stjarnor, nyttRekord, kommentarer, procent: pappa.procent, pappa: pappa.text, saker: skrapSaker.slice() };
   lage = "slut";
   tidSedanSlut = 0;
   fingerNere = false;
@@ -1342,7 +1366,15 @@ function uppdatera(dt) {
   skakning = Math.max(0, skakning - dt);
 
   if (lage === "slut") {
+    const fore = tidSedanSlut;
     tidSedanSlut += dt;
+    if (tidSedanSlut > SLUT.snurra && tidSedanSlut < SLUT.landar && Math.floor(fore * 14) !== Math.floor(tidSedanSlut * 14)) {
+      spelaTon(600, 600, 0.03, "square", 0.03);
+    }
+    if (fore < SLUT.landar && tidSedanSlut >= SLUT.landar) {
+      if (resultat && resultat.procent === 0) spelaArpeggio([784, 988, 1175, 1568]);
+      else spelaTon(330, 180, 0.4, "sawtooth", 0.06);
+    }
     return;
   }
   if (lage !== "spelar") return;
@@ -2229,9 +2261,8 @@ function ritaPilar() {
 
 // ---------- Panelen högst upp: hinken och klockan ----------
 
-const HINK_MAX = Math.ceil(S.stjarnor[2] / (1 - S.skatt) * 1.15);
-// Hur mycket man behöver i hinken (före skatten) för varje stjärna
-const HINK_STJARNOR = S.stjarnor.map((n) => Math.ceil(n / (1 - S.skatt)));
+const HINK_MAX = Math.ceil(S.stjarnor[2] * 1.15);
+const HINK_STJARNOR = S.stjarnor; // Hur mycket man behöver i hinken för varje stjärna
 const GODISPRICKAR = Array.from({ length: 60 }, (_, i) => ({ x: fro(i * 3.1), y: fro(i * 7.7), f: ["#ff5fa2", "#5fd3ff", "#ffe14d", "#8be36b", "#c18bff", "#ff8a4d"][i % 6] }));
 
 function ritaHink(cx, cy, hh) {
@@ -2532,23 +2563,26 @@ function ritaSkarmar() {
 
   if (lage === "slut" && resultat) {
     const r = resultat;
-    const procent = Math.round(S.skatt * 100);
     rad(r.hemma ? t("Hemma! 🏠", "Home! 🏠") : t("Klockan är 20! Dags att gå hem 🕗", "It's 8 o'clock! Time to go home 🕗"), ts * (lag ? 0.85 : 1.05), "#ffb347");
     rad(t(`Du samlade ${r.samlat} godis 🍬 i ${r.hus} hus`, `You collected ${r.samlat} candies 🍬 from ${r.hus} houses`), ts * 0.75);
     if (r.saker.length && !lag) rad(t("Och: ", "And: ") + r.saker.join(" "), ts * 0.6, "#d5def0");
     if (!lag && hojd > 700) for (const k of r.kommentarer) rad(k, liten, "#d5def0");
-    if (tidSedanSlut > 1.2) {
-      const visat = Math.min(r.skatt, Math.round(r.skatt * (tidSedanSlut - 1.2)));
-      rad(t(`👨 Föräldraskatt ${procent} %: −${visat} 🍬`, `👨 Parent tax ${procent}%: −${visat} 🍬`), ts * 0.7, "#ffb3b3");
+    if (tidSedanSlut > SLUT.snurra && tidSedanSlut < SLUT.landar) {
+      // Hur mycket tar pappa i kväll? Procenten snurrar...
+      const snurr = S.pappaskatt[Math.floor(tidSedanSlut * 14) % S.pappaskatt.length].procent;
+      rad(t(`👨 Pappaskatt: ${snurr} % ...`, `👨 Dad tax: ${snurr}% ...`), ts * 0.7, "#ffb3b3");
+    } else if (tidSedanSlut >= SLUT.landar) {
+      const visat = Math.min(r.skatt, Math.round(r.skatt * (tidSedanSlut - SLUT.landar) * 1.5));
+      rad(t(`👨 Pappaskatt ${r.procent} %: −${visat} 🍬`, `👨 Dad tax ${r.procent}%: −${visat} 🍬`), ts * 0.7, r.procent === 0 ? "#b3ffb8" : "#ffb3b3");
       rad(t("Pappa: ", "Dad: ") + "\"" + r.pappa + "\"", liten, "#ffd6d6");
     }
-    if (tidSedanSlut > 2.4) {
+    if (tidSedanSlut > SLUT.kvar) {
       rad(t(`Kvar till dig: ${r.kvar} 🍬`, `Yours to keep: ${r.kvar} 🍬`), ts * 0.9, "#ffe14d");
       rad(stjarnor(r.stjarnor) + "  " + S.betyg[r.stjarnor], ts * 0.7);
       rad(r.nyttRekord ? t("🏆 Nytt rekord! 🏆", "🏆 New high score! 🏆") : t("Rekord: ", "High score: ") + rekord + " 🍬", ts * 0.55, "#d5def0");
       if (fatt.size && !lag) rad("🏆 " + [...fatt].map((k) => S.utmarkelser[k].namn).join(" · "), liten, "#d5def0");
     }
-    if (tidSedanSlut > 3.5) rad(t("Tryck för att gå ut igen", "Tap to go out again"), ts * 0.65);
+    if (tidSedanSlut > SLUT.klar) rad(t("Tryck för att gå ut igen", "Tap to go out again"), ts * 0.65);
   }
 }
 
