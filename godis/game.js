@@ -44,7 +44,9 @@ const INSTALLNINGAR = {
 
   // ---------------------------------------------------------------
   //  DRÄKTERNA man kan välja på startskärmen
-  //  ata = vad tant Majken säger
+  //  ata     = vad tant Majken säger
+  //  fotter  = landar på fötterna: tappar inget godis på bananskal
+  //  hundSer = hundarna ser en på så här mycket längre håll (1.5 = 50 % längre)
   // ---------------------------------------------------------------
   drakter: [
     { typ: "spoke", namn: t("Spöket", "The Ghost"), text: t("Ett lakan med två hål. Mamma vet inte än.", "A sheet with two holes. Mum doesn't know yet."),
@@ -55,6 +57,8 @@ const INSTALLNINGAR = {
       ata: t("Pumpor måste också äta.", "Pumpkins need to eat too.") },
     { typ: "skelett", namn: t("Skelettet", "The Skeleton"), text: t("Lyser i mörkret. Nästan.", "Glows in the dark. Almost."),
       ata: t("Och skelett måste äta MEST!", "And skeletons need to eat the MOST!") },
+    { typ: "katt", namn: t("Katten", "The Cat"), text: t("Landar alltid på fötterna. Men hundarna ÄLSKAR katter...", "Always lands on its feet. But dogs LOVE cats..."),
+      ata: t("Katter måste också äta. Fast helst fisk.", "Cats need to eat too. Preferably fish."), fotter: true, hundSer: 1.5 },
   ],
 
   // ---------------------------------------------------------------
@@ -191,6 +195,11 @@ const INSTALLNINGAR = {
       t("Han är snäll! Han vill bara hälsa!", "He's friendly! He just wants to say hello!"),
       t("Det är flexikopplet. Det har en egen vilja.", "It's the retractable leash. It has a mind of its own."),
       t("Han får inte äta godis. Därför tar han ditt.", "He's not allowed candy. That's why he takes yours."),
+    ],
+    // När hunden får syn på någon som är utklädd till katt
+    hundKatt: [
+      t("Åh nej. Han HATAR katter.", "Oh no. He HATES cats."),
+      t("Han har aldrig sett en så stor katt!", "He's never seen such a big cat!"),
     ],
     hundSnodde: [
       t("Förlåt! Han gör aldrig så här.", "Sorry! He never does this."),
@@ -1048,6 +1057,12 @@ function uppdateraBarn(dt) {
       b.halkar = 0.9;
       b.harMal = false;
       stat.halkat += 1;
+      if (drakt.fotter) {
+        // Katter landar alltid på fötterna (gör en volt, men tappar inget)
+        visaText(t("Landade på fötterna! 🐈‍⬛", "Landed on its feet! 🐈‍⬛"), b.x, b.y - 1.6, "#b3ffb8");
+        spelaTon(500, 1000, 0.25, "triangle", 0.06);
+        break;
+      }
       const n = tappa(2 + Math.floor(Math.random() * 2), b.x, b.y, 1.5);
       visaText(t("Halka! 🍌", "Slip! 🍌"), b.x, b.y - 1.6, "#ffe14d");
       spelaTon(700, 140, 0.5, "sawtooth", 0.06);
@@ -1329,8 +1344,13 @@ function uppdateraHundar(dt) {
         d.malY = a.y + slumpMellan(-2, 2);
         d.bytOm = slumpMellan(1, 2.5);
       }
-      if (d.vila <= 0 && godis > 0 && tillBarn < S.hundSer && Math.hypot(barn.x - a.x, barn.y - a.y) < S.hundKoppel + 1.5) {
+      const ser = S.hundSer * (drakt.hundSer || 1);
+      if (d.vila <= 0 && godis > 0 && tillBarn < ser && Math.hypot(barn.x - a.x, barn.y - a.y) < S.hundKoppel + ser) {
         d.jagar = S.hundJagar;
+        if (drakt.hundSer && a.pratOm < 6) {
+          saga(a, slumpa(S.folk.hundKatt), 2.4);
+          a.pratOm = 9;
+        }
         visaText(t("Voff!", "Woof!"), d.x, d.y - 1, "#ffffff", false, 0.9);
         spelaTon(520, 330, 0.09, "square", 0.07);
         spelaTon(520, 330, 0.09, "square", 0.07, 0.15);
@@ -2049,6 +2069,59 @@ function ritaDrakt(typ, x, y, s, o = {}) {
     ctx.beginPath();
     ctx.ellipse(0.08, -1.12, 0.08, 0.035, -0.4, 0, VARV);
     ctx.fill();
+  } else if (typ === "katt") {
+    // Svansen (bakom kroppen) viftar när man går
+    const vift = Math.sin(fas * 0.5 + tid * 2) * 0.06;
+    ctx.strokeStyle = "#15151a";
+    ctx.lineWidth = 0.09;
+    ctx.beginPath();
+    ctx.moveTo(-r * 0.12, -0.32);
+    ctx.quadraticCurveTo(-r * 0.5, -0.3, -r * (0.42 + vift), -0.62);
+    ctx.quadraticCurveTo(-r * (0.38 + vift), -0.8, -r * (0.26 + vift), -0.76);
+    ctx.stroke();
+    ben("#15151a", "#2a2a33");
+    rundRekt(ctx, -0.22, -0.74, 0.44, 0.52, 0.12);
+    fylld("#1d1d24");
+    ctx.fillStyle = "#3a3a46";
+    ctx.beginPath();
+    ctx.ellipse(0, -0.46, 0.11, 0.17, 0, 0, VARV);
+    ctx.fill();
+    hink();
+    // Huvan med öron
+    for (const i of [-1, 1]) {
+      ctx.beginPath();
+      ctx.moveTo(i * 0.2, -0.98);
+      ctx.lineTo(i * 0.14, -1.2);
+      ctx.lineTo(i * 0.04, -1.07);
+      ctx.closePath();
+      fylld("#1d1d24");
+      ctx.fillStyle = "#f4a7c0";
+      ctx.beginPath();
+      ctx.moveTo(i * 0.16, -1.02);
+      ctx.lineTo(i * 0.14, -1.14);
+      ctx.lineTo(i * 0.08, -1.07);
+      ctx.closePath();
+      ctx.fill();
+    }
+    ctx.beginPath();
+    ctx.arc(0, -0.9, 0.22, 0, VARV);
+    fylld("#1d1d24");
+    ansikte(-0.88);
+    // Målad nos och morrhår
+    ctx.fillStyle = "#1a1020";
+    ctx.beginPath();
+    ctx.arc(r * 0.04, -0.865, 0.025, 0, VARV);
+    ctx.fill();
+    ctx.strokeStyle = "#1a1020";
+    ctx.lineWidth = 0.014;
+    ctx.beginPath();
+    for (const i of [-1, 1]) {
+      for (const k of [-1, 0, 1]) {
+        ctx.moveTo(r * 0.04 + i * 0.06, -0.85 + k * 0.02);
+        ctx.lineTo(r * 0.04 + i * 0.15, -0.86 + k * 0.035);
+      }
+    }
+    ctx.stroke();
   } else {
     // Skelettet
     ben("#1b1b1f", "#111111");
