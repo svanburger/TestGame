@@ -451,7 +451,9 @@ att lösa kan mormor inte hjälpa till, så prova att lösa den själv först.
 Det är Halloween! Klä ut dig och ring på hos grannarna i kvarteret. Man får
 samla godis mellan klockan 18 och 20, vilket är 5 minuter på riktigt.
 
-- **Välj dräkt** på startskärmen: spöke, häxa, pumpa eller skelett.
+- **Välj dräkt** på startskärmen: spöke, häxa, pumpa, skelett eller svart
+  katt. Katten landar alltid på fötterna och tappar inget godis på
+  bananskal, men hundarna ser den på längre håll och vill gärna jaga den.
 - **Dra med fingret** (eller tryck någonstans, eller använd
   piltangenterna/WASD) så går barnet dit. Man får gå vart man vill i
   kvarteret, som har 36 hus på fyra gator. Man hinner inte alla på en kväll.
