@@ -91,8 +91,10 @@ Så kopplar man in det (en gång):
 Sedan finns en ruta längst ner under **🏆 Topplista** i menyn:
 
 - **Ny familjekod** skapar en kod. Enhetens gamla resultat följer med.
-- **Jag har en kod** låter en annan enhet gå med. Man kan också trycka
-  **📤 Skicka länk** och öppna länken på den andra enheten.
+- **Jag har en kod** låter en annan enhet gå med.
+- Med `familjeLank: true` i `topplista.js` finns också en knapp, **📤 Skicka
+  länk**, som skickar en länk. Öppnar man länken på en annan enhet går den
+  med i familjen. Den är avstängd just nu.
 - **Lämna** gör att enheten slutar dela (resultaten ligger kvar på enheten).
 
 **Bra att veta:** Supabase lägger gratisprojekt i viloläge om ingen har
