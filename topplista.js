@@ -35,6 +35,7 @@
     supabaseAdress: "https://picwtecaatrjjaryjsox.supabase.co", // Project URL
     supabaseNyckel: "sb_publishable_HjMcny2OxWmqar6deibNjA_XNJYLraz", // Publishable key (sb_publishable_...) eller den gamla "anon public"-nyckeln
     familjeLank: false,  // true = man kan skicka en länk som gör att en annan enhet går med i familjen
+    familjelista: false, // true = familjens topplista syns i menyn. false = topplistan finns bara på varje enhet
   };
 
   // Spelen som har en topplista, i samma ordning som i menyn.
@@ -82,7 +83,7 @@
   let gamlaNamn = las("topplista-namn", []);
 
   // Familjens topplista
-  const MED_SUPABASE = !!(INSTALLNINGAR.supabaseAdress && INSTALLNINGAR.supabaseNyckel);
+  const MED_SUPABASE = !!(INSTALLNINGAR.familjelista && INSTALLNINGAR.supabaseAdress && INSTALLNINGAR.supabaseNyckel);
   let familj = MED_SUPABASE ? las("topplista-familj", "") : "";
   let familjListor = las("topplista-familjlistor", {}); // Det senaste vi hämtade
   let ko = las("topplista-ko", []);                      // Resultat som inte har skickats än
@@ -425,7 +426,8 @@
     let valt = null;
     function valj(spel) {
       valt = spel;
-      plats.replaceChildren(skapa("h3", "tl-spelnamn", spel.ikon + " " + spel.namn), ritaLista(spel, markera), varListan());
+      plats.replaceChildren(skapa("h3", "tl-spelnamn", spel.ikon + " " + spel.namn), ritaLista(spel, markera));
+      if (MED_SUPABASE) plats.append(varListan()); // Bara när det finns två sorters listor
       for (const f of flikar.children) f.setAttribute("aria-selected", String(f.dataset.spel === spel.id));
     }
 

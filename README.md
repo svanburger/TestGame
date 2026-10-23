@@ -71,6 +71,9 @@ topplista med de 10 bästa resultaten.
 
 ### Familjens topplista 👨‍👩‍👧
 
+**Avstängd just nu.** Den slås på med `familjelista: true` högst upp i
+`topplista.js`. Supabase-projektet och nyckeln är redan inlagda.
+
 Med en gratis databas i Supabase kan familjens iPads och telefoner dela
 topplista. Varje familj har en **familjekod** (till exempel `K7QM-2XPA`),
 och bara enheter med samma kod ser samma lista. Främlingar kan alltså inte
