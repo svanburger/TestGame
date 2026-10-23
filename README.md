@@ -66,21 +66,27 @@ topplista med de 10 bästa resultaten.
   *Spara inte*.
 - Topplistan för ett spel finns i **pausmenyn**. Alla topplistorna finns
   under **🏆 Topplista** i menyn.
-- Topplistan sparas på **just den här enheten** (iPaden har sin egen lista,
-  telefonen sin), om man inte har kopplat in familjens topplista (se nedan).
+- Topplistan är **gemensam för alla som spelar**, på alla enheter (se
+  Topplistan på nätet nedan). Utan internet sparas resultaten på enheten
+  och skickas när internet är tillbaka.
 
-### Familjens topplista 👨‍👩‍👧
+### Topplistan på nätet 🌍
 
-**Avstängd just nu.** Den slås på med `familjelista: true` högst upp i
-`topplista.js`. Supabase-projektet och nyckeln är redan inlagda.
+Topplistan sparas i en gratis databas i Supabase. Det finns tre lägen, som
+väljs högst upp i `topplista.js`:
 
-Med en gratis databas i Supabase kan familjens iPads och telefoner dela
-topplista. Varje familj har en **familjekod** (till exempel `K7QM-2XPA`),
-och bara enheter med samma kod ser samma lista. Främlingar kan alltså inte
-se barnens namn eller skriva något på listan. Utan internet sparas
-resultaten på enheten och skickas när internet är tillbaka.
+- `global: true` (som nu): **en topplista för alla** som spelar. När man
+  skriver sitt namn står det att alla ser det, och att man bara ska skriva
+  sitt förnamn. Första gången en enhet öppnar spelen följer dess gamla
+  resultat med upp.
+- `global: false` och `familjelista: true`: bara enheter med samma
+  familjekod delar topplista (se nedan).
+- Båda `false`: topplistan finns bara på varje enhet.
 
-Så kopplar man in det (en gång):
+Vill man ta bort ett namn från den globala listan gör man det i Supabase:
+**Table Editor → topplista**, markera raden och ta bort den.
+
+Så kopplar man in Supabase (det är redan gjort):
 
 1. Skapa ett nytt projekt på [supabase.com](https://supabase.com) (New
    project). Namn spelar ingen roll, till exempel `bajskorv`.
@@ -91,7 +97,15 @@ Så kopplar man in det (en gång):
 4. Klistra in dem i `supabaseAdress` och `supabaseNyckel` högst upp i
    `topplista.js`.
 
-Sedan finns en ruta längst ner under **🏆 Topplista** i menyn:
+#### Familjekod
+
+Med `global: false` och `familjelista: true` kan familjens iPads och
+telefoner dela topplista. Varje familj har en **familjekod** (till exempel `K7QM-2XPA`),
+och bara enheter med samma kod ser samma lista. Främlingar kan alltså inte
+se barnens namn eller skriva något på listan. Utan internet sparas
+resultaten på enheten och skickas när internet är tillbaka.
+
+Då finns en ruta längst ner under **🏆 Topplista** i menyn:
 
 - **Ny familjekod** skapar en kod. Enhetens gamla resultat följer med.
 - **Jag har en kod** låter en annan enhet gå med.

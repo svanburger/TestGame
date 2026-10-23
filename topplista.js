@@ -30,12 +30,13 @@
     sparadeNamn: 6,    // Hur många namn som syns som knappar
     fordrojning: 0.7,  // Sekunder innan man får skriva sitt namn (spelen kan ändra det)
 
-    // Familjens topplista. Fyll i från Supabase: Project Settings → API.
+    // Topplistan på nätet. Fyll i från Supabase: Project Settings → API.
     // Är de tomma finns topplistan bara på varje enhet för sig.
     supabaseAdress: "https://picwtecaatrjjaryjsox.supabase.co", // Project URL
     supabaseNyckel: "sb_publishable_HjMcny2OxWmqar6deibNjA_XNJYLraz", // Publishable key (sb_publishable_...) eller den gamla "anon public"-nyckeln
     familjeLank: false,  // true = man kan skicka en länk som gör att en annan enhet går med i familjen
-    familjelista: false, // true = familjens topplista syns i menyn. false = topplistan finns bara på varje enhet
+    global: true,        // true = en topplista för alla som spelar, på alla enheter
+    familjelista: false, // true = familjer med samma familjekod delar topplista (används inte när global är på)
   };
 
   // Spelen som har en topplista, i samma ordning som i menyn.
@@ -82,9 +83,14 @@
   let listor = las("topplista", {});
   let gamlaNamn = las("topplista-namn", []);
 
-  // Familjens topplista
-  const MED_SUPABASE = !!(INSTALLNINGAR.familjelista && INSTALLNINGAR.supabaseAdress && INSTALLNINGAR.supabaseNyckel);
+  // Topplistan på nätet. Den globala listan är en "familj" som alla är med i.
+  const GLOBAL_KOD = "GLOBAL00";
+  const MED_NYCKLAR = !!(INSTALLNINGAR.supabaseAdress && INSTALLNINGAR.supabaseNyckel);
+  const MED_GLOBAL = MED_NYCKLAR && INSTALLNINGAR.global;
+  const MED_FAMILJ = MED_NYCKLAR && !MED_GLOBAL && INSTALLNINGAR.familjelista;
+  const MED_SUPABASE = MED_GLOBAL || MED_FAMILJ;
   let familj = MED_SUPABASE ? las("topplista-familj", "") : "";
+  if (MED_FAMILJ && familj === GLOBAL_KOD) familj = ""; // Den globala listan är ingen riktig familj
   let familjListor = las("topplista-familjlistor", {}); // Det senaste vi hämtade
   let ko = las("topplista-ko", []);                      // Resultat som inte har skickats än
   let natStatus = "";    // "hamtar", "fel" eller "" (allt gick bra)
@@ -224,9 +230,14 @@
     spara("topplista-ko", []);
   }
 
+  // Första gången med den globala listan följer enhetens gamla resultat med dit
+  if (MED_GLOBAL) {
+    if (familj !== GLOBAL_KOD) gaMed(GLOBAL_KOD);
+    else skicka();
+  }
   // En länk med ?familj=KOD gör att enheten går med i familjen (om familjeLank är på)
-  if (MED_SUPABASE && !INSTALLNINGAR.familjeLank) skicka();
-  if (MED_SUPABASE && INSTALLNINGAR.familjeLank) {
+  if (MED_FAMILJ && !INSTALLNINGAR.familjeLank) skicka();
+  if (MED_FAMILJ && INSTALLNINGAR.familjeLank) {
     try {
       const url = new URL(location.href);
       const kod = stadaKod(url.searchParams.get("familj"));
@@ -318,7 +329,7 @@
   function varListan() {
     let text = t("📱 Sparad på den här enheten", "📱 Saved on this device");
     if (familj) {
-      text = t("👨‍👩‍👧 Familjens topplista", "👨‍👩‍👧 The family's high scores");
+      text = MED_GLOBAL ? t("🌍 Topplista för alla som spelar", "🌍 High scores for everyone who plays") : t("👨‍👩‍👧 Familjens topplista", "👨‍👩‍👧 The family's high scores");
       if (natStatus === "hamtar") text += t(" · hämtar…", " · loading…");
       if (natStatus === "fel") text += t(" · utan internet just nu", " · offline right now");
     }
@@ -447,7 +458,7 @@
     }
     delar.push(plats);
     // I menyn kan man koppla ihop familjens enheter
-    if (!spelId && MED_SUPABASE) delar.push(familjeDel(() => valj(valt)));
+    if (!spelId && MED_FAMILJ) delar.push(familjeDel(() => valj(valt)));
     delar.push(knapp(t("Klar", "Done"), "", stang));
     oppna(delar);
     // Har familjens lista ändrats när den har hämtats ritas den om
@@ -500,6 +511,8 @@
     uppdateraKnapp();
 
     form.append(etikett, falt);
+    // Med den globala listan syns namnet för alla
+    if (MED_GLOBAL) form.append(skapa("p", "tl-var", t("Alla som spelar ser namnet. Skriv bara ditt förnamn.", "Everyone who plays sees the name. Just write your first name.")));
 
     // Namn man har skrivit förut, så att man bara behöver trycka
     if (gamlaNamn.length) {
