@@ -34,6 +34,7 @@
     // Är de tomma finns topplistan bara på varje enhet för sig.
     supabaseAdress: "https://picwtecaatrjjaryjsox.supabase.co", // Project URL
     supabaseNyckel: "sb_publishable_HjMcny2OxWmqar6deibNjA_XNJYLraz", // Publishable key (sb_publishable_...) eller den gamla "anon public"-nyckeln
+    familjeLank: false,  // true = man kan skicka en länk som gör att en annan enhet går med i familjen
   };
 
   // Spelen som har en topplista, i samma ordning som i menyn.
@@ -222,8 +223,9 @@
     spara("topplista-ko", []);
   }
 
-  // En länk med ?familj=KOD gör att enheten går med i familjen
-  if (MED_SUPABASE) {
+  // En länk med ?familj=KOD gör att enheten går med i familjen (om familjeLank är på)
+  if (MED_SUPABASE && !INSTALLNINGAR.familjeLank) skicka();
+  if (MED_SUPABASE && INSTALLNINGAR.familjeLank) {
     try {
       const url = new URL(location.href);
       const kod = stadaKod(url.searchParams.get("familj"));
@@ -236,8 +238,8 @@
     } catch (e) {
       // Gammal webbläsare – strunta i länken
     }
-    window.addEventListener("online", () => skicka());
   }
+  if (MED_SUPABASE) window.addEventListener("online", () => skicka());
 
   // ---------- Rutan som visas ovanpå spelet ----------
 
@@ -331,10 +333,12 @@
         del.append(
           skapa("p", "tl-familjtext", t("Familjekod: ", "Family code: ")),
           skapa("p", "tl-kod", visaKod(familj)),
-          skapa("p", "tl-familjtext", t("Skriv in koden på de andra iPadsen och telefonerna, eller skicka länken.", "Enter the code on the other iPads and phones, or send the link."))
+          skapa("p", "tl-familjtext", INSTALLNINGAR.familjeLank
+            ? t("Skriv in koden på de andra iPadsen och telefonerna, eller skicka länken.", "Enter the code on the other iPads and phones, or send the link.")
+            : t("Skriv in koden på de andra iPadsen och telefonerna.", "Enter the code on the other iPads and phones."))
         );
-        const rad = skapa("div", "tl-knapprad");
-        rad.append(
+        const rad = skapa("div", INSTALLNINGAR.familjeLank ? "tl-knapprad" : "");
+        if (INSTALLNINGAR.familjeLank) rad.append(
           knapp(t("📤 Skicka länk", "📤 Send link"), "sekundar", async () => {
             const lank = new URL("./?familj=" + familj, document.baseURI).href;
             try {
@@ -346,7 +350,9 @@
             } catch (e) {
               // Man ångrade sig – gör inget
             }
-          }),
+          })
+        );
+        rad.append(
           knapp(t("Lämna", "Leave"), "sekundar", () => {
             lamna();
             visaDel();
