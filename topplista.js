@@ -32,8 +32,8 @@
 
     // Familjens topplista. Fyll i från Supabase: Project Settings → API.
     // Är de tomma finns topplistan bara på varje enhet för sig.
-    supabaseAdress: "",  // Project URL, t.ex. "https://abcdefghijkl.supabase.co"
-    supabaseNyckel: "",  // Publishable key (sb_publishable_...) eller den gamla "anon public"-nyckeln
+    supabaseAdress: "https://picwtecaatrjjaryjsox.supabase.co", // Project URL
+    supabaseNyckel: "sb_publishable_HjMcny2OxWmqar6deibNjA_XNJYLraz", // Publishable key (sb_publishable_...) eller den gamla "anon public"-nyckeln
   };
 
   // Spelen som har en topplista, i samma ordning som i menyn.
