@@ -648,6 +648,7 @@ function slutaSpel() {
     rekord = poang;
     sparaRekord(rekord);
   }
+  Topplista.nyttResultat("fis", poang); // Har man kommit med får man skriva sitt namn
 }
 
 // Varje ny dag krystar pappa fortare, gränsen kan hamna lägre och

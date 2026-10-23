@@ -521,6 +521,7 @@ function slutaSpel() {
     rekord = poang;
     sparaRekord(rekord);
   }
+  Topplista.nyttResultat("pappa", poang); // Har man kommit med får man skriva sitt namn
 }
 
 // Pappa blir tröttare ju längre man spelar, och då lugnar han sig långsammare

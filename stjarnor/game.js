@@ -237,6 +237,7 @@ function slutaSpel() {
     rekord = poang;
     sparaRekord(rekord);
   }
+  Topplista.nyttResultat("stjarnor", poang); // Har man kommit med får man skriva sitt namn
 }
 
 // ---------- Rita ----------

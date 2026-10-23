@@ -1311,6 +1311,7 @@ function banaKlar() {
     if (hundTyp.katt) utmarkelse("kattmanniska");
     sparaInstallning("hund-hemma", "ja");
     sparaOmRekord();
+    Topplista.nyttResultat("hund", poang, { fordrojning: 0.9 }); // Har man kommit med får man skriva sitt namn
     spelaArpeggio([523, 659, 784, 1047]);
   }
 }
@@ -1320,6 +1321,7 @@ function slutaSpel() {
   tidSedanSlut = 0;
   fingerNere = false;
   sparaOmRekord();
+  Topplista.nyttResultat("hund", poang);
 }
 
 function sparaOmRekord() {
