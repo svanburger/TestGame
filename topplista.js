@@ -5,7 +5,10 @@
 //  skriva sitt namn. Namnen man har skrivit förut syns som knappar, så att
 //  man inte behöver skriva samma namn varje gång.
 //
-//  Topplistan sparas i webbläsaren på just den här enheten.
+//  Topplistan sparas i webbläsaren på just den här enheten. Har man
+//  kopplat in Supabase (se nedan och README) kan familjen dela topplista:
+//  alla enheter med samma familjekod ser samma lista. Utan internet sparas
+//  resultaten på enheten och skickas när det finns internet igen.
 //
 //  Så här använder ett spel topplistan:
 //
@@ -26,6 +29,11 @@
     langstaNamn: 14,   // Max antal tecken i ett namn
     sparadeNamn: 6,    // Hur många namn som syns som knappar
     fordrojning: 0.7,  // Sekunder innan man får skriva sitt namn (spelen kan ändra det)
+
+    // Familjens topplista. Fyll i från Supabase: Project Settings → API.
+    // Är de tomma finns topplistan bara på varje enhet för sig.
+    supabaseAdress: "",  // Project URL, t.ex. "https://abcdefghijkl.supabase.co"
+    supabaseNyckel: "",  // Publishable key (sb_publishable_...) eller den gamla "anon public"-nyckeln
   };
 
   // Spelen som har en topplista, i samma ordning som i menyn.
@@ -72,8 +80,27 @@
   let listor = las("topplista", {});
   let gamlaNamn = las("topplista-namn", []);
 
-  function listaFor(spelId) {
+  // Familjens topplista
+  const MED_SUPABASE = !!(INSTALLNINGAR.supabaseAdress && INSTALLNINGAR.supabaseNyckel);
+  let familj = MED_SUPABASE ? las("topplista-familj", "") : "";
+  let familjListor = las("topplista-familjlistor", {}); // Det senaste vi hämtade
+  let ko = las("topplista-ko", []);                      // Resultat som inte har skickats än
+  let natStatus = "";    // "hamtar", "fel" eller "" (allt gick bra)
+  let narHamtat = null;  // Körs när en ny familjelista har hämtats
+
+  function egenLista(spelId) {
     return Array.isArray(listor[spelId]) ? listor[spelId] : [];
+  }
+
+  // Den lista som visas: familjens (med det som inte har skickats än), annars enhetens
+  function listaFor(spelId) {
+    if (!familj) return egenLista(spelId);
+    const fran = Array.isArray(familjListor[spelId]) ? familjListor[spelId] : [];
+    const alla = [...fran];
+    for (const rad of ko) {
+      if (rad.spel === spelId && !alla.some((r) => r.tid === rad.tid && r.namn === rad.namn)) alla.push(rad);
+    }
+    return sortera(alla).slice(0, INSTALLNINGAR.antal);
   }
 
   // Bäst först. Har två lika många poäng står den som kom först överst.
@@ -93,11 +120,123 @@
   function laggTill(spelId, namn, poang) {
     const rad = { namn, poang, tid: Date.now() };
     listor = las("topplista", {}); // Ett annat spel i en annan flik kan ha sparat under tiden
-    listor[spelId] = sortera([...listaFor(spelId), rad]).slice(0, INSTALLNINGAR.antal);
+    listor[spelId] = sortera([...egenLista(spelId), rad]).slice(0, INSTALLNINGAR.antal);
     spara("topplista", listor);
+    if (familj) {
+      ko = [...ko, { spel: spelId, ...rad }];
+      spara("topplista-ko", ko);
+      skicka();
+    }
     gamlaNamn = [namn, ...gamlaNamn.filter((n) => n !== namn)].slice(0, INSTALLNINGAR.sparadeNamn);
     spara("topplista-namn", gamlaNamn);
     return rad;
+  }
+
+  // ---------- Familjens topplista (Supabase) ----------
+  //
+  //  Supabase-projektet har två funktioner (se supabase.sql):
+  //    spara_resultat  – sparar ett resultat för en familj
+  //    hamta_topplista – hämtar de 10 bästa i varje spel för en familj
+  //  Utan rätt familjekod kan man inte se någon annans lista.
+
+  const KOD_TECKEN = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // Inga O/0 eller I/1 som går att blanda ihop
+
+  function nyKod() {
+    const slump = new Uint32Array(8);
+    crypto.getRandomValues(slump);
+    return Array.from(slump, (n) => KOD_TECKEN[n % KOD_TECKEN.length]).join("");
+  }
+
+  // "k7qm 2xpa" och "K7QM-2XPA" blir "K7QM2XPA". Fel längd blir "".
+  function stadaKod(text) {
+    const kod = String(text || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+    return kod.length === 8 ? kod : "";
+  }
+
+  function visaKod(kod) {
+    return kod.slice(0, 4) + "-" + kod.slice(4);
+  }
+
+  function anropa(funktion, data) {
+    const nyckel = INSTALLNINGAR.supabaseNyckel;
+    const huvuden = { "Content-Type": "application/json", apikey: nyckel };
+    // Den gamla anon-nyckeln ska också skickas som Authorization. Den nya (sb_...) ska inte det.
+    if (!nyckel.startsWith("sb_")) huvuden.Authorization = "Bearer " + nyckel;
+    const adress = INSTALLNINGAR.supabaseAdress.replace(/\/+$/, "") + "/rest/v1/rpc/" + funktion;
+    return fetch(adress, { method: "POST", headers: huvuden, body: JSON.stringify(data) }).then((svar) => {
+      if (!svar.ok) throw new Error("Supabase svarade " + svar.status);
+      return svar.status === 204 ? null : svar.json();
+    });
+  }
+
+  // Skickar det som ligger i kön, och hämtar sedan familjens lista
+  let skickar = null;
+  function skicka() {
+    if (!familj) return Promise.resolve();
+    if (skickar) return skickar;
+    natStatus = "hamtar";
+    skickar = (async () => {
+      try {
+        // En i taget. Det som kommer till medan vi skickar följer med i samma vända.
+        for (let varv = 0; ko.length && varv < 500; varv++) {
+          const rad = ko[0];
+          await anropa("spara_resultat", { p_familj: familj, p_spel: rad.spel, p_namn: rad.namn, p_poang: rad.poang, p_tid: rad.tid });
+          ko = ko.filter((r) => r !== rad);
+          spara("topplista-ko", ko);
+        }
+        const rader = await anropa("hamta_topplista", { p_familj: familj });
+        const nya = {};
+        for (const r of rader || []) (nya[r.spel] = nya[r.spel] || []).push({ namn: r.namn, poang: r.poang, tid: Number(r.tid) });
+        familjListor = nya;
+        spara("topplista-familjlistor", familjListor);
+        natStatus = "";
+      } catch (e) {
+        natStatus = "fel"; // Inget internet, eller projektet sover. Det som inte skickats ligger kvar i kön.
+      } finally {
+        skickar = null;
+        if (narHamtat) narHamtat();
+      }
+    })();
+    return skickar;
+  }
+
+  function gaMed(kod) {
+    familj = kod;
+    spara("topplista-familj", familj);
+    familjListor = {};
+    spara("topplista-familjlistor", familjListor);
+    // Enhetens egna resultat följer med till familjens lista. Samma resultat sparas bara en gång.
+    const alla = [];
+    for (const spel of Object.keys(listor)) for (const rad of egenLista(spel)) alla.push({ spel, ...rad });
+    ko = alla;
+    spara("topplista-ko", ko);
+    return skicka();
+  }
+
+  function lamna() {
+    familj = "";
+    spara("topplista-familj", "");
+    familjListor = {};
+    spara("topplista-familjlistor", {});
+    ko = [];
+    spara("topplista-ko", []);
+  }
+
+  // En länk med ?familj=KOD gör att enheten går med i familjen
+  if (MED_SUPABASE) {
+    try {
+      const url = new URL(location.href);
+      const kod = stadaKod(url.searchParams.get("familj"));
+      if (url.searchParams.has("familj")) {
+        url.searchParams.delete("familj");
+        history.replaceState(null, "", url.href);
+      }
+      if (kod && kod !== familj) gaMed(kod);
+      else skicka();
+    } catch (e) {
+      // Gammal webbläsare – strunta i länken
+    }
+    window.addEventListener("online", () => skicka());
   }
 
   // ---------- Rutan som visas ovanpå spelet ----------
@@ -134,6 +273,7 @@
     if (!ruta) return;
     ruta.remove();
     ruta = null;
+    narHamtat = null;
     const sen = narStangd;
     narStangd = null;
     if (sen) sen();
@@ -171,6 +311,98 @@
     return ol;
   }
 
+  // En rad under listan som säger vems lista det är
+  function varListan() {
+    let text = t("📱 Sparad på den här enheten", "📱 Saved on this device");
+    if (familj) {
+      text = t("👨‍👩‍👧 Familjens topplista", "👨‍👩‍👧 The family's high scores");
+      if (natStatus === "hamtar") text += t(" · hämtar…", " · loading…");
+      if (natStatus === "fel") text += t(" · utan internet just nu", " · offline right now");
+    }
+    return skapa("p", "tl-var", text);
+  }
+
+  // Där man skapar en familjekod, går med i en familj eller lämnar den
+  function familjeDel(ritaOm) {
+    const del = skapa("div", "tl-familj");
+    function visaDel(lage) {
+      del.replaceChildren();
+      if (familj) {
+        del.append(
+          skapa("p", "tl-familjtext", t("Familjekod: ", "Family code: ")),
+          skapa("p", "tl-kod", visaKod(familj)),
+          skapa("p", "tl-familjtext", t("Skriv in koden på de andra iPadsen och telefonerna, eller skicka länken.", "Enter the code on the other iPads and phones, or send the link."))
+        );
+        const rad = skapa("div", "tl-knapprad");
+        rad.append(
+          knapp(t("📤 Skicka länk", "📤 Send link"), "sekundar", async () => {
+            const lank = new URL("./?familj=" + familj, document.baseURI).href;
+            try {
+              if (navigator.share) await navigator.share({ title: "Bajskorv Studios", text: t("Vår familjs topplista", "Our family's high scores"), url: lank });
+              else {
+                await navigator.clipboard.writeText(lank);
+                visaTips(t("Länken är kopierad!", "The link is copied!"));
+              }
+            } catch (e) {
+              // Man ångrade sig – gör inget
+            }
+          }),
+          knapp(t("Lämna", "Leave"), "sekundar", () => {
+            lamna();
+            visaDel();
+            ritaOm();
+          })
+        );
+        del.append(rad);
+      } else if (lage === "skrivKod") {
+        const form = skapa("form", "tl-form");
+        const falt = skapa("input", "tl-falt");
+        falt.placeholder = "ABCD-1234";
+        falt.maxLength = 12;
+        falt.autocomplete = "off";
+        falt.autocapitalize = "characters";
+        falt.spellcheck = false;
+        falt.setAttribute("aria-label", t("Familjekod", "Family code"));
+        const gaKnapp = skapa("button", "menyknapp", t("Gå med", "Join"));
+        gaKnapp.type = "submit";
+        form.append(falt, gaKnapp);
+        form.addEventListener("submit", (e) => {
+          e.preventDefault();
+          const kod = stadaKod(falt.value);
+          if (!kod) {
+            visaTips(t("Koden har 8 tecken, t.ex. ABCD-1234.", "The code has 8 characters, e.g. ABCD-1234."));
+            return;
+          }
+          falt.blur();
+          gaMed(kod);
+          visaDel();
+          ritaOm();
+        });
+        del.append(skapa("p", "tl-familjtext", t("Skriv familjekoden:", "Enter the family code:")), form);
+        falt.focus({ preventScroll: true });
+      } else {
+        del.append(skapa("p", "tl-familjtext", t("🌍 Dela topplistan med familjens andra iPads och telefoner", "🌍 Share the high scores with the family's other iPads and phones")));
+        const rad = skapa("div", "tl-knapprad");
+        rad.append(
+          knapp(t("Ny familjekod", "New family code"), "sekundar", () => {
+            gaMed(nyKod());
+            visaDel();
+            ritaOm();
+          }),
+          knapp(t("Jag har en kod", "I have a code"), "sekundar", () => visaDel("skrivKod"))
+        );
+        del.append(rad);
+      }
+    }
+    const tipsRad = skapa("p", "tl-familjtips");
+    function visaTips(text) {
+      tipsRad.textContent = text;
+      del.append(tipsRad);
+    }
+    visaDel();
+    return del;
+  }
+
   function knapp(text, klass, vidTryck) {
     const b = skapa("button", "menyknapp " + (klass || ""), text);
     b.type = "button";
@@ -184,8 +416,10 @@
     const delar = [rubrik];
     const plats = skapa("div", "tl-innehall");
 
+    let valt = null;
     function valj(spel) {
-      plats.replaceChildren(skapa("h3", "tl-spelnamn", spel.ikon + " " + spel.namn), ritaLista(spel, markera));
+      valt = spel;
+      plats.replaceChildren(skapa("h3", "tl-spelnamn", spel.ikon + " " + spel.namn), ritaLista(spel, markera), varListan());
       for (const f of flikar.children) f.setAttribute("aria-selected", String(f.dataset.spel === spel.id));
     }
 
@@ -203,8 +437,16 @@
       }
       delar.push(flikar);
     }
-    delar.push(plats, knapp(t("Klar", "Done"), "", stang));
+    delar.push(plats);
+    // I menyn kan man koppla ihop familjens enheter
+    if (!spelId && MED_SUPABASE) delar.push(familjeDel(() => valj(valt)));
+    delar.push(knapp(t("Klar", "Done"), "", stang));
     oppna(delar);
+    // Har familjens lista ändrats när den har hämtats ritas den om
+    narHamtat = () => {
+      if (ruta && valt && plats.isConnected) valj(valt);
+    };
+    if (familj) skicka();
 
     // I menyn visas först spelet där någon senast kom med
     let forst = spelId ? hittaSpel(spelId) : SPELEN[0];
@@ -447,6 +689,27 @@
       outline: 4px solid #4a90e2;
       outline-offset: 3px;
     }
+    .tl-var { margin: 0; font-size: 0.9rem; color: #6b5a48; }
+    .tl-familj {
+      display: grid;
+      gap: 8px;
+      padding: 14px;
+      border-radius: 18px;
+      background: #f4f6fb;
+    }
+    .tl-familjtext, .tl-familjtips { margin: 0; font-size: 1rem; }
+    .tl-familjtips { font-weight: 700; color: #b5462f; }
+    .tl-kod {
+      margin: 0;
+      font-size: 1.8rem;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      font-variant-numeric: tabular-nums;
+      -webkit-user-select: all;
+      user-select: all;
+    }
+    .tl-knapprad { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .tl-knapprad .menyknapp { font-size: 1.05rem; padding: 10px 8px; }
     @keyframes tl-lys {
       50% { transform: scale(1.03); }
     }

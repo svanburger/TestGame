@@ -9,6 +9,7 @@ inget att installera. Startsidan är en meny där man väljer spel.
 | `spel.css`   | Gemensam stil för spelen (fyller skärmen, hus-knappen).   |
 | `sprak.js`   | Väljer svenska eller engelska och översätter texterna.    |
 | `topplista.js` | Topplistan: de 10 bästa i varje spel, med namn.         |
+| `supabase.sql` | Det som ska in i Supabase för familjens topplista.     |
 | `offline.js`, `sw.js` | Sparar spelen på enheten så att de fungerar utan internet. |
 | `manifest.webmanifest` | Gör att menyn kan installeras som en app. `ikon-192.png` och `ikon-512.png` är appens ikon. |
 | `favicon.svg` | Ikonen med bajshögen som syns i webbläsarens flik. `favicon.png` och `apple-touch-icon.png` (hemskärmen på iPad) är samma bild som PNG. |
@@ -66,7 +67,37 @@ topplista med de 10 bästa resultaten.
 - Topplistan för ett spel finns i **pausmenyn**. Alla topplistorna finns
   under **🏆 Topplista** i menyn.
 - Topplistan sparas på **just den här enheten** (iPaden har sin egen lista,
-  telefonen sin).
+  telefonen sin), om man inte har kopplat in familjens topplista (se nedan).
+
+### Familjens topplista 👨‍👩‍👧
+
+Med en gratis databas i Supabase kan familjens iPads och telefoner dela
+topplista. Varje familj har en **familjekod** (till exempel `K7QM-2XPA`),
+och bara enheter med samma kod ser samma lista. Främlingar kan alltså inte
+se barnens namn eller skriva något på listan. Utan internet sparas
+resultaten på enheten och skickas när internet är tillbaka.
+
+Så kopplar man in det (en gång):
+
+1. Skapa ett nytt projekt på [supabase.com](https://supabase.com) (New
+   project). Namn spelar ingen roll, till exempel `bajskorv`.
+2. Öppna **SQL Editor**, klistra in allt i `supabase.sql` och tryck **Run**.
+3. Gå till **Project Settings → API** (eller **API Keys**) och kopiera
+   *Project URL* och *Publishable key* (eller den äldre *anon public*).
+   De är gjorda för att synas i webbläsaren, så de får ligga i koden.
+4. Klistra in dem i `supabaseAdress` och `supabaseNyckel` högst upp i
+   `topplista.js`.
+
+Sedan finns en ruta längst ner under **🏆 Topplista** i menyn:
+
+- **Ny familjekod** skapar en kod. Enhetens gamla resultat följer med.
+- **Jag har en kod** låter en annan enhet gå med. Man kan också trycka
+  **📤 Skicka länk** och öppna länken på den andra enheten.
+- **Lämna** gör att enheten slutar dela (resultaten ligger kvar på enheten).
+
+**Bra att veta:** Supabase lägger gratisprojekt i viloläge om ingen har
+använt dem på en vecka. Då fungerar spelen ändå, men resultaten skickas
+inte förrän man har väckt projektet igen (Restore project på supabase.com).
 
 Så här kopplar man in topplistan i ett spel:
 
@@ -390,9 +421,24 @@ trycka så hårt att han bajsar på sig.
 - När spelet är slut får man en titel, från *Pruttpraktikant* till
   *Klimatbov*.
 
+**👥 Två spelare:** På startskärmen väljer man 1 eller 2 spelare. Med två
+spelare står två pappor bredvid varandra, blå och röd. Man håller tummen
+på sin halva av skärmen (blå till vänster, röd till höger, på datorn A och
+L), och båda krystar samtidigt.
+
+- Båda papporna har en egen hemlig gräns. Man får släppa en fis per runda.
+- Den som släpper **närmast sin gräns** utan att bajsa på sig vinner rundan
+  och får en ⭐. Efter rundan ser man hur nära gränsen var och en kom.
+- Bajsar man på sig, eller inte vågar krysta inom 8 sekunder, förlorar man
+  rundan.
+- Varje runda är i ett nytt rum. Den som först får 3 ⭐ vinner.
+- Bäst är att hålla iPaden eller telefonen liggande, med en tumme var.
+
 Testa att ändra i `fis/game.js`:
 
 - hur många underbyxor pappa har (`underbyxor`)
+- två spelare (`tvaSpelare`): hur många rundor man ska vinna, hur länge man
+  får vänta, och spelarnas namn, färger och tangenter
 - hur fort trycket ökar och var gränsen hamnar (`krystFart`, `grans`)
 - hur tidigt varningarna kommer (`varningar`)
 - fisarnas namn och ljud (`fisar`)
