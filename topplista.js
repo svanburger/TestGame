@@ -481,7 +481,9 @@
     falt.autocapitalize = "words";
     falt.spellcheck = false;
     falt.enterKeyHint = "done";
-    falt.value = gamlaNamn[0] || "";
+    falt.value = gamlaNamn[0] || ""; // Namnet man skrev senast på den här enheten
+    // Trycker man i rutan markeras namnet, så att ett nytt namn skrivs över det gamla
+    falt.addEventListener("focus", () => setTimeout(() => falt.setSelectionRange(0, falt.value.length), 0));
 
     const sparaKnapp = skapa("button", "menyknapp", t("Spara", "Save"));
     sparaKnapp.type = "submit";
