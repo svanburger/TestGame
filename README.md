@@ -8,6 +8,10 @@ inget att installera. Startsidan är en meny där man väljer spel.
 | `index.html` | Menyn man ser först, med Bajskorv Studios-loggan.         |
 | `spel.css`   | Gemensam stil för spelen (fyller skärmen, hus-knappen).   |
 | `sprak.js`   | Väljer svenska eller engelska och översätter texterna.    |
+| `topplista.js` | Topplistan: de 10 bästa i varje spel, med namn.         |
+| `supabase.sql` | Det som ska in i Supabase för familjens topplista.     |
+| `offline.js`, `sw.js` | Sparar spelen på enheten så att de fungerar utan internet. |
+| `manifest.webmanifest` | Gör att menyn kan installeras som en app. `ikon-192.png` och `ikon-512.png` är appens ikon. |
 | `favicon.svg` | Ikonen med bajshögen som syns i webbläsarens flik. `favicon.png` och `apple-touch-icon.png` (hemskärmen på iPad) är samma bild som PNG. |
 | `stjarnor/`  | Spelet "Fånga stjärnorna".                                |
 | `parkour/`   | Spelet "Parkourkatten".                                   |
@@ -50,6 +54,75 @@ I HTML skriver man svenskan som vanligt och engelskan i `data-en`:
 ```
 
 Varje spel laddar `sprak.js` före sin `game.js`.
+
+## Topplista 🏆
+
+Varje spel (utom Bordsplaceringen, som är ett pussel utan poäng) har en
+topplista med de 10 bästa resultaten.
+
+- När spelet är slut och man har kommit med på topplistan får man **skriva
+  sitt namn**. Namnen man har skrivit förut syns som knappar, så att man
+  bara behöver trycka på sitt namn. Vill man inte vara med trycker man
+  *Spara inte*.
+- Topplistan för ett spel finns i **pausmenyn**. Alla topplistorna finns
+  under **🏆 Topplista** i menyn.
+- Topplistan sparas på **just den här enheten** (iPaden har sin egen lista,
+  telefonen sin), om man inte har kopplat in familjens topplista (se nedan).
+
+### Familjens topplista 👨‍👩‍👧
+
+Med en gratis databas i Supabase kan familjens iPads och telefoner dela
+topplista. Varje familj har en **familjekod** (till exempel `K7QM-2XPA`),
+och bara enheter med samma kod ser samma lista. Främlingar kan alltså inte
+se barnens namn eller skriva något på listan. Utan internet sparas
+resultaten på enheten och skickas när internet är tillbaka.
+
+Så kopplar man in det (en gång):
+
+1. Skapa ett nytt projekt på [supabase.com](https://supabase.com) (New
+   project). Namn spelar ingen roll, till exempel `bajskorv`.
+2. Öppna **SQL Editor**, klistra in allt i `supabase.sql` och tryck **Run**.
+3. Gå till **Project Settings → API** (eller **API Keys**) och kopiera
+   *Project URL* och *Publishable key* (eller den äldre *anon public*).
+   De är gjorda för att synas i webbläsaren, så de får ligga i koden.
+4. Klistra in dem i `supabaseAdress` och `supabaseNyckel` högst upp i
+   `topplista.js`.
+
+Sedan finns en ruta längst ner under **🏆 Topplista** i menyn:
+
+- **Ny familjekod** skapar en kod. Enhetens gamla resultat följer med.
+- **Jag har en kod** låter en annan enhet gå med. Man kan också trycka
+  **📤 Skicka länk** och öppna länken på den andra enheten.
+- **Lämna** gör att enheten slutar dela (resultaten ligger kvar på enheten).
+
+**Bra att veta:** Supabase lägger gratisprojekt i viloläge om ingen har
+använt dem på en vecka. Då fungerar spelen ändå, men resultaten skickas
+inte förrän man har väckt projektet igen (Restore project på supabase.com).
+
+Så här kopplar man in topplistan i ett spel:
+
+```js
+// När spelet är slut
+Topplista.nyttResultat("stjarnor", poang);
+```
+
+```html
+<!-- En knapp som visar topplistan, t.ex. i pausmenyn -->
+<button class="menyknapp sekundar" type="button" data-topplista="stjarnor" data-en="🏆 High scores">🏆 Topplista</button>
+```
+
+Spelet måste också finnas i `SPELEN` högst upp i `topplista.js`. Där står
+också hur många som får plats (`antal`) och hur långa namnen får vara
+(`langstaNamn`).
+
+## Utan internet ✈️
+
+Spelen fungerar utan internet, till exempel i bilen eller på flyget. Första
+gången man öppnar spelen (med internet) sparas alla filerna på enheten. Har
+man internet hämtas alltid den senaste versionen, så ändringar syns direkt.
+
+Det sköts av `sw.js`. Lägger man till ett nytt spel ska dess mapp in i
+listan `FILER` i `sw.js`, annars fungerar det nya spelet bara med internet.
 
 ## Fånga stjärnorna ⭐
 
@@ -348,9 +421,24 @@ trycka så hårt att han bajsar på sig.
 - När spelet är slut får man en titel, från *Pruttpraktikant* till
   *Klimatbov*.
 
+**👥 Två spelare:** På startskärmen väljer man 1 eller 2 spelare. Med två
+spelare står två pappor bredvid varandra, blå och röd. Man håller tummen
+på sin halva av skärmen (blå till vänster, röd till höger, på datorn A och
+L), och båda krystar samtidigt.
+
+- Båda papporna har en egen hemlig gräns. Man får släppa en fis per runda.
+- Den som släpper **närmast sin gräns** utan att bajsa på sig vinner rundan
+  och får en ⭐. Efter rundan ser man hur nära gränsen var och en kom.
+- Bajsar man på sig, eller inte vågar krysta inom 8 sekunder, förlorar man
+  rundan.
+- Varje runda är i ett nytt rum. Den som först får 3 ⭐ vinner.
+- Bäst är att hålla iPaden eller telefonen liggande, med en tumme var.
+
 Testa att ändra i `fis/game.js`:
 
 - hur många underbyxor pappa har (`underbyxor`)
+- två spelare (`tvaSpelare`): hur många rundor man ska vinna, hur länge man
+  får vänta, och spelarnas namn, färger och tangenter
 - hur fort trycket ökar och var gränsen hamnar (`krystFart`, `grans`)
 - hur tidigt varningarna kommer (`varningar`)
 - fisarnas namn och ljud (`fisar`)
@@ -521,6 +609,9 @@ Testa att ändra i `godis/game.js`:
 3. Lägg till ett nytt kort i menyn i `index.html` i roten (kopiera ett av
    `<a class="kort ...">` och ändra länk, emoji och text, även den
    engelska i `data-en`).
+4. Lägg till mappen i `FILER` i `sw.js`, så att spelet fungerar utan internet.
+5. Har spelet poäng: lägg till det i `SPELEN` i `topplista.js` och anropa
+   `Topplista.nyttResultat(...)` när spelet är slut (se Topplista ovan).
 
 ## Köra spelet
 
@@ -547,7 +638,8 @@ Varje gång ni pushar till `main` uppdateras spelet där automatiskt.
 
 **Tips:** Öppna sidan i Safari på iPaden, tryck på dela-knappen och välj
 **Lägg till på hemskärmen**. Då får spelet en egen ikon och startar i
-helskärm som en riktig app.
+helskärm som en riktig app. Har man öppnat spelen en gång med internet
+fungerar de sedan även utan.
 
 ### Testa på iPaden utan att lägga upp på nätet
 

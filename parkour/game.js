@@ -540,6 +540,7 @@ function slutaSpel() {
     rekord = poang;
     sparaRekord(rekord);
   }
+  Topplista.nyttResultat("parkour", poang); // Har man kommit med får man skriva sitt namn
 }
 
 // Krockar katten med djuret?

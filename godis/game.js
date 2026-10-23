@@ -830,6 +830,9 @@ function slutaKvallen(hemma) {
   tidSedanSlut = 0;
   fingerNere = false;
   spelaArpeggio([523, 659, 784, 1047]);
+  // Har man kommit med får man skriva sitt namn, när godiset har flugit klart.
+  // Precis som rekordet räknas det på hela hinken.
+  Topplista.nyttResultat("godis", godis, { fordrojning: SLUT.klar - 0.2 });
 }
 
 // ---------- Texter, bubblor och tips ----------

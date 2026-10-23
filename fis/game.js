@@ -42,6 +42,18 @@ const INSTALLNINGAR = {
   },
   hundGanger: 2,          // Hur många gånger per bana man får skylla på hunden
 
+  // Två spelare: båda pappor krystar samtidigt, och var och en håller
+  // fingret på sin halva av skärmen. Båda har en egen hemlig gräns. Den
+  // som släpper närmast sin gräns utan att bajsa på sig vinner rundan.
+  tvaSpelare: {
+    vinster: 3,           // Så många rundor behöver man vinna
+    vantaPaStart: 8,      // Sekunder man har på sig att börja krysta
+    spelare: [
+      { namn: t("Blå", "Blue"), farg: "#4a7bb7", ljus: "#9fd0ff", tangent: "a" },
+      { namn: t("Röd", "Red"), farg: "#d9534f", ljus: "#ffb0a8", tangent: "l" },
+    ],
+  },
+
   pappaFarg: "#4a7bb7",   // Pappas tröja
   ljud: true,
   musik: true,            // Hissmusik, sång och orgel
@@ -315,6 +327,14 @@ let noter = [];  // Noter när alla sjunger
 let fisNr = 0;
 let luktKommenterad = -1;
 
+// Två spelare
+let tvaSpelare = false;
+let valtAntal = lasInstallning("spelare-fis") === "2" ? 2 : 1; // Det man valde förra gången
+let spelare = [];      // De två papporna, se nySpelare()
+let runda = 0;
+let rundVinnare = [];
+let startKnappar = []; // Knapparna på startskärmen, så att man vet var man trycker
+
 let banPoang = 0;
 let banFisar = 0;
 let banSmyg = 0;
@@ -367,11 +387,16 @@ function segment() {
   return segNr >= 0 ? bana().tidslinje[segNr] : null;
 }
 
+// Med två spelare står papporna bredvid varandra, och de andra flyttar ut lite
+const DUELL_AVSTAND = 1.35; // Så långt från mitten varje pappa står
+
 function personX(p) {
+  if (tvaSpelare) return mittX + Math.sign(p.pos) * u * 1.1 + p.pos * spridning * u * 0.85;
   return mittX + p.pos * spridning * u;
 }
 
 function hundX() {
+  if (tvaSpelare) return mittX; // Hunden sitter mellan papporna
   return mittX + hund.pos * u;
 }
 
@@ -403,6 +428,7 @@ function anpassaStorlek() {
   spridning = begr(((bredd - marginal.vanster - marginal.hoger) / 2 / u - 0.8) / 3.7, 0.7, 1.5);
   emojiMinne.clear();
   bakgrundRum = ""; // Rummet ritas om nästa gång
+  spelare.forEach((sp, i) => { sp.x = mittX + (i === 0 ? -1 : 1) * DUELL_AVSTAND * u; });
 }
 
 // Mäter hur snabbt bilderna ritas. Går det för långsamt ritar vi med färre pixlar.
@@ -430,17 +456,35 @@ function hundKnapp() {
 canvas.addEventListener("pointerdown", (e) => {
   e.preventDefault();
   startaLjud();
-  if (lage === "start" || (lage === "slut" && tidSedanSlut > 1)) {
-    startaSpel();
+  if (lage === "start") {
+    const knapp = startKnappar.find((k) => e.clientX >= k.x && e.clientX <= k.x + k.w && e.clientY >= k.y && e.clientY <= k.y + k.h);
+    if (knapp) startaSpel(knapp.antal);
+    return;
+  }
+  if (lage === "slut" && tidSedanSlut > 1) {
+    visaStartskarm();
     return;
   }
   if (lage !== "spelar") return;
   if (fas === "intro") {
-    if (fasTid > 0.6) borjaBana();
+    if (fasTid > 0.6 && !tvaSpelare) borjaBana();
     return;
   }
   if (fas === "klar") {
-    if (fasTid > 1) nastaBana();
+    if (fasTid > 1) tvaSpelare ? nastaRunda() : nastaBana();
+    return;
+  }
+  if (tvaSpelare) {
+    // Vänster halva är blå pappa, höger halva är röd
+    const sp = spelare[e.clientX < mittX ? 0 : 1];
+    if (borjaKrystaDuell(sp)) {
+      sp.pekare = e.pointerId;
+      try {
+        canvas.setPointerCapture(e.pointerId);
+      } catch (fel) {
+        // Gör inget – det fungerar ändå
+      }
+    }
     return;
   }
   const k = hundKnapp();
@@ -461,6 +505,7 @@ canvas.addEventListener("pointerdown", (e) => {
 
 function slappFinger(e) {
   if (krystar && e.pointerId === krystPekare) slappFis();
+  for (const sp of spelare) if (sp.krystar && e.pointerId === sp.pekare) slappFisDuell(sp);
 }
 canvas.addEventListener("pointerup", slappFinger);
 canvas.addEventListener("pointercancel", slappFinger);
@@ -476,20 +521,35 @@ window.addEventListener("keydown", (e) => {
     return;
   }
   if (e.repeat) return;
-  if (lage === "start" || (lage === "slut" && tidSedanSlut > 1)) {
-    if (arKnapp(e)) {
+  if (lage === "start") {
+    // 1 eller 2 väljer antal spelare. Mellanslag startar det man valde förra gången.
+    const antal = e.key === "1" ? 1 : e.key === "2" ? 2 : arKnapp(e) ? valtAntal : 0;
+    if (antal) {
       startaLjud();
-      startaSpel();
+      startaSpel(antal);
     }
+    return;
+  }
+  if (lage === "slut") {
+    if (arKnapp(e) && tidSedanSlut > 1) visaStartskarm();
     return;
   }
   if (lage !== "spelar") return;
   if (fas === "intro") {
-    if (arKnapp(e) && fasTid > 0.6) borjaBana();
+    if (arKnapp(e) && fasTid > 0.6 && !tvaSpelare) borjaBana();
     return;
   }
   if (fas === "klar") {
-    if (arKnapp(e) && fasTid > 1) nastaBana();
+    if (arKnapp(e) && fasTid > 1) tvaSpelare ? nastaRunda() : nastaBana();
+    return;
+  }
+  if (tvaSpelare) {
+    // På datorn krystar blå med A och röd med L
+    const sp = spelare.find((q) => q.tangent === e.key.toLowerCase());
+    if (sp && borjaKrystaDuell(sp)) {
+      startaLjud();
+      sp.pekare = "tangent";
+    }
     return;
   }
   if (e.key === "h" || e.key === "H") {
@@ -505,6 +565,9 @@ window.addEventListener("keydown", (e) => {
 
 window.addEventListener("keyup", (e) => {
   if (arKnapp(e) && krystar && krystPekare === "tangent") slappFis();
+  for (const sp of spelare) {
+    if (sp.krystar && sp.pekare === "tangent" && sp.tangent === e.key.toLowerCase()) slappFisDuell(sp);
+  }
 });
 
 // Stoppa nyp-zoom i Safari på iPad/iPhone
@@ -520,6 +583,12 @@ function pausa() {
   krystPekare = null;
   tryck = 0;
   steg = 0;
+  for (const sp of spelare) {
+    sp.krystar = false;
+    sp.pekare = null;
+    sp.tryck = 0;
+    sp.steg = 0;
+  }
   pausmeny.hidden = false;
   tystaLjud(true);
   document.getElementById("fortsatt").focus();
@@ -558,7 +627,12 @@ document.addEventListener("visibilitychange", () => {
 
 // ---------- Spelets regler ----------
 
-function startaSpel() {
+function startaSpel(antalSpelare = valtAntal) {
+  valtAntal = antalSpelare;
+  sparaInstallning("spelare-fis", String(antalSpelare));
+  tvaSpelare = antalSpelare === 2;
+  spelare = tvaSpelare ? S.tvaSpelare.spelare.map(nySpelare) : [];
+  anpassaStorlek(); // Papporna får sina platser
   lage = "spelar";
   poang = 0;
   dag = 1;
@@ -569,7 +643,21 @@ function startaSpel() {
   storstaFis = "";
   slutOm = 0;
   olyckaText = "";
+  if (tvaSpelare) {
+    runda = 0;
+    nyRunda();
+    return;
+  }
   visaIntro(0);
+}
+
+// Tillbaka till startskärmen, där man väljer 1 eller 2 spelare
+function visaStartskarm() {
+  lage = "start";
+  tvaSpelare = false;
+  spelare = [];
+  startTips = slumpa(S.tips);
+  laddaBana(0);
 }
 
 function laddaBana(nr) {
@@ -648,6 +736,7 @@ function slutaSpel() {
     rekord = poang;
     sparaRekord(rekord);
   }
+  Topplista.nyttResultat("fis", poang); // Har man kommit med får man skriva sitt namn
 }
 
 // Varje ny dag krystar pappa fortare, gränsen kan hamna lägre och
@@ -664,15 +753,22 @@ function svarighet() {
 
 // Slumpar var gränsen hamnar till nästa fis
 function nyGrans() {
+  ({ grans, varn } = slumpaGrans());
+}
+
+function slumpaGrans() {
   const sv = svarighet();
-  grans = sv.min + Math.random() * (sv.max - sv.min);
+  const g = sv.min + Math.random() * (sv.max - sv.min);
   const v = S.varningar;
   const darr = () => (Math.random() - 0.5) * 4;
-  varn = [
-    grans - v.kurr * sv.varning + darr(),
-    grans - v.svett * sv.varning + darr(),
-    grans - Math.max(2.5, v.panik * sv.varning + darr() * 0.5),
-  ];
+  return {
+    grans: g,
+    varn: [
+      g - v.kurr * sv.varning + darr(),
+      g - v.svett * sv.varning + darr(),
+      g - Math.max(2.5, v.panik * sv.varning + darr() * 0.5),
+    ],
+  };
 }
 
 function kvarUnderbyxor() {
@@ -790,12 +886,12 @@ function slappFis() {
 }
 
 // Lukten kommer ut bakom pappa och sprider sig åt sidorna
-function puffa(t, nr) {
+function puffa(t, nr, x = mittX) {
   const antal = 5 + Math.round(t / 9);
   for (let i = 0; i < antal; i++) {
     const sida = Math.random() < 0.5 ? -1 : 1;
     moln.push({
-      x: mittX + sida * u * 0.35,
+      x: x + sida * u * 0.35,
       y: golvY - u * (1.0 + Math.random() * 0.3),
       vx: sida * u * (0.3 + Math.random() * 0.9) * (0.5 + t / 100),
       vy: -u * (0.05 + Math.random() * 0.25),
@@ -979,6 +1075,10 @@ function uppdatera(dt) {
   if (lage !== "spelar") return;
 
   fasTid += dt;
+  if (tvaSpelare) {
+    uppdateraDuell(dt);
+    return;
+  }
   if (fas === "intro") {
     if (fasTid > 4.5) borjaBana();
     return;
@@ -1044,6 +1144,214 @@ function uppdatera(dt) {
   }
 
   if (banTid >= banLangd && olyckaTid <= 0 && slutOm <= 0) avslutaBana();
+}
+
+// ---------- Två spelare ----------
+//
+//  Båda papporna krystar samtidigt i samma rum. Var och en har en egen
+//  hemlig gräns och får släppa en fis per runda. Den som släpper närmast
+//  sin gräns utan att bajsa på sig vinner rundan och får en ⭐.
+
+function nySpelare(inst) {
+  return { ...inst, x: mittX, vinster: 0, bajsat: 0, tryck: 0, krystar: false, pekare: null, steg: 0, olyckaTid: 0, lattnadTid: 0, rodnadTid: 0 };
+}
+
+// Första rundan visas reglerna lite längre
+function introLangd() {
+  return runda === 1 ? 5.5 : 3;
+}
+
+function nyRunda() {
+  runda += 1;
+  laddaBana((runda - 1) % S.banor.length); // Varje runda är i nästa rum
+  fas = "intro";
+  fasTid = 0;
+  slutOm = 0;
+  rundVinnare = [];
+  for (const sp of spelare) {
+    Object.assign(sp, slumpaGrans(), {
+      tryck: 0, krystar: false, pekare: null, steg: 0, blubbTid: 0, vila: 0,
+      olyckaTid: 0, lattnadTid: 0, rodnadTid: 0,
+      klar: false,    // Har släppt sin fis, bajsat eller inte vågat
+      kraft: null,    // Hur hårt man tryckte när man släppte
+      bajsade: false,
+      fis: "",
+    });
+  }
+}
+
+function borjaKrystaDuell(sp) {
+  if (fas !== "bana" || sp.klar || sp.krystar || sp.vila > 0) return false;
+  sp.krystar = true;
+  sp.steg = 0;
+  return true;
+}
+
+function slappFisDuell(sp) {
+  if (!sp.krystar) return;
+  sp.krystar = false;
+  sp.pekare = null;
+  const kraft = sp.tryck;
+  sp.tryck = 0;
+  sp.steg = 0;
+  sp.vila = S.vilaEfterFis;
+  if (kraft < S.minstaFis) {
+    // För liten för att räknas. Man får försöka igen.
+    if (kraft > 2) flyg(t("…inget kom", "…nothing came out"), sp.x, golvY - u * 4.6);
+    return;
+  }
+  sp.klar = true;
+  sp.kraft = kraft;
+  const typ = valjFis(kraft);
+  sp.fis = typ.namn;
+  if (kraft > storstaTryck) {
+    storstaTryck = kraft;
+    storstaFis = typ.namn;
+  }
+  flyg(typ.namn, sp.x, golvY - u * 4.6, "#ffffff", true);
+  if (sp.grans - kraft <= S.bromsspar) flyg(t("Bromsspår! Nära!", "Skid marks! Close!"), sp.x, golvY - u * 4.1, "#e8a868");
+
+  // Poängen räknas inte på om någon hörde, men folk märker det ändå
+  const hords = kraft > omgivning + 2;
+  if (hords) {
+    sp.rodnadTid = 2.4;
+    const horande = folk.filter((q) => !q.dov);
+    for (const q of horande) reagera(q, slumpa(["😳", "🤨", "😮"]), 2.4);
+    if (horande.length && Math.random() < 0.6) sag(slumpa(horande), slumpa(bana().horde));
+  } else {
+    sp.lattnadTid = 0.9;
+  }
+  fisNr += 1;
+  fisLjud(kraft, typ.ljud, !hords);
+  puffa(kraft, fisNr, sp.x);
+}
+
+function duellOlycka(sp) {
+  sp.krystar = false;
+  sp.pekare = null;
+  sp.tryck = 0;
+  sp.steg = 0;
+  sp.olyckaTid = OLYCKA_TID;
+  sp.klar = true;
+  sp.bajsade = true;
+  sp.bajsat += 1;
+  skakning = 0.5;
+  for (const q of folk) reagera(q, slumpa(["😱", "🤢", "😳"]), OLYCKA_TID);
+  sag(slumpa(folk), t("Oj.", "Oops."), 2);
+  flyg(t("Oj då!", "Uh-oh!"), sp.x, golvY - u * 4.6, "#ffb3b3", true);
+  fisNr += 1;
+  puffa(30, fisNr, sp.x);
+  effekt("olycka");
+}
+
+function uppdateraDuell(dt) {
+  skakning = Math.max(0, skakning - dt);
+  for (const sp of spelare) {
+    sp.lattnadTid -= dt;
+    sp.rodnadTid -= dt;
+    sp.vila -= dt;
+    sp.olyckaTid = Math.max(0, sp.olyckaTid - dt);
+  }
+  if (fas === "intro") {
+    if (fasTid > introLangd()) {
+      fas = "bana";
+      fasTid = 0;
+      flyg(t("KRYSTA!", "PUSH!"), mittX, golvY - u * 4.4, "#ffe14d", true);
+      effekt("kurr");
+    }
+    return;
+  }
+  if (fas === "klar") {
+    if (fasTid > 6) nastaRunda();
+    return;
+  }
+
+  // Rummet låter som vanligt. Tidslinjen börjar om när den är slut.
+  banTid += dt;
+  const b = bana();
+  if (banTid >= banLangd) {
+    banTid -= banLangd;
+    segNr = -1;
+  }
+  while (segNr + 1 < b.tidslinje.length && banTid >= segStart[segNr + 1]) {
+    segNr += 1;
+    startaSegment(b.tidslinje[segNr]);
+  }
+  omgivning += (malNiva() - omgivning) * Math.min(1, dt * 14);
+
+  for (const sp of spelare) {
+    if (sp.krystar) {
+      sp.tryck += svarighet().fart * (1 + sp.tryck / 100) * dt;
+      const nytt = sp.tryck >= sp.varn[2] ? 3 : sp.tryck >= sp.varn[1] ? 2 : sp.tryck >= sp.varn[0] ? 1 : 0;
+      if (nytt > sp.steg) {
+        if (nytt === 1) {
+          effekt("kurr");
+          flyg(t("*kurr*", "*grumble*"), sp.x + u * 0.9, golvY - u * 2.1, "#ffffff");
+        }
+        if (nytt === 3) {
+          effekt("blubb");
+          sp.blubbTid = 0.55;
+          flyg(t("*blubb*", "*blub*"), sp.x - u * 0.9, golvY - u * 1.5, "#e8a868");
+        }
+        sp.steg = nytt;
+      }
+      if (sp.steg === 3) {
+        sp.blubbTid -= dt;
+        if (sp.blubbTid <= 0) {
+          effekt("blubb");
+          sp.blubbTid = 0.55;
+        }
+      }
+      if (sp.tryck >= sp.grans) duellOlycka(sp);
+    } else if (!sp.klar && fasTid > S.tvaSpelare.vantaPaStart) {
+      sp.klar = true;
+      flyg(t("Vågade inte! 🐔", "Chickened out! 🐔"), sp.x, golvY - u * 4.6, "#ffb3b3", true);
+    }
+  }
+
+  // När båda är klara dröjer det en stund, så att man hinner se vad som hände
+  if (spelare.every((sp) => sp.klar)) {
+    if (slutOm <= 0) slutOm = spelare.some((sp) => sp.olyckaTid > 0) ? 2.2 : 1.4;
+    slutOm -= dt;
+    if (slutOm <= 0) avgorRunda();
+  }
+}
+
+// Hur långt från gränsen man släppte (0 = precis på gränsen)
+function avstand(sp) {
+  return Math.round(sp.grans - sp.kraft);
+}
+
+function avgorRunda() {
+  const kvar = spelare.filter((sp) => sp.kraft !== null && !sp.bajsade);
+  const bast = Math.min(...kvar.map(avstand));
+  rundVinnare = kvar.filter((sp) => avstand(sp) === bast);
+  for (const sp of rundVinnare) {
+    sp.vinster += 1;
+    sp.lattnadTid = 3;
+  }
+  fas = "klar";
+  fasTid = 0;
+  slutOm = 0;
+  effekt(rundVinnare.length ? "klar" : "syrsor");
+}
+
+// Matchen är slut när någon har vunnit tillräckligt många rundor och leder
+function matchKlar() {
+  const [a, b] = spelare;
+  return Math.max(a.vinster, b.vinster) >= S.tvaSpelare.vinster && a.vinster !== b.vinster;
+}
+
+function nastaRunda() {
+  if (matchKlar()) slutaDuell();
+  else nyRunda();
+}
+
+function slutaDuell() {
+  lage = "slut";
+  tidSedanSlut = 0;
+  for (const p of folk) p.pratTid = 0;
+  effekt("klar");
 }
 
 // ---------- Rita ----------
@@ -1621,18 +1929,19 @@ function ritaMoln() {
   }
 }
 
-function ritaPappa() {
+// p är pappan som ska ritas: var han står, hur hårt han krystar och hur han mår
+function ritaPappa(p) {
   const s = u;
-  const olyck = olyckaTid > 0;
-  const tr = krystar ? tryck / 100 : 0;
-  const panik = krystar && steg >= 3;
-  const lattnad = !krystar && !olyck && lattnadTid > 0;
-  const rodnar = !krystar && !olyck && !lattnad && rodnadTid > 0;
+  const olyck = p.olyckaTid > 0;
+  const tr = p.krystar ? p.tryck / 100 : 0;
+  const panik = p.krystar && p.steg >= 3;
+  const lattnad = !p.krystar && !olyck && p.lattnadTid > 0;
+  const rodnar = !p.krystar && !olyck && !lattnad && p.rodnadTid > 0;
   let skak = 0;
-  if (krystar) skak = 0.008 + tr * 0.012 + (steg >= 2 ? 0.012 : 0) + (panik ? 0.025 : 0);
-  if (olyck && olyckaTid > OLYCKA_TID - 0.4) skak = 0.05;
+  if (p.krystar) skak = 0.008 + tr * 0.012 + (p.steg >= 2 ? 0.012 : 0) + (panik ? 0.025 : 0);
+  if (olyck && p.olyckaTid > OLYCKA_TID - 0.4) skak = 0.05;
   const dx = (Math.random() - 0.5) * skak * 2;
-  const sank = krystar ? 0.1 + tr * 0.16 : 0; // Pappa böjer på knäna när han krystar
+  const sank = p.krystar ? 0.1 + tr * 0.16 : 0; // Pappa böjer på knäna när han krystar
   const andas = Math.sin(tid * 2.2) * 0.02;
   const kant = "#4a2618";
   const hud = "#f0c39a";
@@ -1641,7 +1950,7 @@ function ritaPappa() {
   const lw = 0.035;
 
   ctx.save();
-  ctx.translate(mittX + dx * s, golvY);
+  ctx.translate(p.x + dx * s, golvY);
   ctx.scale(s, s);
   ctx.lineJoin = "round";
   ctx.lineCap = "round";
@@ -1697,15 +2006,15 @@ function ritaPappa() {
   const axelY = by - 0.5;
   // I panik håller pappa händerna för baken (armarna hamnar bakom kroppen)
   if (panik || olyck) {
-    for (const sida of [-1, 1]) arm([[sida * 0.45, axelY], [sida * 0.72, by + 0.1], [sida * 0.4, hoftY + 0.05]], S.pappaFarg);
+    for (const sida of [-1, 1]) arm([[sida * 0.45, axelY], [sida * 0.72, by + 0.1], [sida * 0.4, hoftY + 0.05]], p.farg);
   }
 
   // Magen
   const bulle = 1 + tr * 0.1 + andas;
   ctx.beginPath();
   ctx.ellipse(0, by, 0.62 * bulle, 0.76, 0, 0, Math.PI * 2);
-  fylld(S.pappaFarg);
-  if (krystar && steg >= 1) {
+  fylld(p.farg);
+  if (p.krystar && p.steg >= 1) {
     // Magen kurrar
     ctx.strokeStyle = "rgba(255, 255, 255, 0.8)";
     ctx.lineWidth = 0.04;
@@ -1724,10 +2033,10 @@ function ritaPappa() {
   if (!panik && !olyck) {
     for (const sida of [-1, 1]) {
       const axel = [sida * 0.45, axelY];
-      if (krystar) arm([axel, [sida * 0.85, by - 0.05], [sida * 0.5, by + 0.25]], S.pappaFarg); // Knutna händer
-      else if (lattnad) arm([axel, [sida * 0.85, by - 0.3], [sida * 0.95, axelY - 0.6]], S.pappaFarg); // Skönt!
-      else if (rodnar && sida > 0) arm([axel, [0.85, by - 0.4], [0.5, axelY - 0.6]], S.pappaFarg); // Kliar sig i nacken
-      else arm([axel, [sida * 0.72, by], [sida * 0.74, by + 0.45]], S.pappaFarg);
+      if (p.krystar) arm([axel, [sida * 0.85, by - 0.05], [sida * 0.5, by + 0.25]], p.farg); // Knutna händer
+      else if (lattnad) arm([axel, [sida * 0.85, by - 0.3], [sida * 0.95, axelY - 0.6]], p.farg); // Skönt!
+      else if (rodnar && sida > 0) arm([axel, [0.85, by - 0.4], [0.5, axelY - 0.6]], p.farg); // Kliar sig i nacken
+      else arm([axel, [sida * 0.72, by], [sida * 0.74, by + 0.45]], p.farg);
     }
   }
 
@@ -1736,7 +2045,7 @@ function ritaPappa() {
   ctx.beginPath();
   ctx.arc(0, hy, 0.42, 0, Math.PI * 2);
   fylld(hud);
-  if (krystar) {
+  if (p.krystar) {
     ctx.fillStyle = `rgba(255, 50, 40, ${0.12 + tr * 0.4})`; // Röd i ansiktet
     ctx.fill();
   } else if (olyck) {
@@ -1759,7 +2068,7 @@ function ritaPappa() {
   ctx.fill();
 
   // Kinder
-  if (krystar) {
+  if (p.krystar) {
     for (const sida of [-1, 1]) {
       ctx.fillStyle = "rgba(255, 110, 100, 0.7)";
       ctx.beginPath();
@@ -1791,7 +2100,7 @@ function ritaPappa() {
       ctx.beginPath();
       ctx.arc(ex + jx, ey + 0.01, 0.032, 0, Math.PI * 2);
       ctx.fill();
-    } else if (krystar) {
+    } else if (p.krystar) {
       // Hårt hopknipna ögon: > <
       ctx.moveTo(ex + sida * 0.065, ey - 0.055);
       ctx.lineTo(ex - sida * 0.05, ey);
@@ -1810,7 +2119,7 @@ function ritaPappa() {
     }
 
     ctx.beginPath();
-    if (krystar && !panik) {
+    if (p.krystar && !panik) {
       ctx.moveTo(ex + sida * 0.1, ey - 0.16);
       ctx.lineTo(ex - sida * 0.07, ey - 0.1);
     } else if (panik || olyck) {
@@ -1847,7 +2156,7 @@ function ritaPappa() {
     ctx.moveTo(-0.11, my);
     for (let i = 1; i <= 6; i++) ctx.lineTo(-0.11 + i * 0.0367, my + (i % 2 ? -0.025 : 0.025));
     ctx.stroke();
-  } else if (krystar) {
+  } else if (p.krystar) {
     ctx.moveTo(-0.1, my);
     ctx.lineTo(0.1, my);
     ctx.lineWidth = 0.055;
@@ -1868,17 +2177,17 @@ function ritaPappa() {
   ctx.restore();
 
   // Svettdroppe
-  if ((krystar && steg >= 2) || olyck) {
+  if ((p.krystar && p.steg >= 2) || olyck) {
     const f = (tid * 0.8) % 1;
     ctx.globalAlpha = 1 - f * 0.6;
-    ritaEmoji("💧", mittX + s * 0.45, golvY + (hy - 0.15 + f * 0.35) * s, s * 0.32);
+    ritaEmoji("💧", p.x + s * 0.45, golvY + (hy - 0.15 + f * 0.35) * s, s * 0.32);
     ctx.globalAlpha = 1;
   }
   // Det som inte skulle hända
   if (olyck) {
-    const t = OLYCKA_TID - olyckaTid;
+    const t = OLYCKA_TID - p.olyckaTid;
     const studs = Math.abs(Math.sin(t * 6)) * Math.max(0, 1 - t) * 0.5;
-    ritaEmoji("💩", mittX, golvY + (hy - 0.95 - studs) * s, s * (0.6 + Math.min(t * 2, 1) * 0.3));
+    ritaEmoji("💩", p.x, golvY + (hy - 0.95 - studs) * s, s * (0.6 + Math.min(t * 2, 1) * 0.3));
   }
 }
 
@@ -2120,6 +2429,10 @@ function ritaRuta(rader, mittY, morker = 0.8) {
 
 function ritaRutor() {
   if (lage !== "spelar" && lage !== "paus") return;
+  if (tvaSpelare) {
+    ritaDuellRutor();
+    return;
+  }
   const b = bana();
   if (fas === "intro") {
     const rader = [[t(`Dag ${dag}`, `Day ${dag}`), 0.6, "#ffd27a"], [`${b.ikon} ${b.namn}`, 1.2], [b.tips, 0.6]];
@@ -2139,6 +2452,159 @@ function ritaRutor() {
     ], hojd * 0.45);
   } else if (olyckaTid > 0 && olyckaTid < OLYCKA_TID - 0.4) {
     ritaRuta([[olyckaText, 0.75], ["−1 🩲", 0.75, "#ffb3b3"]], hojd * 0.3, 0.7);
+  }
+}
+
+// ---------- Två spelare: poäng, mätare och rutor ----------
+
+function ritaDuellPanel() {
+  const storlek = begr(u * 0.5, 20, 34);
+  const rad1 = marginal.topp + 40; // I höjd med hus- och pausknappen
+  const rad2 = marginal.topp + 88;
+  const ikon = storlek * 0.9;
+  const mal = S.tvaSpelare.vinster;
+  const smal = bredd < 640;
+  const tangenter = window.matchMedia && window.matchMedia("(hover: hover)").matches;
+
+  spelare.forEach((sp, i) => {
+    const vanster = i === 0;
+    const kant = vanster ? marginal.vanster : bredd - marginal.hoger;
+    const halv = vanster ? mittX - marginal.vanster : bredd - marginal.hoger - mittX;
+    const mitt = vanster ? (kant + mittX) / 2 : (mittX + kant) / 2;
+
+    // Namnet och vunna rundor. Blå står till höger om hus- och pausknappen.
+    ctx.font = `bold ${storlek}px ${TYPSNITT}`;
+    const nw = ctx.measureText(sp.namn).width;
+    const sw = smal ? storlek * 1.9 : mal * storlek * 1.05;
+    const nx = vanster ? marginal.vanster + 150 : bredd - marginal.hoger - 16 - sw - storlek * 0.4 - nw;
+    const sx = nx + nw + storlek * 0.4;
+    ritaText(sp.namn, nx, rad1, storlek, sp.ljus, "left");
+    if (smal) {
+      ritaEmoji("⭐", sx + storlek * 0.5, rad1, storlek * 0.9);
+      ritaText(String(sp.vinster), sx + storlek * 1.1, rad1, storlek, "#ffffff", "left");
+    } else {
+      for (let k = 0; k < mal; k++) {
+        ctx.globalAlpha = k < sp.vinster ? 1 : 0.25;
+        ritaEmoji("⭐", sx + k * storlek * 1.05 + storlek / 2, rad1, storlek * 0.9);
+      }
+      ctx.globalAlpha = 1;
+    }
+
+    // Mätaren: pappas ansikte åker med trycket
+    const w = Math.min(halv - ikon * 2.2, 320);
+    const x0 = mitt - w / 2;
+    const mh = Math.max(16, storlek * 0.6);
+    ctx.fillStyle = "rgba(25, 20, 40, 0.45)";
+    rundRekt(ctx, x0 - ikon * 0.8, rad2 - ikon * 0.85, w + ikon * 1.6, ikon * 1.7, ikon * 0.85);
+    ctx.fill();
+    ctx.fillStyle = "rgba(255, 255, 255, 0.2)";
+    rundRekt(ctx, x0, rad2 - mh / 2, w, mh, mh / 2);
+    ctx.fill();
+    if (sp.krystar) {
+      ctx.save();
+      rundRekt(ctx, x0, rad2 - mh / 2, w, mh, mh / 2);
+      ctx.clip();
+      ctx.fillStyle = sp.ljus;
+      ctx.fillRect(x0, rad2 - mh / 2, w * begr(sp.tryck / 100, 0, 1), mh);
+      ctx.restore();
+    }
+    ctx.strokeStyle = "#ffffff";
+    ctx.lineWidth = 2.5;
+    rundRekt(ctx, x0, rad2 - mh / 2, w, mh, mh / 2);
+    ctx.stroke();
+    const mx = x0 + w * begr(sp.krystar ? sp.tryck / 100 : 0, 0, 1);
+    ctx.fillStyle = sp.farg;
+    ctx.beginPath();
+    ctx.arc(mx, rad2, ikon * 0.62, 0, Math.PI * 2);
+    ctx.fill();
+    const ansikte = sp.olyckaTid > 0 || sp.bajsade ? "💩" : sp.krystar ? ANSIKTEN[sp.steg] : "😌";
+    ritaEmoji(ansikte, mx, rad2, ikon * 1.05);
+
+    // Plattan längst ner på varje halva, där man håller tummen
+    const pt = golvY + u * 0.3;
+    const pb = hojd - marginal.botten - 10;
+    const px = vanster ? kant + 10 : mittX + 6;
+    const pw = halv - 16;
+    if (pb - pt > 20) {
+      ctx.fillStyle = sp.farg;
+      ctx.globalAlpha = sp.krystar ? 0.6 : 0.3;
+      rundRekt(ctx, px, pt, pw, pb - pt, Math.min(20, (pb - pt) / 2));
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      let text = "👆 " + sp.namn + (tangenter ? ` (${sp.tangent.toUpperCase()})` : "");
+      if (fas === "bana") {
+        if (sp.bajsade) text = t("💩 Oj då!", "💩 Uh-oh!");
+        else if (sp.klar && sp.kraft === null) text = t("🐔 Vågade inte", "🐔 Chickened out");
+        else if (sp.klar) text = "✓ " + sp.fis;
+        else if (sp.krystar) text = t("💪 Krystar…", "💪 Pushing…");
+        else text = t(`👆 Håll inne! ${Math.max(1, Math.ceil(S.tvaSpelare.vantaPaStart - fasTid))}`, `👆 Hold here! ${Math.max(1, Math.ceil(S.tvaSpelare.vantaPaStart - fasTid))}`);
+      }
+      const ts = Math.min(storlek * 0.8, (pb - pt) * 0.45);
+      ctx.font = `bold ${ts}px ${TYPSNITT}`;
+      const ryms = (pw - 16) / ctx.measureText(text).width;
+      ritaText(text, px + pw / 2, (pt + pb) / 2, ryms < 1 ? ts * ryms : ts, "#ffffff");
+    }
+  });
+}
+
+// Hur det gick för en spelare i rundan
+function resultatText(sp) {
+  if (sp.bajsade) return t(`💩 bajsade på sig (gränsen var ${Math.round(sp.grans)})`, `💩 pooped (the limit was ${Math.round(sp.grans)})`);
+  if (sp.kraft === null) return t("🐔 vågade inte", "🐔 chickened out");
+  const d = avstand(sp);
+  if (d === 0) return t(`PRICK på gränsen! (${sp.fis})`, `Right ON the limit! (${sp.fis})`);
+  return t(`${d} från gränsen (${sp.fis})`, `${d} from the limit (${sp.fis})`);
+}
+
+function ritaDuellRutor() {
+  const b = bana();
+  const [a, c] = spelare;
+  if (fas === "intro") {
+    const rader = [[t(`Runda ${runda}`, `Round ${runda}`), 0.6, "#ffd27a"], [`${b.ikon} ${b.namn}`, 1.2]];
+    if (runda === 1) {
+      rader.push([t("Håll fingret på din sida för att krysta", "Hold your finger on your side to push"), 0.55, "#9dffb0"]);
+      rader.push([t("Släpp så nära gränsen du vågar – men bajsa inte!", "Let go as close to the limit as you dare – but don't poop!"), 0.55]);
+      rader.push([t(`Först till ${S.tvaSpelare.vinster} ⭐ vinner`, `First to ${S.tvaSpelare.vinster} ⭐ wins`), 0.5, "#d5def0"]);
+    }
+    const kvar = Math.ceil(introLangd() - fasTid);
+    rader.push([kvar <= 3 ? String(kvar) : " ", 1.1, "#ffe14d"]);
+    ritaRuta(rader, hojd * 0.45);
+  } else if (fas === "klar") {
+    const rader = [];
+    if (rundVinnare.length === 2) rader.push([t("Oavgjort! Båda får en ⭐", "A tie! Both get a ⭐"), 0.9, "#ffd27a"]);
+    else if (rundVinnare.length === 1) rader.push([t(`${rundVinnare[0].namn} vinner rundan! ⭐`, `${rundVinnare[0].namn} wins the round! ⭐`), 0.95, rundVinnare[0].ljus]);
+    else rader.push([t("Ingen vann rundan!", "Nobody won the round!"), 0.9, "#ffd27a"]);
+    for (const sp of spelare) rader.push([`${sp.namn}: ${resultatText(sp)}`, 0.55, sp.ljus]);
+    rader.push([`${a.namn} ${a.vinster} – ${c.vinster} ${c.namn}`, 0.75]);
+    if (fasTid > 1) rader.push([matchKlar() ? t("Tryck för att se vem som vann", "Tap to see who won") : t("Tryck för nästa runda", "Tap for the next round"), 0.55, "#9dffb0"]);
+    ritaRuta(rader, hojd * 0.42);
+  }
+}
+
+// Två knappar på startskärmen: 1 eller 2 spelare
+function ritaStartKnappar(y, ts) {
+  const mellan = ts * 0.5;
+  const w = Math.min((bredd - 48 - mellan) / 2, ts * 7.5);
+  const h = ts * 1.6;
+  const x0 = bredd / 2 - w - mellan / 2;
+  startKnappar = [1, 2].map((antal, i) => ({ antal, x: x0 + i * (w + mellan), y: y - ts * 0.5, w, h }));
+  for (const k of startKnappar) {
+    const vald = k.antal === valtAntal;
+    ctx.fillStyle = vald ? "#ffd95e" : "#ffffff";
+    ctx.strokeStyle = "#2b1d0e";
+    ctx.lineWidth = 3;
+    rundRekt(ctx, k.x, k.y, k.w, k.h, k.h * 0.35);
+    ctx.fill();
+    ctx.stroke();
+    const text = k.antal === 1 ? t("👤 1 spelare", "👤 1 player") : t("👥 2 spelare", "👥 2 players");
+    const s = ts * 0.75;
+    ctx.font = `bold ${s}px ${TYPSNITT}`;
+    const ryms = (k.w - ts * 0.6) / ctx.measureText(text).width;
+    ctx.font = `bold ${ryms < 1 ? s * ryms : s}px ${TYPSNITT}`;
+    ctx.fillStyle = "#2b1d0e";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(text, k.x + k.w / 2, k.y + k.h / 2);
   }
 }
 
@@ -2171,13 +2637,24 @@ function ritaSkarmar() {
     rad(t("Fisa när det låter mycket, så hör ingen", "Fart when it's noisy, so nobody hears"), ts * 0.65);
     rad(t("Men tryck inte för hårt… 💩", "But don't push too hard… 💩"), ts * 0.65, "#ffb3b3");
     y += ts * 0.4;
-    rad(t("Tryck för att börja", "Tap to start"), ts * 0.85);
+    ritaStartKnappar(y, ts);
+    y += ts * 2.1;
     if (rekord > 0) rad(t("Rekord: ", "High score: ") + rekord, ts * 0.6, "#d5def0");
     y += ts * 0.3;
     rad(startTips, ts * 0.5, "#d5def0");
   }
 
-  if (lage === "slut") {
+  if (lage === "slut" && tvaSpelare) {
+    const [a, b] = spelare;
+    const vinnare = a.vinster > b.vinster ? a : b;
+    rad(t(`🏆 ${vinnare.namn} vinner! 🏆`, `🏆 ${vinnare.namn} wins! 🏆`), ts * 1.3, vinnare.ljus);
+    rad(`${a.namn} ${a.vinster} – ${b.vinster} ${b.namn}`, ts * 1.0);
+    const bajs = a.bajsat + b.bajsat;
+    rad(t(`${runda} rundor · ${bajs} ${bajs === 1 ? "olycka" : "olyckor"} 💩`, `${antal(runda, "round", "rounds")} · ${antal(bajs, "accident", "accidents")} 💩`), ts * 0.6, "#d5def0");
+    if (storstaFis) rad(t(`Största fisen: ${storstaFis}`, `Biggest fart: ${storstaFis}`), ts * 0.55, "#d5def0");
+    y += ts * 0.4;
+    if (tidSedanSlut > 1) rad(t("Tryck för att spela igen", "Tap to play again"), ts * 0.8);
+  } else if (lage === "slut") {
     rad(t("Slut på rena underbyxor!", "Out of clean underpants!"), ts * 1.1, "#ffd27a");
     if (olyckaText) rad(olyckaText, ts * 0.6, "#d5def0");
     rad(t(poang + " poäng", antal(poang, "point", "points")), ts * 1.0);
@@ -2205,12 +2682,14 @@ function rita() {
   for (const p of folk) ritaPerson(p);
   ritaMoln();
   ritaHund();
-  ritaPappa();
+  if (tvaSpelare) for (const sp of spelare) ritaPappa(sp);
+  else ritaPappa({ x: mittX, krystar, tryck, steg, olyckaTid, lattnadTid, rodnadTid, farg: S.pappaFarg });
   ritaTexter();
   ritaBubblor();
   ctx.restore();
 
-  if (lage === "spelar" || lage === "paus") {
+  if ((lage === "spelar" || lage === "paus") && tvaSpelare) ritaDuellPanel();
+  else if (lage === "spelar" || lage === "paus") {
     ritaPanel();
     ritaHundKnapp();
   }
