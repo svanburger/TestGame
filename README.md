@@ -600,6 +600,25 @@ samla godis mellan klockan 18 och 20, vilket är 5 minuter på riktigt.
   hundägarna, tonåringen och barnen som tipsar om var det bästa godiset
   finns. Mamma och pappa skickar sms under kvällen.
 
+**👥 Två spelare:** På startskärmen väljer man 1 eller 2 spelare, och med
+två spelare väljer båda en dräkt (Blå och Röd).
+
+- Skärmen delas i två halvor, en för varje barn. Liggande skärm delas på
+  bredden, stående skärm på höjden. Man styr sitt barn med fingret på sin
+  halva (på datorn Blå med WASD och Röd med piltangenterna).
+- Varje barn har en ring i sin färg runt fötterna. En pil i kanten visar åt
+  vilket håll det andra barnet är, och syns det andra barnet står namnet
+  ovanför.
+- **Samma hus:** står båda vid dörren när godiset delas ut delar de lika.
+  Den som ringde på får det som blir över. Kommer det andra barnet efter
+  att godiset är utdelat är det för sent.
+- **Ensam vid dörren** får man allt, och sedan är huset tomt även för den
+  andra.
+- Går ett barn hem efter 19.30 väntar det hemma tills det andra kommer.
+  Kvällen tar slut när båda är hemma eller klockan 20.
+- Den som har mest godis vinner och får skriva in sig på topplistan. I
+  tvåspelarläget tar pappa ingen skatt.
+
 Testa att ändra i `godis/game.js`:
 
 - hur lång kvällen är (`speltid`, i sekunder) och hur fort barnet går
@@ -612,6 +631,7 @@ Testa att ändra i `godis/game.js`:
   pumpan igen senare (`igen`)
 - vad grannarna säger om man går för tidigt (`gickForTidigt`)
 - dräkterna (`drakter`) och vad folket på gatorna säger (`folk`)
+- två spelare (`tvaSpelare`): namn, färger och tangenter för Blå och Röd
 - hur länge det man får syns vid dörren (`visaGodis`) och hur fort det
   flyger iväg (`flygTid`)
 - hur många bananskal det finns (`bananskal`), hur länge tappat godis ligger
