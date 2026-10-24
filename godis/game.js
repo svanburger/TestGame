@@ -42,6 +42,14 @@ const INSTALLNINGAR = {
   hundVila: 10,         // Sekunder innan hunden vill ha mer godis
   vindpustar: 2,        // Hur många vindpustar det blir på en kväll
 
+  // Två spelare: skärmen delas i två halvor, och varje barn har sin egen.
+  // Ringer båda på samma hus delar de på godiset. Den som har mest godis
+  // klockan 20 vinner. tangenter = vänster, höger, upp, ner på datorn.
+  tvaSpelare: [
+    { namn: t("Blå", "Blue"), farg: "#4a90e2", ljus: "#9fd0ff", tangenter: ["a", "d", "w", "s"] },
+    { namn: t("Röd", "Red"), farg: "#e2574a", ljus: "#ffb0a8", tangenter: ["arrowleft", "arrowright", "arrowup", "arrowdown"] },
+  ],
+
   // ---------------------------------------------------------------
   //  DRÄKTERNA man kan välja på startskärmen
   //  ata     = vad tant Majken säger
@@ -368,11 +376,100 @@ let vindTider = [];
 let smsKvar = [];
 let resultat = null;
 let stat = nyStatistik();
-const fatt = new Set();
-const visadeTips = new Set();
+let fatt = new Set();
+let visadeTips = new Set();
 const tangent = {};
 
 let barn = nyttBarn(0, 0);
+
+// ---------- En eller två spelare ----------
+//
+//  Allt som hör till ett barn (hinken, ryggsäcken, kameran, fingret ...)
+//  finns i ett spelarobjekt. Variablerna ovanför (barn, godis, kamX ...)
+//  gäller alltid det barn som är "aktivt" just nu. bytTill(sp) gör ett
+//  annat barn aktivt. Med en spelare finns bara ett barn, och då byts
+//  inget.
+//
+//  Varje barn har också en egen del av skärmen (vy). Med en spelare är
+//  det hela skärmen. Medan ett barn är aktivt är bredd, hojd, marginal,
+//  panelH och mittY storleken på just dess del.
+
+let tvaSpelare = false;
+let valtAntal = lasInstallning("spelare-godis") === "2" ? 2 : 1;
+let valdDrakt2 = Number(lasInstallning("drakt2-godis")) || 1;
+if (!S.drakter[valdDrakt2]) valdDrakt2 = 1;
+let spelare = [];   // Barnen som är med
+let aktiv = null;   // Barnet som variablerna ovanför gäller just nu
+let helskarm = null; // Hela skärmen, som en vy
+
+function nySpelare(nr, draktNr) {
+  const sp = {
+    nr, drakt: S.drakter[draktNr], barn: nyttBarn(0, 0), godis: 0, skrapSaker: [], flygande: [], stat: nyStatistik(),
+    samtal: null, lapp: null, tips: null, fingerNere: false, fingerX: 0, fingerY: 0, hinkStuds: 0, fickStuds: 0,
+    kamX: 0, kamY: 0, toaster: [], fatt: new Set(), visadeTips: new Set(),
+    pekare: null, hemma: false, vy: null,
+  };
+  if (tvaSpelare) Object.assign(sp, S.tvaSpelare[nr]);
+  return sp;
+}
+
+// Sparar undan det aktiva barnets variabler i dess spelarobjekt
+function sparaUndan(sp) {
+  Object.assign(sp, { barn, godis, skrapSaker, flygande, stat, drakt, samtal, lapp, tips, fingerNere, fingerX, fingerY, hinkStuds, fickStuds, kamX, kamY, toaster, fatt, visadeTips });
+}
+
+function bytTill(sp) {
+  if (aktiv !== sp) {
+    if (aktiv) sparaUndan(aktiv);
+    ({ barn, godis, skrapSaker, flygande, stat, drakt, samtal, lapp, tips, fingerNere, fingerX, fingerY, hinkStuds, fickStuds, kamX, kamY, toaster, fatt, visadeTips } = sp);
+    aktiv = sp;
+  }
+  visaVy(sp.vy || helskarm);
+}
+
+let nuVy = null; // Vyn som bredd, hojd osv. gäller just nu
+
+function visaVy(vy) {
+  if (!vy) return;
+  nuVy = vy;
+  bredd = vy.w;
+  hojd = vy.h;
+  marginal = vy.marginal;
+  panelH = vy.panelH;
+  mittY = vy.mittY;
+}
+
+// Gör något för varje barn (med det barnet aktivt). Efteråt är samma barn aktivt som innan.
+function forVarje(gor) {
+  const fore = aktiv;
+  const foreVy = nuVy;
+  for (const sp of spelare) {
+    bytTill(sp);
+    gor(sp);
+  }
+  if (fore) bytTill(fore);
+  visaVy(foreVy);
+}
+
+// Barnet som är närmast något (och inte har gått hem)
+function narmast(p) {
+  let bast = null;
+  for (const sp of spelare) {
+    if (sp.hemma) continue;
+    if (!bast || avst(p, sp.barn) < avst(p, bast.barn)) bast = sp;
+  }
+  return bast || spelare[0];
+}
+
+// Hur mycket godis ett barn har (även om det inte är aktivt just nu)
+function godisFor(sp) {
+  return sp === aktiv ? godis : sp.godis;
+}
+
+function visaTipsAlla(text, langd, sms = false) {
+  if (!tvaSpelare) visaTips(text, langd, sms);
+  else forVarje(() => visaTips(text, langd, sms));
+}
 
 function nyttBarn(x, y) {
   return { x, y, malX: x, malY: y, harMal: false, riktning: 1, gangFas: 0, ror: false, halkar: 0, hopp: 0 };
@@ -452,24 +549,50 @@ function lasMarginal(namn) {
 }
 
 function anpassaStorlek() {
-  marginal = {
+  const m = {
     topp: lasMarginal("--sakert-topp"),
     vanster: lasMarginal("--sakert-vanster"),
     hoger: lasMarginal("--sakert-hoger"),
     botten: lasMarginal("--sakert-botten"),
   };
-  bredd = window.innerWidth;
-  hojd = window.innerHeight;
-  canvas.width = Math.round(bredd * pixelSkala);
-  canvas.height = Math.round(hojd * pixelSkala);
-  canvas.style.width = bredd + "px";
-  canvas.style.height = hojd + "px";
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+  canvas.width = Math.round(w * pixelSkala);
+  canvas.height = Math.round(h * pixelSkala);
+  canvas.style.width = w + "px";
+  canvas.style.height = h + "px";
   ctx.setTransform(pixelSkala, 0, 0, pixelSkala, 0, 0);
 
-  u = Math.min(bredd, hojd) / 9;
-  panelH = marginal.topp + Math.max(100, Math.min(140, u * 1.5));
-  mittY = panelH + (hojd - panelH - marginal.botten) * 0.55;
-  uppdateraKamera(0, true);
+  // Med två spelare delas skärmen: sida vid sida när den ligger, ovanför varandra när den står
+  const liggande = w >= h;
+  if (tvaSpelare) u = (liggande ? Math.min((w / 2) * 1.25, h) : Math.min(w, (h / 2) * 1.25)) / 9;
+  else u = Math.min(w, h) / 9;
+  const gorVy = (x, y, vw, vh, marg) => {
+    const ph = marg.topp + (tvaSpelare ? Math.max(84, Math.min(120, u * 1.4)) : Math.max(100, Math.min(140, u * 1.5)));
+    return { x, y, w: vw, h: vh, marginal: marg, panelH: ph, mittY: ph + (vh - ph - marg.botten) * 0.55 };
+  };
+  helskarm = gorVy(0, 0, w, h, m);
+  if (tvaSpelare && spelare.length === 2) {
+    if (liggande) {
+      spelare[0].vy = gorVy(0, 0, Math.floor(w / 2), h, { ...m, hoger: 0 });
+      spelare[1].vy = gorVy(Math.floor(w / 2), 0, w - Math.floor(w / 2), h, { ...m, vanster: 0 });
+    } else {
+      spelare[0].vy = gorVy(0, 0, w, Math.floor(h / 2), { ...m, botten: 0 });
+      spelare[1].vy = gorVy(0, Math.floor(h / 2), w, h - Math.floor(h / 2), { ...m, topp: 0 });
+    }
+  } else {
+    for (const sp of spelare) sp.vy = helskarm;
+  }
+  const fore = aktiv;
+  for (const sp of spelare) {
+    bytTill(sp);
+    uppdateraKamera(0, true);
+  }
+  if (fore) bytTill(fore);
+  else {
+    visaVy(helskarm);
+    uppdateraKamera(0, true);
+  }
   emojiMinne.clear();
 }
 
@@ -506,6 +629,16 @@ function tryckPaStart(px, py) {
     if (px < k.x || px > k.x + k.w || py < k.y || py > k.y + k.h) continue;
     if (k.start) {
       startaSpel();
+    } else if (k.antal) {
+      // 1 eller 2 spelare
+      if (k.antal !== valtAntal) spelaTon(700, 1000, 0.1, "triangle", 0.08);
+      valtAntal = k.antal;
+      sparaInstallning("spelare-godis", String(k.antal));
+    } else if (k.vem === 1) {
+      // Röd väljer dräkt
+      if (k.i !== valdDrakt2) spelaTon(700, 1000, 0.1, "triangle", 0.08);
+      valdDrakt2 = k.i;
+      sparaInstallning("drakt2-godis", String(k.i));
     } else if (k.i !== valdDrakt) {
       valdDrakt = k.i;
       drakt = S.drakter[k.i];
@@ -524,39 +657,58 @@ canvas.addEventListener("pointerdown", (e) => {
     return;
   }
   if (lage === "slut") {
-    if (tidSedanSlut > SLUT.klar) visaStart();
+    if (tidSedanSlut > slutKlar()) visaStart();
     return;
   }
   if (lage !== "spelar") return;
+  // Med två spelare styr fingret barnet på den halva där det började
+  const sp = tvaSpelare ? spelare.find((q) => arIVy(q.vy, e.clientX, e.clientY)) : spelare[0];
+  if (!sp || sp.hemma) return;
+  bytTill(sp);
+  sp.pekare = e.pointerId;
   fingerNere = true;
   try {
     canvas.setPointerCapture(e.pointerId);
   } catch (fel) {
     // Gör inget – det fungerar ändå
   }
-  fingerX = e.clientX;
-  fingerY = e.clientY;
+  fingerX = e.clientX - sp.vy.x;
+  fingerY = e.clientY - sp.vy.y;
   malFranFinger();
 });
 
+function arIVy(vy, x, y) {
+  return vy && x >= vy.x && x < vy.x + vy.w && y >= vy.y && y < vy.y + vy.h;
+}
+
 canvas.addEventListener("pointermove", (e) => {
+  const sp = spelare.find((q) => q.pekare === e.pointerId);
+  if (!sp) return;
+  bytTill(sp);
   if (!fingerNere) return;
-  fingerX = e.clientX;
-  fingerY = e.clientY;
+  fingerX = e.clientX - sp.vy.x;
+  fingerY = e.clientY - sp.vy.y;
 });
 
-canvas.addEventListener("pointerup", () => {
+function slappFinger(e) {
+  const sp = spelare.find((q) => q.pekare === e.pointerId);
+  if (!sp) return;
+  bytTill(sp);
+  sp.pekare = null;
   fingerNere = false;
-});
-
-canvas.addEventListener("pointercancel", () => {
-  fingerNere = false;
-});
+}
+canvas.addEventListener("pointerup", slappFinger);
+canvas.addEventListener("pointercancel", slappFinger);
 
 window.addEventListener("keydown", (e) => {
   if (e.key === "p" || e.key === "Escape") {
     if (lage === "spelar") pausa();
     else if (lage === "paus") fortsatt();
+    return;
+  }
+  if (lage === "start" && (e.key === "1" || e.key === "2")) {
+    valtAntal = Number(e.key);
+    sparaInstallning("spelare-godis", e.key);
     return;
   }
   if (lage === "start" && (e.key === "ArrowLeft" || e.key === "ArrowRight")) {
@@ -569,7 +721,7 @@ window.addEventListener("keydown", (e) => {
   if (e.key === " " || e.key === "Enter") {
     startaLjud();
     if (lage === "start") startaSpel();
-    else if (lage === "slut" && tidSedanSlut > SLUT.klar) visaStart();
+    else if (lage === "slut" && tidSedanSlut > slutKlar()) visaStart();
     e.preventDefault();
     return;
   }
@@ -588,7 +740,10 @@ document.addEventListener("gesturestart", (e) => e.preventDefault());
 function pausa() {
   if (lage !== "spelar") return;
   lage = "paus";
-  fingerNere = false;
+  forVarje((sp) => {
+    fingerNere = false;
+    sp.pekare = null;
+  });
   for (const k in tangent) tangent[k] = false;
   pausmeny.hidden = false;
   document.getElementById("fortsatt").focus();
@@ -654,7 +809,7 @@ function byggKvarteret() {
       tak: TAKFARGER[(i * 3 + 1) % TAKFARGER.length],
       oppnar: def.oppnar ? minuter(def.oppnar) : 0,
       stanger: def.stanger ? minuter(def.stanger) : 99999,
-      besokt: false, provat: false, oppen: 0, skrammer: 0, meddelat: false,
+      besokt: false, provat: [false, false], oppen: 0, skrammer: 0, meddelat: false, // provat: en för varje barn
     });
   });
 
@@ -746,6 +901,13 @@ function visaStart() {
   lage = "start";
   resultat = null;
   pausmeny.hidden = true;
+  // Tillbaka till en hel skärm
+  tvaSpelare = false;
+  if (spelare.length > 1) {
+    bytTill(spelare[0]);
+    spelare = [spelare[0]];
+  }
+  anpassaStorlek();
 }
 
 function startaSpel() {
@@ -754,26 +916,25 @@ function startaSpel() {
   speltid = 0;
   tidSedanSlut = 0;
   klocka = 18 * 60;
-  godis = 0;
-  skrapSaker = [];
-  flygande = [];
   tappat = [];
   texter = [];
   bubblor = [];
   fladdermoss = [];
-  samtal = null;
-  lapp = null;
-  tips = null;
-  toaster = [];
   vind = null;
   resultat = null;
-  stat = nyStatistik();
-  fatt.clear();
-  visadeTips.clear();
+  // Ett nytt spelarobjekt för varje barn, med tom hink
+  tvaSpelare = valtAntal === 2;
+  aktiv = null;
+  spelare = tvaSpelare ? [nySpelare(0, valdDrakt), nySpelare(1, valdDrakt2)] : [nySpelare(0, valdDrakt)];
   byggKvarteret();
   const hem = husLista.find((h) => h.def.special === "hem");
-  barn = nyttBarn(hem.x, hem.fram + 0.9);
-  hem.provat = true; // Mamma säger inget förrän man har gått därifrån
+  anpassaStorlek(); // Skärmen delas (eller inte)
+  forVarje((sp) => {
+    barn = nyttBarn(hem.x + (tvaSpelare ? (sp.nr === 0 ? -0.6 : 0.6) : 0), hem.fram + 0.9);
+    hem.provat[sp.nr] = true; // Mamma säger inget förrän man har gått därifrån
+    uppdateraKamera(0, true);
+  });
+  bytTill(spelare[0]);
   // Vindpustarna kommer på slumpade tider under kvällen
   vindTider = [];
   for (let i = 0; i < S.vindpustar; i++) {
@@ -781,8 +942,13 @@ function startaSpel() {
     vindTider.push(18 * 60 + 15 + i * del + Math.random() * (del - 25));
   }
   smsKvar = S.sms.map((m) => ({ ...m, min: minuter(m.tid) }));
-  uppdateraKamera(0, true);
-  visaTips(t("Gå till husen med 🎃 och ring på!", "Walk to the houses with a 🎃 and knock!"), 5);
+  if (tvaSpelare) visaTipsAlla(t("Ring på där det lyser 🎃. Ringer ni på samma hus delar ni på godiset!", "Knock where you see a 🎃. Knock on the same house and you share the candy!"), 6);
+  else visaTips(t("Gå till husen med 🎃 och ring på!", "Walk to the houses with a 🎃 and knock!"), 5);
+}
+
+// Hur länge slutskärmen visas innan man kan trycka sig vidare
+function slutKlar() {
+  return resultat && resultat.tva ? 2 : SLUT.klar;
 }
 
 // När saker händer på slutskärmen (sekunder efter att kvällen är slut)
@@ -803,6 +969,10 @@ function pappaTar(tidpunkt) {
 }
 
 function slutaKvallen(hemma) {
+  if (tvaSpelare) {
+    slutaKvallenTva(hemma);
+    return;
+  }
   // Godis som fortfarande flyger hamnar i hinken
   for (const f of flygande) landa(f);
   flygande = [];
@@ -833,6 +1003,26 @@ function slutaKvallen(hemma) {
   // Har man kommit med får man skriva sitt namn, när godiset har flugit klart.
   // Precis som rekordet räknas det på hela hinken.
   Topplista.nyttResultat("godis", godis, { fordrojning: SLUT.klar - 0.2 });
+}
+
+// Två spelare: den som har mest godis vinner, och vinnaren får skriva in sig på topplistan
+function slutaKvallenTva(hemma) {
+  forVarje((sp) => {
+    for (const f of flygande) landa(f);
+    flygande = [];
+    samtal = null;
+    fingerNere = false;
+    sp.pekare = null;
+  });
+  const lista = spelare.map((sp) => ({ sp, godis: godisFor(sp), hus: (sp === aktiv ? stat : sp.stat).besokta }));
+  const mest = Math.max(...lista.map((r) => r.godis));
+  const vinnare = lista.filter((r) => r.godis === mest && mest > 0);
+  resultat = { tva: true, hemma, lista, vinnare };
+  lage = "slut";
+  tidSedanSlut = 0;
+  spelaArpeggio([523, 659, 784, 1047]);
+  // Vid oavgjort skriver man in resultatet en gång
+  if (vinnare.length) Topplista.nyttResultat("godis", mest, { fordrojning: 1.6 });
 }
 
 // ---------- Texter, bubblor och tips ----------
@@ -978,7 +1168,7 @@ function uppdateraTappat(dt) {
       continue;
     }
     g.kvar -= dt;
-    if (Math.hypot(barn.x - g.x, barn.y - g.y) < 0.75 && barn.halkar <= 0) {
+    if (g.kvar > 0 && !aktiv.hemma && Math.hypot(barn.x - g.x, barn.y - g.y) < 0.75 && barn.halkar <= 0) {
       g.kvar = -1;
       g.plockad = true;
       godis += 1;
@@ -1025,10 +1215,13 @@ function uppdateraBarn(dt) {
   if (fingerNere) malFranFinger();
   let dx = 0;
   let dy = 0;
-  if (tangent.arrowleft || tangent.a) dx -= 1;
-  if (tangent.arrowright || tangent.d) dx += 1;
-  if (tangent.arrowup || tangent.w) dy -= 1;
-  if (tangent.arrowdown || tangent.s) dy += 1;
+  // Med två spelare har varje barn sina egna tangenter, annars går alla
+  const tk = tvaSpelare ? [aktiv.tangenter] : S.tvaSpelare.map((q) => q.tangenter);
+  const tryckt = (i) => tk.some((lista) => tangent[lista[i]]);
+  if (tryckt(0)) dx -= 1;
+  if (tryckt(1)) dx += 1;
+  if (tryckt(2)) dy -= 1;
+  if (tryckt(3)) dy += 1;
   if (dx || dy) {
     b.harMal = false;
   } else if (b.harMal) {
@@ -1079,8 +1272,13 @@ function uppdateraBarn(dt) {
   // Ringa på hos husen
   for (const h of husLista) {
     const d = Math.hypot(b.x - h.x, b.y - (h.fram + 0.35));
-    if (h.provat && d > 1.4) h.provat = false;
-    if (d < 0.6 && !samtal && !h.provat && b.halkar <= 0) ringPa(h);
+    if (h.provat[aktiv.nr] && d > 1.4) h.provat[aktiv.nr] = false;
+    if (d < 0.6 && !samtal && !h.provat[aktiv.nr] && b.halkar <= 0) {
+      // Står det andra barnet redan och väntar vid dörren blir man med och delar
+      const annat = spelare.find((q) => q !== aktiv && q.samtal && q.samtal.h === h && !q.samtal.slut);
+      if (annat) gaMedISamtal(annat.samtal, h);
+      else ringPa(h);
+    }
   }
 }
 
@@ -1101,7 +1299,7 @@ function harPumpa(h) {
 function ringPa(h) {
   const def = h.def;
   const sp = def.special;
-  h.provat = true;
+  h.provat[aktiv.nr] = true;
 
   if (sp === "hem") {
     if (klocka < minuter(S.hemTid)) {
@@ -1109,6 +1307,14 @@ function ringPa(h) {
       h.oppen = 2.5;
       spelaRingklocka();
       backa(h);
+    } else if (tvaSpelare) {
+      // Det här barnet är klart. Kvällen tar slut när båda är hemma (eller klockan 20).
+      aktiv.hemma = true;
+      fingerNere = false;
+      samtal = null;
+      saga(h, t("Välkommen hem! Pappa väntar med en skål...", "Welcome home! Dad is waiting with a bowl..."));
+      if (spelare.every((q) => q.hemma)) slutaKvallen(true);
+      else visaTipsAlla(t(`🏠 ${aktiv.namn} har gått hem.`, `🏠 ${aktiv.namn} went home.`), 3);
     } else {
       saga(h, t("Välkommen hem! Pappa väntar med en skål...", "Welcome home! Dad is waiting with a bowl..."));
       slutaKvallen(true);
@@ -1116,12 +1322,12 @@ function ringPa(h) {
     return;
   }
   if (h.besokt) {
-    if (sp !== "tv") saga(barn, t("Här har jag redan varit.", "I've already been here."), 1.8);
+    if (sp !== "tv") saga(barn, tvaSpelare ? t("Här har vi redan varit.", "We've already been here.") : t("Här har jag redan varit.", "I've already been here."), 1.8);
     return;
   }
   if (sp === "tv") {
     // Ingen öppnar, men någon svarar...
-    samtal = { h, rader: def.rep.map(rad), i: -1, vanta: 1.1, godis: 0, sak: [], ger: 99, dorr: false };
+    samtal = { h, rader: def.rep.map(rad), i: -1, vanta: 1.1, godis: 0, sak: [], ger: 99, dorr: false, med: [aktiv] };
     saga(barn, t("Bus eller godis!", "Trick or treat!"), 1.2);
     spelaRingklocka();
     return;
@@ -1161,7 +1367,8 @@ function ringPa(h) {
   const omg = h.igenGjort ? def.igen : def;
   let rader = omg.rep.map(rad);
   if (sp === "majken" && !h.igenGjort) rader = rader.concat([rad(drakt.ata)]);
-  samtal = { h, rader, i: -1, vanta: 1.0, godis: omg.godis || 0, sak: omg.sak || [], ger: omg.ger || 0, dorr: true };
+  // med = barnen som står vid dörren. Kommer det andra barnet dit blir det med (gaMedISamtal).
+  samtal = { h, rader, i: -1, vanta: 1.0, godis: omg.godis || 0, sak: omg.sak || [], ger: omg.ger || 0, dorr: true, med: [aktiv] };
   saga(barn, t("Bus eller godis!", "Trick or treat!"), 1.2);
   spelaRingklocka();
   backa(h);
@@ -1169,6 +1376,22 @@ function ringPa(h) {
     samtal.vanta = 2.4; // Först kommer skelettet...
     h.skrammer = 1.6;
   }
+}
+
+// Det andra barnet har redan ringt på här. Då blir man med och delar på det som ges.
+function gaMedISamtal(s, h) {
+  h.provat[aktiv.nr] = true;
+  if (s.gett) {
+    saga(barn, t("Åh nej, för sent!", "Oh no, too late!"), 1.8);
+    return;
+  }
+  s.med.push(aktiv);
+  samtal = s;
+  saga(barn, t("Jag med! Bus eller godis!", "Me too! Trick or treat!"), 1.6);
+  fingerNere = false;
+  barn.malX = h.x + (barn.x < h.x ? -0.7 : 0.7);
+  barn.malY = h.fram + 1.05;
+  barn.harMal = true;
 }
 
 // Barnet tar ett steg tillbaka från dörren, så att man ser vem som öppnar
@@ -1185,7 +1408,12 @@ function rad(r) {
 
 function uppdateraSamtal(dt) {
   if (!samtal) return;
+  if (samtal.slut) {
+    samtal = null; // Samtalet tog slut medan det andra barnet skötte det
+    return;
+  }
   const s = samtal;
+  if (s.med[0] !== aktiv) return; // Den som ringde på sköter samtalet
   const h = s.h;
   if (h.skrammer > 0) {
     const fore = h.skrammer;
@@ -1201,12 +1429,14 @@ function uppdateraSamtal(dt) {
       utmarkelse("modig");
     }
   }
-  // Har barnet gått vidare får det godiset ändå, och samtalet tar slut
-  const gattVidare = Math.hypot(barn.x - h.x, barn.y - h.fram) > 3.5 && h.skrammer <= 0;
+  // Har barnet gått vidare får det godiset ändå, och samtalet tar slut.
+  // Med två barn vid dörren har man gått vidare först när båda har gått.
+  const gattVidare = s.med.every((q) => !vidDorren(q, h)) && h.skrammer <= 0;
   if (gattVidare && !s.gett && s.ger < 99) {
     // Barnet gick innan det fick godiset. Pumpan lyser kvar, så man kan komma tillbaka.
     saga(h, slumpa(S.gickForTidigt), 2.8);
     h.oppen = 1.5;
+    s.slut = true;
     samtal = null;
     visaTipsEnGang("vanta", t("Stanna vid dörren tills du får godiset!", "Stay at the door until you get the candy!"), 4);
     return;
@@ -1223,6 +1453,7 @@ function uppdateraSamtal(dt) {
       // Vissa hus tänder pumpan igen senare
       if (h.def.igen) h.igenFran = Math.max(minuter(h.def.igen.tid), klocka + 10);
     }
+    s.slut = true;
     samtal = null;
     kollaAllaHus();
     return;
@@ -1233,11 +1464,37 @@ function uppdateraSamtal(dt) {
   s.vanta = langd;
 }
 
+// Står barnet kvar vid dörren?
+function vidDorren(q, h) {
+  const b = q === aktiv ? barn : q.barn;
+  return Math.hypot(b.x - h.x, b.y - h.fram) <= 3.5;
+}
+
 function geHusetsGodis(s) {
   if (s.gett || s.ger >= 99) return;
   s.gett = true;
   const sp = s.h.def.special;
-  geGodis(s.h.x, s.h.fram, s.godis, s.sak, sp === "choklad" ? "🍫" : "");
+  const bild = sp === "choklad" ? "🍫" : "";
+  // Står båda barnen vid dörren delar de på godiset (den som ringde på får det som blir över)
+  const har = s.med.filter((q) => vidDorren(q, s.h));
+  if (har.length < 2) {
+    geGodis(s.h.x, s.h.fram, s.godis, s.sak, bild);
+    utmarkelserFor(sp);
+    return;
+  }
+  const agare = aktiv;
+  har.forEach((q, i) => {
+    bytTill(q);
+    const antal = Math.floor(s.godis / har.length) + (i < s.godis % har.length ? 1 : 0);
+    const saker = s.sak.filter((_, k) => k % har.length === i);
+    geGodis(s.h.x + (i === 0 ? -0.5 : 0.5), s.h.fram, antal, saker, bild);
+    utmarkelserFor(sp);
+  });
+  bytTill(agare);
+  visaText(t("Ni delar! 🤝", "You share! 🤝"), s.h.x, s.h.fram - 2.4, "#b3ffb8", true, 2);
+}
+
+function utmarkelserFor(sp) {
   if (sp === "choklad") utmarkelse("choklad");
   if (sp === "sture") utmarkelse("sture");
   if (sp === "pumpa") utmarkelse("pumpa");
@@ -1254,14 +1511,14 @@ function uppdateraHus(dt) {
       // Huset tänder pumpan igen: där finns mer godis!
       h.igenGjort = true;
       h.besokt = false;
-      visaTips(t("🎃 " + h.def.namn + " har tänt pumpan igen!", "🎃 " + h.def.namn + " has lit the pumpkin again!"), 3.5);
+      visaTipsAlla(t("🎃 " + h.def.namn + " har tänt pumpan igen!", "🎃 " + h.def.namn + " has lit the pumpkin again!"), 3.5);
       spelaArpeggio([523, 659, 784]);
     }
     // Huset med pumpafamiljen får fler pumpor när de har skurit klart
     if (h.def.special === "pumpa" && klocka >= h.oppnar && !h.meddelat) {
       h.meddelat = true;
       if (Math.hypot(barn.x - h.x, barn.y - h.fram) < 12) visaText(t("Pumpafamiljen har öppnat!", "The pumpkin family is open!"), h.x, h.fram - 3, "#ffb347");
-      visaTips(t("🎃 Pumpafamiljen har öppnat!", "🎃 The pumpkin family is open!"), 3.5);
+      visaTipsAlla(t("🎃 Pumpafamiljen har öppnat!", "🎃 The pumpkin family is open!"), 3.5);
     }
   }
 }
@@ -1270,6 +1527,7 @@ function uppdateraHus(dt) {
 
 function uppdateraFolk(dt) {
   for (const p of folk) {
+    if (tvaSpelare) bytTill(narmast(p)); // Folk pratar med barnet som är närmast
     if (p.slinga.length > 1) {
       const mal = p.slinga[p.mal];
       const dx = mal.x - p.x;
@@ -1310,6 +1568,8 @@ function uppdateraFolk(dt) {
 
 function uppdateraHundar(dt) {
   for (const d of hundar) {
+    // Med två barn jagar hunden det som är närmast, och fortsätter jaga samma barn
+    if (tvaSpelare) bytTill(d.jagar > 0 && d.offer && !d.offer.hemma ? d.offer : narmast(d));
     const a = d.agare;
     d.vila = Math.max(0, d.vila - dt);
     d.barKvar = Math.max(0, d.barKvar - dt);
@@ -1348,8 +1608,9 @@ function uppdateraHundar(dt) {
         d.bytOm = slumpMellan(1, 2.5);
       }
       const ser = S.hundSer * (drakt.hundSer || 1);
-      if (d.vila <= 0 && godis > 0 && tillBarn < ser && Math.hypot(barn.x - a.x, barn.y - a.y) < S.hundKoppel + ser) {
+      if (d.vila <= 0 && godis > 0 && !aktiv.hemma && tillBarn < ser && Math.hypot(barn.x - a.x, barn.y - a.y) < S.hundKoppel + ser) {
         d.jagar = S.hundJagar;
+        d.offer = aktiv;
         if (drakt.hundSer && a.pratOm < 6) {
           saga(a, slumpa(S.folk.hundKatt), 2.4);
           a.pratOm = 9;
@@ -1385,7 +1646,7 @@ function uppdateraHandelser(dt) {
   if (vindTider.length && klocka >= vindTider[0] && !samtal && barn.halkar <= 0) {
     vindTider.shift();
     vind = { kvar: 2.4, riktning: Math.random() < 0.5 ? -1 : 1, blast: false, lov: [] };
-    visaText(t("Det blåser!", "It's windy!"), barn.x, barn.y - 1.7, "#cfe8ff");
+    for (const sp of spelare) if (!sp.hemma) visaText(t("Det blåser!", "It's windy!"), sp.barn.x, sp.barn.y - 1.7, "#cfe8ff");
     spelaTon(250, 700, 1.2, "sine", 0.05);
   }
   if (vind) {
@@ -1400,16 +1661,18 @@ function uppdateraHandelser(dt) {
     }
     if (!vind.blast && vind.kvar < 1.6) {
       vind.blast = true;
-      if (godis >= 2) {
-        tappa(2, barn.x, barn.y, 1.2, vind.riktning * 2.6);
-        visaTipsEnGang("vind", t("Vinden tog lite godis! Spring och hämta det!", "The wind took some candy! Run and get it!"), 4);
-      }
+      forVarje((sp) => {
+        if (godis >= 2 && !sp.hemma) {
+          tappa(2, barn.x, barn.y, 1.2, vind.riktning * 2.6);
+          visaTipsEnGang("vind", t("Vinden tog lite godis! Spring och hämta det!", "The wind took some candy! Run and get it!"), 4);
+        }
+      });
     }
     if (vind.kvar <= 0) vind = null;
   }
   if (smsKvar.length && klocka >= smsKvar[0].min) {
     const m = smsKvar.shift();
-    visaTips("📱 " + m.fran + ": " + m.text, 5.5, true);
+    visaTipsAlla("📱 " + m.fran + ": " + m.text, 5.5, true);
     spelaTon(1568, 1568, 0.08, "sine", 0.06);
     spelaTon(2093, 2093, 0.1, "sine", 0.06, 0.12);
   }
@@ -1451,8 +1714,8 @@ function uppdateraKamera(dt, direkt) {
 
 // ---------- Allt som händer varje bildruta ----------
 
-function uppdatera(dt) {
-  tid += dt;
+// Utmärkelser, lappar, tips och hinkens studs för det aktiva barnet
+function uppdateraRutor(dt) {
   for (const ts of toaster) ts.kvar -= dt;
   toaster = toaster.filter((ts) => ts.kvar > 0);
   if (lapp) {
@@ -1465,8 +1728,18 @@ function uppdatera(dt) {
   }
   hinkStuds = Math.max(0, hinkStuds - dt * 4);
   fickStuds = Math.max(0, fickStuds - dt * 4);
+}
+
+function uppdatera(dt) {
+  tid += dt;
+  if (spelare.length) forVarje(() => uppdateraRutor(dt));
+  else uppdateraRutor(dt);
   skakning = Math.max(0, skakning - dt);
 
+  if (lage === "slut" && resultat && resultat.tva) {
+    tidSedanSlut += dt;
+    return;
+  }
   if (lage === "slut") {
     const fore = tidSedanSlut;
     tidSedanSlut += dt;
@@ -1489,7 +1762,7 @@ function uppdatera(dt) {
   const fore = klocka;
   klocka = 18 * 60 + Math.min(1, speltid / S.speltid) * 120;
   if (fore < 19 * 60 + 50 && klocka >= 19 * 60 + 50) {
-    visaTips(t("⏰ 10 minuter kvar!", "⏰ 10 minutes left!"), 3.5);
+    visaTipsAlla(t("⏰ 10 minuter kvar!", "⏰ 10 minutes left!"), 3.5);
     spelaTon(880, 880, 0.15, "square", 0.05);
     spelaTon(880, 880, 0.15, "square", 0.05, 0.25);
   }
@@ -1501,16 +1774,24 @@ function uppdatera(dt) {
   for (const b of bubblor) b.kvar -= dt;
   bubblor = bubblor.filter((b) => b.kvar > 0);
 
-  uppdateraBarn(dt);
-  if (lage !== "spelar") return; // Kom hem
-  uppdateraSamtal(dt);
+  // Först det som gäller varje barn för sig
+  for (const sp of spelare) {
+    bytTill(sp);
+    if (!sp.hemma) uppdateraBarn(dt);
+    if (lage !== "spelar") return; // Kom hem
+    uppdateraSamtal(dt);
+    uppdateraFlygande(dt);
+    uppdateraTappat(sp === spelare[0] ? dt : 0); // Godiset på marken åldras bara en gång per bildruta
+    uppdateraKamera(dt, false);
+  }
+  // Sedan det som händer i kvarteret
+  bytTill(spelare[0]);
   uppdateraHus(dt);
   uppdateraFolk(dt);
   uppdateraHundar(dt);
+  visaVy(helskarm); // Löven och fladdermössen flyger över hela skärmen
   uppdateraHandelser(dt);
-  uppdateraFlygande(dt);
-  uppdateraTappat(dt);
-  uppdateraKamera(dt, false);
+  bytTill(spelare[0]);
 
   if (klocka >= 20 * 60) {
     slutaKvallen(false);
@@ -2181,6 +2462,74 @@ function ritaBarnet() {
   ritaDrakt(drakt.typ, SX(barn.x), SY(barn.y), u, { fas: barn.gangFas, riktning: barn.riktning, ror: barn.ror, halkar: barn.halkar, hopp: barn.hopp, hink: true });
 }
 
+// Med två spelare har varje barn en ring i sin färg runt fötterna
+function ritaEttBarn(q) {
+  const b = q.barn;
+  ctx.strokeStyle = q.farg;
+  ctx.lineWidth = Math.max(2.5, u * 0.07);
+  ctx.beginPath();
+  ctx.ellipse(SX(b.x), SY(b.y), u * 0.45, u * 0.15, 0, 0, VARV);
+  ctx.stroke();
+  ritaDrakt(q.drakt.typ, SX(b.x), SY(b.y), u, { fas: b.gangFas, riktning: b.riktning, ror: b.ror, halkar: b.halkar, hopp: b.hopp, hink: true });
+}
+
+const DRAKT_EMOJI = { spoke: "👻", haxa: "🧙", pumpa: "🎃", skelett: "💀", katt: "🐈‍⬛" };
+
+// Var är det andra barnet? Syns det på skärmen står namnet ovanför det,
+// annars visar en pil i kanten åt vilket håll det är.
+function ritaAnnanSpelare() {
+  for (const q of spelare) {
+    if (q === aktiv || q.hemma) continue;
+    const sx = SX(q.barn.x);
+    const sy = SY(q.barn.y) - u * 0.6;
+    const r = Math.max(20, u * 0.42);
+    const kant = r + 8;
+    const x0 = marginal.vanster + kant;
+    const x1 = bredd - marginal.hoger - kant;
+    const y0 = panelH + kant;
+    const y1 = hojd - marginal.botten - kant;
+    if (sx > x0 && sx < x1 && sy > y0 && sy < y1) {
+      ritaText(q.namn, sx, SY(q.barn.y) - u * 1.95, Math.max(14, u * 0.3), q.ljus);
+      continue;
+    }
+    const ex = begr(sx, x0, x1);
+    const ey = begr(sy, y0, y1);
+    const vinkel = Math.atan2(sy - ey, sx - ex);
+    ctx.fillStyle = q.farg;
+    ctx.strokeStyle = "#ffffff";
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(ex + Math.cos(vinkel) * (r + 11), ey + Math.sin(vinkel) * (r + 11));
+    ctx.lineTo(ex + Math.cos(vinkel + 0.55) * r, ey + Math.sin(vinkel + 0.55) * r);
+    ctx.lineTo(ex + Math.cos(vinkel - 0.55) * r, ey + Math.sin(vinkel - 0.55) * r);
+    ctx.closePath();
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(ex, ey, r, 0, VARV);
+    ctx.fill();
+    ctx.stroke();
+    ritaEmoji(DRAKT_EMOJI[q.drakt.typ] || "🧒", ex, ey, r * 1.15);
+  }
+}
+
+// Barnet har gått hem och väntar på det andra
+function ritaHemma() {
+  ctx.fillStyle = "rgba(15, 6, 30, 0.7)";
+  ctx.fillRect(0, panelH, bredd, hojd - panelH);
+  const ts = Math.max(18, Math.min(bredd, hojd) / 12);
+  const annat = spelare.find((q) => q !== aktiv);
+  ritaText(t("🏠 Hemma!", "🏠 Home!"), bredd / 2, (panelH + hojd) / 2 - ts, ts * 1.3, "#ffb347");
+  ritaText(t(`Väntar på ${annat.namn}...`, `Waiting for ${annat.namn}...`), bredd / 2, (panelH + hojd) / 2 + ts * 0.6, ts * 0.8, annat.ljus);
+}
+
+// Strecket mellan de två halvorna
+function ritaDelning() {
+  const v = spelare[1].vy;
+  ctx.fillStyle = "#0b0614";
+  if (v.x > 0) ctx.fillRect(v.x - 2, 0, 4, hojd);
+  else ctx.fillRect(0, v.y - 2, bredd, 4);
+}
+
 // ---------- Folket ----------
 
 const FOLKBILD = { banan: "🚶‍♂️", hund: "🚶‍♀️", pudel: "🚶", tonaring: "🧍", foraldrar: "🧍‍♂️" };
@@ -2371,8 +2720,15 @@ function bubbelPlats(a) {
   return { x: SX(a.x), y: SY(a.y) - u * 1.35 };
 }
 
+// Med delad skärm ritas bara det som händer på den egna halvan (annars
+// skulle pratbubblor och texter från andra sidan kvarteret tryckas in vid kanten)
+function syns(x, y) {
+  return !delad() || (x > -u * 2 && x < bredd + u * 2 && y > 0 && y < hojd + u * 2);
+}
+
 function ritaTexter() {
   for (const tx of texter) {
+    if (!syns(SX(tx.x), SY(tx.y))) continue;
     const storlek = Math.max(18, u * (tx.stor ? 0.45 : 0.32));
     ctx.font = `bold ${storlek}px ${TYPSNITT}`;
     const halv = ctx.measureText(tx.text).width / 2 + 8;
@@ -2642,8 +2998,10 @@ function ritaToast(ts) {
 // ---------- Start- och slutskärmen ----------
 
 // En rad med kort, ett för varje dräkt. Svarar med var nästa rad ska börja.
-function ritaDraktkort(topp, maxHojd) {
+function ritaDraktkort(topp, maxHojd, vem = 0) {
   const lista = S.drakter;
+  const valt = vem === 1 ? valdDrakt2 : valdDrakt;
+  const farg = valtAntal === 2 ? S.tvaSpelare[vem].farg : "rgba(255, 179, 71, 0.95)";
   const mellan = 10;
   const kw = Math.min(150, (bredd - 32 - mellan * (lista.length - 1)) / lista.length);
   const kh = Math.min(maxHojd, kw * 1.3);
@@ -2651,8 +3009,8 @@ function ritaDraktkort(topp, maxHojd) {
   let x = bredd / 2 - total / 2;
   const ts = begr(kw * 0.15, 13, 20);
   lista.forEach((d, i) => {
-    const vald = i === valdDrakt;
-    ctx.fillStyle = vald ? "rgba(255, 179, 71, 0.95)" : "rgba(255, 255, 255, 0.16)";
+    const vald = i === valt;
+    ctx.fillStyle = vald ? farg : "rgba(255, 255, 255, 0.16)";
     rundRekt(ctx, x, topp, kw, kh, 16);
     ctx.fill();
     if (vald) {
@@ -2660,14 +3018,18 @@ function ritaDraktkort(topp, maxHojd) {
       ctx.lineWidth = 3;
       ctx.stroke();
     }
-    const st = Math.min(kw * 0.62, kh * 0.55);
-    ritaDrakt(d.typ, x + kw / 2, topp + kh * 0.72, st, { fas: tid * 6, ror: vald, riktning: 1, hink: true });
-    ctx.font = `bold ${ts}px ${TYPSNITT}`;
-    ctx.fillStyle = vald ? "#2b1d0e" : "#ffffff";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText(d.namn, x + kw / 2, topp + kh - ts * 0.9, kw - 8);
-    startKnappar.push({ x, y: topp, w: kw, h: kh, i });
+    // Är korten små (två rader på en telefon) får namnet inte plats under figuren
+    const visaNamn = kh >= 80;
+    const st = Math.min(kw * 0.62, kh * (visaNamn ? 0.55 : 0.7));
+    ritaDrakt(d.typ, x + kw / 2, topp + kh * (visaNamn ? 0.72 : 0.88), st, { fas: tid * 6, ror: vald, riktning: 1, hink: true });
+    if (visaNamn) {
+      ctx.font = `bold ${ts}px ${TYPSNITT}`;
+      ctx.fillStyle = vald && valtAntal === 1 ? "#2b1d0e" : "#ffffff";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(d.namn, x + kw / 2, topp + kh - ts * 0.9, kw - 8);
+    }
+    startKnappar.push({ x, y: topp, w: kw, h: kh, i, vem });
     x += kw + mellan;
   });
   return topp + kh + 14;
@@ -2697,11 +3059,22 @@ function ritaSkarmar() {
 
   if (lage === "start") {
     rad("🎃 " + t("Bus eller godis", "Trick or Treat") + (bredd > 520 ? " 🎃" : ""), ts * (lag ? 1.05 : 1.3), "#ffb347");
-    if (!lag) rad(t("Välj dräkt", "Choose your costume"), ts * 0.65, "#ffffff");
-    y = ritaDraktkort(y - ts * 0.2, lag ? hojd * 0.32 : hojd * 0.26);
-    rad(drakt.text, ts * 0.55, "#ffffff");
-    rad(t("Samla godis 18–20. Ring på där det lyser 🎃", "Collect candy from 6 to 8 pm. Knock where you see a 🎃"), liten, "#d5def0");
-    if (!lag) rad(t("Akta bananskal 🍌 och hundar 🐕", "Watch out for banana peels 🍌 and dogs 🐕"), liten, "#d5def0");
+    y = ritaAntalKnappar(y - ts * 0.3, ts * (lag ? 0.95 : 1.1)) + ts * 0.2;
+    if (valtAntal === 2) {
+      // Två spelare: en rad med dräkter för varje barn
+      for (const vem of [0, 1]) {
+        const sp = S.tvaSpelare[vem];
+        rad(t(`${sp.namn}: välj dräkt`, `${sp.namn}: choose a costume`), liten, sp.ljus);
+        y = ritaDraktkort(y - ts * 0.25, lag ? hojd * 0.15 : hojd * 0.17, vem) - 4;
+      }
+      if (!lag) rad(t("En halva av skärmen var. Ringer ni på samma hus delar ni på godiset!", "Half the screen each. Knock on the same house and you share the candy!"), liten, "#d5def0");
+    } else {
+      if (!lag) rad(t("Välj dräkt", "Choose your costume"), ts * 0.65, "#ffffff");
+      y = ritaDraktkort(y - ts * 0.2, lag ? hojd * 0.26 : hojd * 0.24);
+      rad(drakt.text, ts * 0.55, "#ffffff");
+      rad(t("Samla godis 18–20. Ring på där det lyser 🎃", "Collect candy from 6 to 8 pm. Knock where you see a 🎃"), liten, "#d5def0");
+      if (!lag) rad(t("Akta bananskal 🍌 och hundar 🐕", "Watch out for banana peels 🍌 and dogs 🐕"), liten, "#d5def0");
+    }
     // Knappen
     const kh = ts * 1.3;
     const kt = "▶ " + t("Ut och knacka!", "Go trick-or-treating!");
@@ -2717,10 +3090,32 @@ function ritaSkarmar() {
     ctx.fillText(kt, mitt, ky + kh / 2, kw - ts * 0.6);
     startKnappar.push({ x: mitt - kw / 2, y: ky, w: kw, h: kh, start: true });
     y = ky + kh + ts * 0.6;
-    if (rekord > 0) rad(t("Rekord: ", "High score: ") + rekord + " 🍬", ts * 0.55, "#d5def0");
+    if (rekord > 0 && valtAntal === 1) rad(t("Rekord: ", "High score: ") + rekord + " 🍬", ts * 0.55, "#d5def0");
   }
 
-  if (lage === "slut" && resultat) ritaResultat(ts, liten, lag);
+  if (lage === "slut" && resultat && resultat.tva) ritaResultatTva(ts, liten, lag);
+  else if (lage === "slut" && resultat) ritaResultat(ts, liten, lag);
+}
+
+// Två knappar: 1 eller 2 spelare. Svarar med var nästa rad ska börja.
+function ritaAntalKnappar(topp, kh) {
+  const mellan = 10;
+  const kw = Math.min((bredd - 32 - mellan) / 2, kh * 5);
+  const x0 = bredd / 2 - kw - mellan / 2;
+  [1, 2].forEach((antal, i) => {
+    const x = x0 + i * (kw + mellan);
+    const vald = antal === valtAntal;
+    ctx.fillStyle = vald ? "#ffb347" : "rgba(255, 255, 255, 0.16)";
+    rundRekt(ctx, x, topp, kw, kh, kh / 2);
+    ctx.fill();
+    ctx.font = `bold ${kh * 0.5}px ${TYPSNITT}`;
+    ctx.fillStyle = vald ? "#2b1d0e" : "#ffffff";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(antal === 1 ? t("👤 1 spelare", "👤 1 player") : t("👥 2 spelare", "👥 2 players"), x + kw / 2, topp + kh / 2, kw - 12);
+    startKnappar.push({ x, y: topp, w: kw, h: kh, antal });
+  });
+  return topp + kh + 12;
 }
 
 // En hög med godis som växer uppåt. "plats" är hur många godis högen är gjord för.
@@ -2735,6 +3130,38 @@ function ritaHog(cx, botten, w, antal, plats) {
       ritaEmoji(GODISBILDER[i % GODISBILDER.length], x, botten - st * 0.4 - rad * st * 0.62, st * 1.05);
     }
   }
+}
+
+// Resultatsidan för två spelare: barnens hinkar bredvid varandra
+function ritaResultatTva(ts, liten, lag) {
+  const r = resultat;
+  let y = marginal.topp + Math.max(ts * 1.6, hojd * 0.07, 68 + ts * 0.7);
+  const titel = r.vinnare.length === 1
+    ? t(`🏆 ${r.vinnare[0].sp.namn} vinner! 🏆`, `🏆 ${r.vinnare[0].sp.namn} wins! 🏆`)
+    : r.vinnare.length === 2 ? t("Oavgjort! 🤝", "A tie! 🤝") : t("Inget godis i kväll...", "No candy tonight...");
+  ritaText(r.hemma ? t("Alla är hemma! 🏠", "Everyone's home! 🏠") : t("Klockan är 20! 🕗", "It's 8 o'clock! 🕗"), bredd / 2, y, ts * (lag ? 0.7 : 0.8), "#ffb347");
+  y += ts * 1.3;
+  const vinnFarg = r.vinnare.length === 1 ? r.vinnare[0].sp.ljus : "#ffe14d";
+  ctx.font = `bold ${ts * 1.1}px ${TYPSNITT}`;
+  const ryms = (bredd - 32) / ctx.measureText(titel).width;
+  ritaText(titel, bredd / 2, y, ts * 1.1 * Math.min(1, ryms), vinnFarg);
+  y += ts * 1.2;
+
+  // Hinkarna
+  const kvar = hojd - marginal.botten - y - ts * 2.2;
+  const hh = Math.max(40, Math.min(kvar * 0.55, bredd * 0.16));
+  r.lista.forEach((rad, i) => {
+    const cx = bredd * (i === 0 ? 0.28 : 0.72);
+    const vann = r.vinnare.some((v) => v.sp === rad.sp);
+    const st = hh * 0.9;
+    const dy = y + st * 0.55;
+    ritaDrakt(rad.sp.drakt.typ, cx - hh * 0.75, dy + st * 0.45, st * 0.75, { fas: tid * 6, ror: vann, riktning: 1, hink: false });
+    if (vann) ritaEmoji("👑", cx - hh * 0.75, dy - st * 0.5, st * 0.45);
+    ritaHink(cx + hh * 0.3, dy + st * 0.1, hh, rad.godis, false);
+    ritaText(rad.sp.namn + ": " + rad.godis + " 🍬", cx, dy + st * 0.1 + hh * 0.75, Math.max(16, ts * 0.6), rad.sp.ljus);
+    ritaText(t(`${rad.hus} hus`, `${rad.hus} houses`), cx, dy + st * 0.1 + hh * 0.75 + ts * 0.75, liten, "#d5def0");
+  });
+  if (tidSedanSlut > slutKlar()) ritaText(t("Tryck för att gå ut igen", "Tap to go out again"), bredd / 2, hojd - marginal.botten - ts * 0.9, ts * 0.65);
 }
 
 // Resultatsidan: hinken till vänster, pappa till höger. Godiset flyger från
@@ -2896,6 +3323,48 @@ function rita() {
   const visaHem = lage !== "paus";
   if (hemKnapp.hidden === visaHem) hemKnapp.hidden = !visaHem;
 
+  if (delad() && (lage === "spelar" || lage === "paus")) {
+    // Två spelare: varje barn ritas på sin halva, med sin egen kamera
+    for (const sp of spelare) {
+      bytTill(sp);
+      ctx.save();
+      ctx.translate(sp.vy.x, sp.vy.y);
+      ctx.beginPath();
+      ctx.rect(0, 0, bredd, hojd);
+      ctx.clip();
+      ritaVarlden();
+      ritaOverst();
+      ritaAnnanSpelare();
+      if (sp.hemma) ritaHemma();
+      ctx.restore();
+    }
+    visaVy(helskarm);
+    ritaDelning();
+  } else {
+    if (spelare.length) bytTill(spelare[0]);
+    visaVy(helskarm);
+    ritaVarlden();
+    if (lage === "spelar" || lage === "paus") ritaOverst();
+  }
+  visaVy(helskarm);
+  ritaSkarmar();
+}
+
+// Är skärmen delad i två?
+function delad() {
+  return tvaSpelare && spelare.length === 2;
+}
+
+// Hinken, klockan, tipsen och lapparna ovanpå kvarteret
+function ritaOverst() {
+  ritaPanel();
+  ritaFlygande();
+  const under = ritaTips() || panelH + 10;
+  if (lapp) ritaLapp(under + 16);
+  if (toaster.length) ritaToast(toaster[0]);
+}
+
+function ritaVarlden() {
   ctx.save();
   if (skakning > 0) ctx.translate((Math.random() - 0.5) * u * 0.2, (Math.random() - 0.5) * u * 0.2);
   ritaMarken();
@@ -2920,7 +3389,11 @@ function rita() {
   for (const s of dekor) if (!s.mark && iBild(s.x, s.y)) lista.push([s.y, () => ritaDekor(s)]);
   for (const p of folk) if (iBild(p.x, p.y)) lista.push([p.y, () => ritaFolk(p)]);
   for (const d of hundar) if (iBild(d.x, d.y)) lista.push([d.y, () => ritaHund(d)]);
-  lista.push([barn.y, ritaBarnet]);
+  if (delad()) {
+    for (const q of spelare) if (!q.hemma) lista.push([q.barn.y, () => ritaEttBarn(q)]);
+  } else {
+    lista.push([barn.y, ritaBarnet]);
+  }
   lista.sort((a, b) => a[0] - b[0]);
   for (const [, ritaDen] of lista) ritaDen();
 
@@ -2938,20 +3411,12 @@ function rita() {
   if (lage === "spelar") ritaPilar();
   for (const b of bubblor) {
     const p = bubbelPlats(b.agare);
+    if (!syns(p.x, p.y)) continue;
     ctx.globalAlpha = Math.min(1, b.kvar * 3);
     ritaPratbubbla(b.text, p.x, p.y);
     ctx.globalAlpha = 1;
   }
   ctx.restore();
-
-  if (lage === "spelar" || lage === "paus") {
-    ritaPanel();
-    ritaFlygande();
-    const under = ritaTips() || panelH + 10;
-    if (lapp) ritaLapp(under + 16);
-    if (toaster.length) ritaToast(toaster[0]);
-  }
-  ritaSkarmar();
 }
 
 // ---------- Spel-loopen: körs ungefär 60 gånger per sekund ----------
