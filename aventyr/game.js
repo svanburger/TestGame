@@ -2130,6 +2130,15 @@ function lasStyrning() {
   };
 }
 
+// Finns det en handkontroll? (Den syns för sidan först när man har tryckt på en knapp.)
+const knapphjalp = document.getElementById("knapphjalp");
+function harHandkontroll() {
+  if (anvanderHandkontroll) return true;
+  const alla = navigator.getGamepads ? navigator.getGamepads() : [];
+  for (let i = 0; i < alla.length; i++) if (alla[i]) return true;
+  return false;
+}
+
 // Handkontrollen i menyerna: styrkorset flyttar, A väljer
 let menyFokus = 0;
 function synligaKnappar() {
@@ -2653,8 +2662,14 @@ function uppdatera(dt, styr) {
   });
   goraKnapp.hidden = !visad;
   if (visad) {
+    // Med handkontroll står X på knappen (X = gör/prata)
     const text = (tvaSpelare ? (visadNr === 0 ? "🔵 " : "🟠 ") : "") + visad.sak.etikett();
-    if (goraKnapp.textContent !== text) goraKnapp.textContent = text;
+    const nyckel = text + (anvanderHandkontroll ? "/x" : "");
+    if (goraKnapp.dataset.text !== nyckel) {
+      goraKnapp.dataset.text = nyckel;
+      goraKnapp.innerHTML = anvanderHandkontroll ? '<span class="xk x">X</span>' : "";
+      goraKnapp.appendChild(document.createTextNode(text));
+    }
   }
   const gor = (nr, f) => {
     if (tvaSpelare) aktiv = nr;   // den som gör saken är den som pratar
@@ -2798,6 +2813,9 @@ function ruta(nu) {
   } else if (lage === "paus" && styr.pausNytt) fortsatt();
   if (lage === "spelar" || lage === "val" || lage === "kort") uppdateraRepliker(dt);
   if (!iMeny) document.querySelectorAll(".fokus").forEach((k) => k.classList.remove("fokus"));
+  // Xbox-knapparna syns i start- och pausrutan när en handkontroll är inkopplad
+  const visaHjalp = (lage === "start" || lage === "paus") && harHandkontroll();
+  if (knapphjalp.hidden === visaHjalp) knapphjalp.hidden = !visaHjalp;
   if (lage !== "paus") animera(dt);
   renderare.render(scen, kamera);
   kvalitet.rakna(verkligTid);
