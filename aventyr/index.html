@@ -323,6 +323,10 @@
       .menyknapp { padding: 8px 14px; }
     }
 
+    .fel { padding: 8px 12px; border-radius: 12px; color: #fff; background: #c0392b; font-size: 0.95rem; }
+    .fel[hidden] { display: none; }
+    #barnval.blinka { animation: blinka 0.4s 2; }
+
     /* Det handkontrollen pekar på i menyerna */
     .fokus { outline: 5px solid #ff7a1a !important; outline-offset: 3px; }
   </style>
@@ -375,6 +379,7 @@
         <button type="button" class="antalknapp" data-antal="2" data-en="👥 Two players">👥 Två spelare</button>
       </div>
       <div id="barnval"></div>
+      <p id="felruta" class="fel" hidden></p>
       <button id="borja" class="menyknapp" type="button" data-en="▶ Start">▶ Börja</button>
       <button id="fortsattSparat" class="menyknapp sekundar" type="button" hidden></button>
       <button class="menyknapp sekundar" type="button" data-topplista="aventyr" data-en="🏆 High scores">🏆 Topplista</button>

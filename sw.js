@@ -61,7 +61,8 @@ self.addEventListener("fetch", (e) => {
 
 async function hamta(fraga) {
   const cache = await caches.open(CACHE);
-  const franNatet = fetch(fraga).then((svar) => {
+  // no-cache: fråga alltid servern om filen är ny, så att gamla och nya filer inte blandas
+  const franNatet = fetch(fraga, { cache: "no-cache" }).then((svar) => {
     if (svar.ok) cache.put(fraga, svar.clone());
     return svar;
   });
