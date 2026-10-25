@@ -2240,22 +2240,31 @@ Object.keys(BARN).forEach((id) => {
   });
   barnval.appendChild(kort);
 });
+// En spelare: ett barn räcker. Två spelare: ett barn var.
+function kanBorja() {
+  return antalSpelare === 2 ? valdaBarn.length === 2 : valdaBarn.length >= 1;
+}
+
 function visaBarnval() {
   barnval.querySelectorAll(".barnkort").forEach((k) => {
     const nr = valdaBarn.indexOf(k.dataset.barn);
     k.classList.toggle("vald", nr >= 0);
-    // Med två spelare: vem styr vilket barn
-    k.querySelector(".spelarnr").textContent = antalSpelare === 2 && nr >= 0 ? (nr === 0 ? t("🔵 Spelare 1", "🔵 Player 1") : t("🟠 Spelare 2", "🟠 Player 2")) : "";
+    // Vem styr vilket barn: "Du" och "Följer med", eller spelare 1 och 2
+    let text = "";
+    if (nr >= 0 && antalSpelare === 2) text = nr === 0 ? t("🔵 Spelare 1", "🔵 Player 1") : t("🟠 Spelare 2", "🟠 Player 2");
+    if (nr >= 0 && antalSpelare === 1) text = nr === 0 ? t("🎮 Du", "🎮 You") : t("👣 Följer med", "👣 Comes along");
+    k.querySelector(".spelarnr").textContent = text;
   });
   document.querySelectorAll(".antalknapp").forEach((k) => k.classList.toggle("vald", Number(k.dataset.antal) === antalSpelare));
   document.getElementById("startInfo").textContent = antalSpelare === 2
     ? t("Välj två syskon. Spelare 1 styr det första och spelare 2 det andra. Ni behöver två handkontroller, eller en var sida av iPaden.",
       "Choose two siblings. Player 1 plays the first and player 2 the second. You need two controllers, or one side of the iPad each.")
-    : t("Välj två syskon. Du styr det ena och det andra följer efter. Du kan byta när du vill!",
-      "Choose two siblings. You play one, and the other follows. You can switch whenever you like!");
+    : t("Välj vem du vill vara. Väljer du ett barn till följer det med, annars väljs ett åt dig. Du kan byta när du vill!",
+      "Choose who you want to be. Pick one more child to come along, or one is picked for you. You can switch whenever you like!");
   // Börja säger själv vad som fattas (en avstängd knapp syns inte på mobilen)
-  document.getElementById("borja").textContent = valdaBarn.length === 2 ? t("▶ Börja", "▶ Start")
-    : t("Välj ett barn till (" + valdaBarn.length + "/2)", "Choose one more child (" + valdaBarn.length + "/2)");
+  document.getElementById("borja").textContent = kanBorja() ? t("▶ Börja", "▶ Start")
+    : antalSpelare === 2 ? t("Välj ett barn till (" + valdaBarn.length + "/2)", "Choose one more child (" + valdaBarn.length + "/2)")
+      : t("Välj ett barn", "Choose a child");
 }
 visaBarnval();
 
@@ -2280,14 +2289,20 @@ function borjaSpela(nyttS) {
   startaKapitel(S.kapitel);
 }
 document.getElementById("borja").addEventListener("click", () => {
-  if (valdaBarn.length !== 2) {
+  if (!kanBorja()) {
     barnval.classList.remove("blinka");
     void barnval.offsetWidth;   // starta om blinkningen
     barnval.classList.add("blinka");
     return;
   }
   glomSparat();
-  borjaSpela({ kapitel: 1, barn: valdaBarn.slice(), spelare: antalSpelare, hjartan: 0, kaos: 0, hittat: [], utmarkelser: [] });
+  const barn = valdaBarn.slice();
+  // Bara ett barn valt: ett syskon som följer med väljs av sig självt
+  if (barn.length === 1) {
+    const andra = Object.keys(BARN).filter((id) => id !== barn[0]);
+    barn.push(andra[Math.floor(Math.random() * andra.length)]);
+  }
+  borjaSpela({ kapitel: 1, barn: barn, spelare: antalSpelare, hjartan: 0, kaos: 0, hittat: [], utmarkelser: [] });
 });
 fortsattKnapp.addEventListener("click", () => borjaSpela(lasSparat()));
 document.getElementById("igen").addEventListener("click", () => {
