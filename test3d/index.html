@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="sv">
+<head>
+  <meta charset="utf-8">
+  <!-- Testsida för 3D: visar vad iPad/Xbox klarar. Finns inte i menyn. -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#1b2a4a">
+  <title data-en="3D test">3D-test</title>
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="../favicon.png" sizes="64x64" type="image/png">
+  <link rel="apple-touch-icon" href="../apple-touch-icon.png">
+  <link rel="stylesheet" href="../spel.css">
+  <style>
+    canvas { position: fixed; left: 0; top: 0; width: 100%; height: 100%; }
+
+    /* Rutan med bilder per sekund och handkontroll, uppe till vänster under 🏠 */
+    #status {
+      position: fixed;
+      top: calc(var(--sakert-topp) + 76px);
+      left: calc(var(--sakert-vanster) + 12px);
+      max-width: 60vw;
+      padding: 6px 10px;
+      border-radius: 10px;
+      font: 14px/1.35 system-ui, -apple-system, sans-serif;
+      color: #fff;
+      background: rgba(0, 0, 0, 0.45);
+      pointer-events: none;
+      white-space: pre-wrap;
+    }
+    #fps { font-size: 22px; font-weight: bold; }
+
+    /* Knappen som öppnar panelen, uppe till höger */
+    #oppnaPanel {
+      position: fixed;
+      top: calc(var(--sakert-topp) + 12px);
+      right: calc(var(--sakert-hoger) + 12px);
+    }
+
+    #panel {
+      position: fixed;
+      top: calc(var(--sakert-topp) + 76px);
+      right: calc(var(--sakert-hoger) + 12px);
+      bottom: calc(var(--sakert-botten) + 12px);
+      width: min(380px, calc(100vw - 24px));
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      touch-action: pan-y;
+      padding: 12px;
+      border-radius: 14px;
+      font: 15px/1.4 system-ui, -apple-system, sans-serif;
+      color: #fff;
+      background: rgba(10, 18, 36, 0.88);
+      -webkit-user-select: text;
+      user-select: text;
+    }
+    #panel[hidden] { display: none; }
+    #panel h3 { margin: 12px 0 6px; font-size: 16px; }
+    #panel h3:first-child { margin-top: 0; }
+    #panel button, #panel select {
+      font: inherit;
+      margin: 2px 4px 4px 0;
+      padding: 8px 12px;
+      border: 0;
+      border-radius: 10px;
+      color: #1b2a4a;
+      background: #ffd95e;
+      touch-action: manipulation;
+    }
+    #panel button.vald { background: #7be07b; }
+    #panel select { max-width: 100%; background: #fff; }
+    #info, #roster {
+      margin: 0;
+      font: 12px/1.35 ui-monospace, Menlo, monospace;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    /* Joysticken för vänster tumme */
+    #joystick {
+      position: fixed;
+      left: calc(var(--sakert-vanster) + 28px);
+      bottom: calc(var(--sakert-botten) + 28px);
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.18);
+      border: 3px solid rgba(255, 255, 255, 0.45);
+    }
+    #pinne {
+      position: absolute;
+      left: 45px;
+      top: 45px;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.75);
+      pointer-events: none;
+    }
+
+    #hopp {
+      position: fixed;
+      right: calc(var(--sakert-hoger) + 36px);
+      bottom: calc(var(--sakert-botten) + 44px);
+      width: 110px;
+      height: 110px;
+      border: 0;
+      border-radius: 50%;
+      font: bold 22px system-ui, -apple-system, sans-serif;
+      color: #1b2a4a;
+      background: rgba(255, 217, 94, 0.85);
+    }
+    #hopp.tryckt { background: #7be07b; }
+    #joystick[hidden], #hopp[hidden] { display: none; }
+
+    #fel {
+      position: fixed;
+      left: 12px; right: 12px; top: 40%;
+      padding: 16px;
+      border-radius: 12px;
+      font: 18px/1.4 system-ui, sans-serif;
+      color: #fff;
+      background: #a33;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="spel"></canvas>
+  <div class="knappar">
+    <a id="hem" class="rund-knapp" href="../" aria-label="Till menyn" data-en-aria-label="Back to the menu">🏠</a>
+  </div>
+  <div id="status"><span id="fps">– fps</span>
+<span id="kontrollStatus"></span></div>
+  <button id="oppnaPanel" class="rund-knapp" type="button" aria-label="Inställningar och info" data-en-aria-label="Settings and info">⚙️</button>
+
+  <div id="panel" hidden>
+    <h3 data-en="Performance">Prestanda</h3>
+    <div id="nivaKnappar"></div>
+
+    <h3 data-en="Swedish speech">Svenskt tal</h3>
+    <div>
+      <button id="prataBajsis" type="button">🗣 Bajsis</button>
+      <button id="prataMorfar" type="button">🗣 Morfar</button>
+    </div>
+    <select id="rostVal"></select>
+    <pre id="roster"></pre>
+
+    <h3 data-en="About this device">Om enheten</h3>
+    <button id="kopiera" type="button" data-en="📋 Copy info">📋 Kopiera info</button>
+    <pre id="info"></pre>
+  </div>
+
+  <div id="joystick" hidden><div id="pinne"></div></div>
+  <button id="hopp" type="button" hidden data-en="JUMP">HOPP</button>
+  <div id="fel" hidden></div>
+
+  <script src="../sprak.js"></script>
+  <script src="../offline.js"></script>
+  <!-- Three.js r159 (MIT-licens, se three-LICENSE.txt). Vanlig skriptfil, inte modul, för gamla webbläsare. -->
+  <script src="three.min.js"></script>
+  <script src="test3d.js"></script>
+</body>
+</html>
