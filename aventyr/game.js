@@ -46,6 +46,14 @@ function arInne(p) { return p.x > 200; }
 //  Renderaren, scenen och ljuset
 // ---------------------------------------------------------------------
 
+// Går något fel syns det i startrutan (eller överst på skärmen), så att man kan berätta vad det står
+window.addEventListener("error", (e) => {
+  const ruta = document.getElementById("felruta");
+  if (!ruta) return;
+  ruta.textContent = "⚠️ " + t("Fel: ", "Error: ") + e.message + t(" Ladda om sidan.", " Reload the page.");
+  ruta.hidden = false;
+});
+
 const duk = document.getElementById("spel");
 let renderare;
 try {
@@ -1966,7 +1974,8 @@ const hoppknapp2 = document.getElementById("hopp2");
 
 // En joystick för tummen. Med två spelare på iPad har man en var.
 function skapaSpak(ruta, pinne) {
-  const spak = { x: 0, y: 0, finger: null };
+  const spak = { x: 0, y: 0, finger: null, slapp: () => {} };
+  if (!ruta || !pinne) return spak;
   function flytta(touch) {
     const r = ruta.getBoundingClientRect();
     const radie = r.width / 2;
@@ -2001,7 +2010,8 @@ function skapaSpak(ruta, pinne) {
 }
 
 function skapaHopp(knapp) {
-  const hopp = { nere: false };
+  const hopp = { nere: false, slapp: () => {} };
+  if (!knapp) return hopp;
   knapp.addEventListener("touchstart", (e) => {
     e.preventDefault();
     hopp.nere = true;
@@ -2025,7 +2035,7 @@ function slappTouch() {
 // Visar knapparna för fingrarna (bara på touchskärmar)
 function visaTouch(synlig) {
   joystick.hidden = hoppknapp.hidden = !(synlig && harTouch);
-  joystick2.hidden = hoppknapp2.hidden = !(synlig && harTouch && tvaSpelare);
+  if (joystick2 && hoppknapp2) joystick2.hidden = hoppknapp2.hidden = !(synlig && harTouch && tvaSpelare);
   bytKnapp.hidden = !synlig || tvaSpelare;
 }
 
@@ -2243,7 +2253,9 @@ function visaBarnval() {
       "Choose two siblings. Player 1 plays the first and player 2 the second. You need two controllers, or one side of the iPad each.")
     : t("Välj två syskon. Du styr det ena och det andra följer efter. Du kan byta när du vill!",
       "Choose two siblings. You play one, and the other follows. You can switch whenever you like!");
-  document.getElementById("borja").disabled = valdaBarn.length !== 2;
+  // Börja säger själv vad som fattas (en avstängd knapp syns inte på mobilen)
+  document.getElementById("borja").textContent = valdaBarn.length === 2 ? t("▶ Börja", "▶ Start")
+    : t("Välj ett barn till (" + valdaBarn.length + "/2)", "Choose one more child (" + valdaBarn.length + "/2)");
 }
 visaBarnval();
 
@@ -2268,7 +2280,12 @@ function borjaSpela(nyttS) {
   startaKapitel(S.kapitel);
 }
 document.getElementById("borja").addEventListener("click", () => {
-  if (valdaBarn.length !== 2) return;
+  if (valdaBarn.length !== 2) {
+    barnval.classList.remove("blinka");
+    void barnval.offsetWidth;   // starta om blinkningen
+    barnval.classList.add("blinka");
+    return;
+  }
   glomSparat();
   borjaSpela({ kapitel: 1, barn: valdaBarn.slice(), spelare: antalSpelare, hjartan: 0, kaos: 0, hittat: [], utmarkelser: [] });
 });
