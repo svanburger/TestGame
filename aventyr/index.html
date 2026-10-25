@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="sv">
+<head>
+  <meta charset="utf-8">
+  <!-- Gör att spelet fyller skärmen på iPad/telefon och inte går att zooma -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <!-- Gör att spelet startar i helskärm när man lagt det på hemskärmen -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Ensamma hemma" data-en-content="Home Alone">
+  <meta name="theme-color" content="#9fd8ff">
+  <title data-en="Home Alone on Saturday">Ensamma hemma på lördag</title>
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="../favicon.png" sizes="64x64" type="image/png">
+  <link rel="apple-touch-icon" href="../apple-touch-icon.png">
+  <link rel="stylesheet" href="../spel.css">
+  <style>
+    canvas { position: fixed; left: 0; top: 0; width: 100%; height: 100%; }
+    .text { font-family: system-ui, -apple-system, sans-serif; }
+
+    /* Hjärtan, kaos och saker, uppe i mitten. Målet under. */
+    #hud {
+      position: fixed;
+      top: calc(var(--sakert-topp) + 12px);
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      pointer-events: none;
+      max-width: max(200px, calc(100vw - 280px));
+    }
+    #poang, #mal {
+      padding: 5px 16px;
+      border-radius: 999px;
+      color: #fff;
+      background: rgba(0, 0, 0, 0.45);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+    }
+    #poang { font-size: 24px; font-weight: bold; }
+    #mal { font-size: 18px; }
+
+    /* Kylskåpsdörren: bilder som blinkar när något behövs hemma */
+    #kylskap {
+      position: fixed;
+      top: calc(var(--sakert-topp) + 12px);
+      right: calc(var(--sakert-hoger) + 12px);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px;
+      padding: 8px;
+      border-radius: 12px;
+      background: #f4f4f0;
+      box-shadow: 0 4px 0 rgba(0, 0, 0, 0.25);
+      font-size: 26px;
+      pointer-events: none;
+    }
+    #kylskap span { opacity: 0.3; text-align: center; }
+    #kylskap span.blinkar { opacity: 1; animation: blinka 0.8s infinite; }
+    @keyframes blinka { 50% { transform: scale(1.3); } }
+
+    /* Sms på storasysters telefon */
+    #sms {
+      position: fixed;
+      top: calc(var(--sakert-topp) + 230px);
+      right: calc(var(--sakert-hoger) + 12px);
+      width: min(300px, 60vw);
+      padding: 10px 14px;
+      border-radius: 16px;
+      font-size: 17px;
+      line-height: 1.35;
+      color: #fff;
+      background: #2a7de1;
+      box-shadow: 0 4px 0 rgba(0, 0, 0, 0.25);
+      pointer-events: none;
+    }
+    #sms b { display: block; font-size: 14px; opacity: 0.85; }
+
+    /* Det figurerna säger */
+    #bubbla {
+      position: fixed;
+      top: calc(var(--sakert-topp) + 100px);
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(560px, calc(100vw - 32px));
+      box-sizing: border-box;
+      padding: 12px 18px;
+      border-radius: 18px;
+      font-size: 20px;
+      line-height: 1.35;
+      color: #2b1d0e;
+      background: #fffbe8;
+      box-shadow: 0 6px 0 rgba(0, 0, 0, 0.2);
+      pointer-events: none;
+    }
+    #bubbla b { display: block; font-size: 16px; color: #8b5a2b; }
+
+    /* Knappen för det man kan göra där man står */
+    #prata {
+      position: fixed;
+      left: 50%;
+      bottom: calc(var(--sakert-botten) + 28px);
+      transform: translateX(-50%);
+      max-width: max(200px, calc(100vw - 420px));
+      min-width: 160px;
+      padding: 14px 24px;
+      border: 0;
+      border-radius: 999px;
+      font-size: 22px;
+      font-weight: bold;
+      color: #2b1d0e;
+      background: #fffbe8;
+      box-shadow: 0 6px 0 rgba(0, 0, 0, 0.25);
+      touch-action: manipulation;
+    }
+
+    /* Byt barn */
+    #byt {
+      position: fixed;
+      right: calc(var(--sakert-hoger) + 160px);
+      bottom: calc(var(--sakert-botten) + 40px);
+      width: 76px;
+      height: 76px;
+      border: 0;
+      border-radius: 50%;
+      font-size: 30px;
+      background: rgba(255, 255, 255, 0.85);
+      touch-action: manipulation;
+    }
+
+    #joystick {
+      position: fixed;
+      left: calc(var(--sakert-vanster) + 28px);
+      bottom: calc(var(--sakert-botten) + 28px);
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.18);
+      border: 3px solid rgba(255, 255, 255, 0.5);
+    }
+    #pinne {
+      position: absolute;
+      left: 45px;
+      top: 45px;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.8);
+      pointer-events: none;
+    }
+    #hopp {
+      position: fixed;
+      right: calc(var(--sakert-hoger) + 36px);
+      bottom: calc(var(--sakert-botten) + 44px);
+      width: 110px;
+      height: 110px;
+      border: 0;
+      border-radius: 50%;
+      font-size: 22px;
+      font-weight: bold;
+      color: #2b1d0e;
+      background: rgba(255, 217, 94, 0.9);
+    }
+    #hopp.tryckt { background: #7be07b; }
+
+    #hud[hidden], #kylskap[hidden], #sms[hidden], #bubbla[hidden], #prata[hidden], #byt[hidden],
+    #joystick[hidden], #hopp[hidden], #barnval[hidden], #fortsattSparat[hidden] { display: none; }
+
+    /* Rutorna (start, val, kapitel, slut) bygger på pausmenyn i spel.css */
+    .pausruta p { margin: 0; font-size: 1.15rem; text-align: center; max-width: 36ch; }
+    .pausruta { max-height: calc(100vh - 32px); overflow-y: auto; }
+
+    #barnval { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: min(520px, 86vw); }
+    .barnkort {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      padding: 10px 8px;
+      border: 4px solid transparent;
+      border-radius: 18px;
+      font: inherit;
+      color: #2b1d0e;
+      background: #fff4d6;
+      touch-action: manipulation;
+    }
+    .barnkort .stor { font-size: 44px; line-height: 1.1; }
+    .barnkort .namn { font-size: 1.15rem; font-weight: 800; }
+    .barnkort .kan { font-size: 0.9rem; }
+    .barnkort.vald { border-color: #3fa34d; background: #d9f5d0; }
+
+    /* Valet: två stora bilder */
+    #valknappar { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; }
+    .valknapp {
+      width: min(240px, 40vw);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      padding: 14px 10px;
+      border: 0;
+      border-radius: 22px;
+      font: inherit;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #2b1d0e;
+      background: #fff4d6;
+      box-shadow: 0 6px 0 rgba(0, 0, 0, 0.25);
+      touch-action: manipulation;
+    }
+    .valknapp .stor { font-size: 70px; line-height: 1.1; }
+
+    #kapitelkort h2 { font-size: 2.2rem; }
+    #slutLista { margin: 0; padding: 0; list-style: none; font-size: 1.15rem; text-align: center; }
+
+    /* Det handkontrollen pekar på i menyerna */
+    .fokus { outline: 5px solid #ff7a1a !important; outline-offset: 3px; }
+  </style>
+</head>
+<body class="text">
+  <canvas id="spel"></canvas>
+
+  <div id="hud" hidden><div id="poang"></div><div id="mal"></div></div>
+  <div id="kylskap" hidden aria-label="Kylskåpsdörren" data-en-aria-label="The fridge door">
+    <span data-behov="katt">🐱</span><span data-behov="blommor">🌱</span>
+    <span data-behov="kran">💧</span><span data-behov="hund">🐕</span>
+  </div>
+  <div id="sms" hidden><b id="smsFran"></b><span id="smsText"></span></div>
+  <div id="bubbla" hidden><b id="vemPratar"></b><span id="repliken"></span></div>
+  <button id="prata" type="button" hidden></button>
+  <button id="byt" type="button" hidden aria-label="Byt barn" data-en-aria-label="Switch child"></button>
+  <div id="joystick" hidden><div id="pinne"></div></div>
+  <button id="hopp" type="button" hidden data-en="JUMP">HOPP</button>
+
+  <div class="knappar">
+    <a id="hem" class="rund-knapp" href="../" aria-label="Till menyn" data-en-aria-label="Back to the menu">🏠</a>
+    <button id="paus" class="rund-knapp" type="button" aria-label="Pausa" data-en-aria-label="Pause" hidden>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="4" width="5" height="16" rx="1.5"/><rect x="14" y="4" width="5" height="16" rx="1.5"/></svg>
+    </button>
+  </div>
+
+  <div id="startruta" class="pausmeny">
+    <div class="pausruta" role="dialog" aria-labelledby="starttitel">
+      <h2 id="starttitel" data-en="🏠 Home Alone on Saturday">🏠 Ensamma hemma på lördag</h2>
+      <p id="startInfo" data-en="Choose two siblings. You play one, and the other follows. You can switch whenever you like!">Välj två syskon. Du styr det ena och det andra följer efter. Du kan byta när du vill!</p>
+      <div id="barnval"></div>
+      <button id="borja" class="menyknapp" type="button" data-en="▶ Start">▶ Börja</button>
+      <button id="fortsattSparat" class="menyknapp sekundar" type="button" hidden></button>
+      <button class="menyknapp sekundar" type="button" data-topplista="aventyr" data-en="🏆 High scores">🏆 Topplista</button>
+    </div>
+  </div>
+
+  <div id="kapitelkort" class="pausmeny" hidden>
+    <div class="pausruta">
+      <p id="kapitelNummer"></p>
+      <h2 id="kapitelTitel"></h2>
+    </div>
+  </div>
+
+  <div id="valruta" class="pausmeny" hidden>
+    <div class="pausruta" role="dialog" aria-labelledby="valFraga">
+      <h2 id="valFraga"></h2>
+      <div id="valknappar"></div>
+    </div>
+  </div>
+
+  <div id="pausmeny" class="pausmeny" hidden>
+    <div class="pausruta" role="dialog" aria-labelledby="paustitel">
+      <h2 id="paustitel" data-en="Paused">Paus</h2>
+      <button id="fortsatt" class="menyknapp" type="button" data-en="▶ Continue">▶ Fortsätt</button>
+      <button id="borjaOmKapitel" class="menyknapp sekundar" type="button" data-en="↻ Restart chapter">↻ Börja om kapitlet</button>
+      <button class="menyknapp sekundar" type="button" data-topplista="aventyr" data-en="🏆 High scores">🏆 Topplista</button>
+      <a class="menyknapp sekundar" href="../" data-en="🏠 Back to menu">🏠 Till menyn</a>
+    </div>
+  </div>
+
+  <div id="slutruta" class="pausmeny" hidden>
+    <div class="pausruta" role="dialog" aria-labelledby="sluttitel">
+      <h2 id="sluttitel" data-en="📝 Today's note">📝 Dagens lapp</h2>
+      <ul id="slutLista"></ul>
+      <p data-en="To be continued in chapter 4: The Snowstorm ❄️">Fortsättning följer i kapitel 4: Snöovädret ❄️</p>
+      <button id="igen" class="menyknapp" type="button" data-en="↻ Play again">↻ Spela igen</button>
+      <button class="menyknapp sekundar" type="button" data-topplista="aventyr" data-en="🏆 High scores">🏆 Topplista</button>
+      <a class="menyknapp sekundar" href="../" data-en="🏠 Back to menu">🏠 Till menyn</a>
+    </div>
+  </div>
+
+  <script src="../sprak.js"></script>
+  <script src="../offline.js"></script>
+  <script src="../topplista.js"></script>
+  <!-- Three.js r159 (MIT-licens, se ../three-LICENSE.txt) -->
+  <script src="../three.min.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>
