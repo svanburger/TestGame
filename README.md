@@ -645,6 +645,26 @@ Testa att ändra i `godis/game.js`:
   pappa säger (`pappa`)
 - musiken: längst ner i `game.js` finns `MUSIK`
 
+## Ensamma hemma på lördag 🏠
+
+Ett äventyr i 3D (kapitel 1–3). Storyn finns i `aventyr/STORY.md`. Man
+väljer två syskon och spelar en eller två.
+
+| | Xbox-handkontroll | iPad | Dator (spelare 1 / spelare 2) |
+|---|---|---|---|
+| Gå | Vänster spak eller styrkorset | Joysticken | WASD / piltangenterna |
+| Hoppa | A | HOPP | Mellanslag / höger Shift |
+| Gör något, prata | X | Knappen i mitten | F eller T / Enter |
+| Byt barn (en spelare) | Y | 🔄 | C |
+| Vrid kameran | Höger spak | Dra med fingret | Q och E |
+| Paus | Menyknappen (☰) | ⏸ | P eller Esc |
+| Välja i menyerna | Styrkorset och A | Tryck | Mus eller Tab och Enter |
+
+Med två spelare har man en handkontroll var på Xboxen (den första är
+spelare 1 🔵). På iPaden har spelare 1 joysticken till vänster och
+spelare 2 den till höger. Flyttar spaken en muspekare på Xboxen ska
+handkontrollen ställas in som spelkontroll i Edge.
+
 ## Lägga till ett nytt spel
 
 1. Kopiera en av spelmapparna, till exempel `stjarnor/`, och ge den ett nytt namn.

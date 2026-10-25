@@ -157,8 +157,9 @@ function slump(fro) {
 const HOGT = 99;   // Så högt att man inte kan stå ovanpå (väggar, tak)
 const hinder = [];   // { x, z, hb, hd, topp }  (hb/hd = halva bredden/djupet)
 
-function laggTillHinder(x, z, bredd, djup, topp) {
-  const h = { x: x, z: z, hb: bredd / 2, hd: djup / 2, topp: topp };
+// hojd = hur högt det syns (för kameran). Utan hojd: 5 meter för höga saker.
+function laggTillHinder(x, z, bredd, djup, topp, hojd) {
+  const h = { x: x, z: z, hb: bredd / 2, hd: djup / 2, topp: topp, hojd: hojd !== undefined ? hojd : (topp === HOGT ? 5 : topp) };
   hinder.push(h);
   return h;
 }
@@ -186,7 +187,7 @@ function iVagen(x, z, fotY, radie) {
 // En möbel eller vägg: syns och går inte att gå igenom
 function mobel(b, h, d, farg, x, z, kanStaPa) {
   const m = lada(b, h, d, farg, x, h / 2, z);
-  laggTillHinder(x, z, b, d, kanStaPa ? h : HOGT);
+  laggTillHinder(x, z, b, d, kanStaPa ? h : HOGT, h);
   return m;
 }
 
@@ -235,7 +236,7 @@ const HEM = { x: 5, dorrZ: 11.45 };
     lada(1.4, 1.2, 0.12, 0x9ec5e8, x - 3, 3.1, 11.45);
     lada(1.4, 1.2, 0.12, 0x9ec5e8, x + 3, 3.1, 11.45);
   });
-  laggTillHinder(0, 16, 40, 9, HOGT);
+  laggTillHinder(0, 16, 40, 9, HOGT, 7.5);
   // Taket: två lutande skivor
   [-1, 1].forEach((sida) => {
     const tak = lada(41, 0.3, 5.4, 0x8a3a2a, 0, 6.3, 16 + sida * 2.3);
@@ -342,6 +343,9 @@ const KANELS_GOMSTALLE = { x: -66, z: -93.5 };
   mobel(0.15, 2.4, 0.15, 0x666666, -78, -86.1);
 })();
 
+// Här ska det inte stå några träd (figurer, saker att hitta, skräp ...)
+const FRIA_PLATSER = [[10, 62], [35, 66], [16, 56], [20, 38], [40, 40], [30, 61], [8, 50], [12, 32], [5, 43], [45, 28], [-23, 9]];
+
 // Träden: alla stammar ritas på en gång, och alla kronor på en gång
 (function byggTrad() {
   const r = slump(7);
@@ -354,6 +358,9 @@ const KANELS_GOMSTALLE = { x: -66, z: -93.5 };
     if (x > -61 && x < -29 && z > 32 && z < 58) return false;             // skolgården
     if (x > -94 && x < -56 && z < -84) return false;                      // kolonilotterna
     if (x > -30 && x < 30 && z > 7 && z < 24) return false;               // radhusen
+    if (x > 50 && x < 66 && z > 45 && z < 71) return false;               // padelbanan
+    if (FRIA_PLATSER.some(([fx, fz]) => Math.hypot(x - fx, z - fz) < 3.2)) return false;
+    if (platser.some((q) => Math.hypot(q[0] - x, q[1] - z) < 2.8)) return false;   // inte träd i träd
     return !hinder.some((h) => overlappar(x, z, h, 2.2));
   };
   const lagg = (x, z) => { if (ledigt(x, z)) platser.push([x, z, 0.8 + r() * 0.7, r() * Math.PI]); };
@@ -432,7 +439,6 @@ const inneMobel = (b, h, d, farg, x, z, kanStaPa) => mobel(b, h, d, farg, ix(x),
   lada(0.12, 0.5, 0.12, 0xd0d0d0, ix(-4.5), 1.25, iz(-6.6));   // kranen
   inneMobel(1, 2, 2, 0xd8b88a, -9.4, -3);            // skafferiet
   inneMobel(2.4, 0.8, 1.6, 0xb07a44, -5, -2.5);      // köksbordet
-  lada(0.5, 0.5, 0.5, 0xb07a44, ix(-5), 0.25, iz(-0.9));   // stol
   lada(0.5, 0.08, 0.5, 0xd0d0d0, ix(-9.2), 1.4, iz(-5.58)).rotation.x = Math.PI / 2;   // lappen
   // Vardagsrummet
   inneMobel(4, 0.6, 1.2, 0x5a7ab0, 5, -6.2, true);   // soffan (man kan hoppa upp på den)
@@ -693,6 +699,17 @@ Object.keys(BARN).forEach((id) => { BARN[id].id = id; });
 // Laget: de två barnen man har valt. lag[aktiv] är det man styr.
 let lag = [];
 let aktiv = 0;
+let tvaSpelare = false;   // Två spelare: var sitt barn, på samma skärm
+// Barnen som spelarna styr: ett barn med en spelare, båda med två
+function styrda() { return tvaSpelare ? lag : [aktivtBarn()]; }
+// Står något av barnen nära platsen?
+function narNagon(q, radie) {
+  return styrda().some((b) => Math.hypot(b.gubbe.grupp.position.x - q.x, b.gubbe.grupp.position.z - q.z) <= radie);
+}
+// "Byt till Lillebror" med en spelare, "Låt Lillebror göra det" med två
+function bytTill(annan) {
+  return tvaSpelare ? t("Låt ", "Let ") + annan.data.namn + t(" göra det! ", " do it! ") : t("Byt till ", "Switch to ") + annan.data.namn + " (🔄). ";
+}
 function aktivtBarn() { return lag[aktiv]; }
 function andraBarnet() { return lag[1 - aktiv]; }
 function aldst() { return lag[0].data.alder > lag[1].data.alder ? lag[0] : lag[1]; }
@@ -771,7 +788,7 @@ const FIGURER = {
   },
   majken: {
     namn: t("🍬 Tant Majken", "🍬 Auntie Majken"), farger: { trija: 0xd86a4a, byxor: 0x6a4a6a, har: 0xdddddd }, rostlage: 1.25, tempo: 0.95, rostNummer: 13,
-    plats: [-14, 6], granne: true,
+    plats: [-23, 9], granne: true,
     repliker: [t("Vill ni ha en karamell? Jag har alltid något i fickan.", "Would you like a sweet? I always have something in my pocket."),
       t("Vad duktiga ni är som är ute och går.", "How good of you to be out for a walk.")],
   },
@@ -1057,7 +1074,7 @@ function provaFormaga(krav, narLyckas) {
   if (!krav || barn.data.formaga === krav) return narLyckas(barn);
   const annan = lag.find((b) => b.data.formaga === krav);
   if (annan) {
-    sag(talare(barn), t("Byt till ", "Switch to ") + annan.data.namn + " (🔄). " + annan.data.namn + " " + FORMAGOR[krav] + "!");
+    sag(talare(barn), bytTill(annan) + annan.data.namn + " " + FORMAGOR[krav] + "!");
   } else {
     const vem = Object.keys(BARN).map((id) => BARN[id]).find((b) => b.formaga === krav);
     sag(talare(barn), t("Det här kan bara ", "Only ") + vem.namn + t(" göra, och " + vem.han + " är inte med i dag.", " can do this, and " + vem.han + " isn't here today."));
@@ -1308,6 +1325,7 @@ function stallInVarlden() {
 
 function startaKapitel(nr) {
   S.kapitel = nr;
+  Musik.tempo(100);
   F = {};
   kapitelTid = 0;
   kapitelStart = JSON.parse(JSON.stringify(S));
@@ -1408,7 +1426,7 @@ const KAPITEL = [
     uppdatera(dt) {
       const p = aktivtBarn().gubbe.grupp.position;
       // Valet kommer när man kommer in i köket
-      if (!F.valGjort && !F.valVisas && arInne(p) && p.x < ix(0) && p.z < iz(0)) {
+      if (!F.valGjort && !F.valVisas && styrda().some((b) => { const q = b.gubbe.grupp.position; return arInne(q) && q.x < ix(0) && q.z < iz(0); })) {
         F.valVisas = true;
         valj(t("Det sprutar vatten! Vad gör vi?", "Water is spraying! What do we do?"), [
           { ikon: "🔧", text: t("Stänga huvudkranen i tvättstugan", "Turn off the main valve in the laundry room"), gor: () => {
@@ -1425,6 +1443,7 @@ const KAPITEL = [
           } },
         ]);
       }
+      Musik.tempo(F.kranStangd ? 100 : 118);
       // Vattnet sprutar
       if (!F.kranStangd) {
         droppar.forEach((d) => {
@@ -1448,7 +1467,7 @@ const KAPITEL = [
       });
       if (F.bat) {
         LEKSAKER.forEach((l) => {
-          if (l.seglat || Math.hypot(p.x - l.grupp.position.x, p.z - l.grupp.position.z) > 1.1) return;
+          if (l.seglat || !narNagon(l.grupp.position, 1.1)) return;
           l.seglat = true;
           l.seglar = 3;
           kaos();
@@ -1571,7 +1590,7 @@ const KAPITEL = [
     uppdatera(dt) {
       const barn = aktivtBarn(), p = barn.gubbe.grupp.position;
       // Tassarna framför huset
-      if (F.valGjort && F.ledtradar.indexOf("tassar") < 0 && Math.hypot(p.x - PLATS.tassar.x, p.z - PLATS.tassar.z) < 2.5) {
+      if (F.valGjort && F.ledtradar.indexOf("tassar") < 0 && narNagon(PLATS.tassar, 2.5)) {
         ledtrad("tassar", talare(barn), t("Tassar i leran! Kanel har sprungit åt det här hållet.", "Paw prints in the mud! Kanel went this way."));
       }
       // Kattfällan: måsar, Coco och ordningsvakten kommer
@@ -1839,7 +1858,7 @@ sak({ // Jamandet bakom staketet
     const kan = lag.find((b) => b.data.formaga === "krypa" || b.data.formaga === "klattra");
     if (barn.data.formaga === "krypa") return ledtrad("mjau", talare(barn), t("Jag kryper in under staketet ... Kanels halsband med bjällran! Spåren går mot skogen.", "I'll crawl under the fence ... Kanel's collar with the bell! The tracks go towards the forest."));
     if (barn.data.formaga === "klattra") return ledtrad("mjau", talare(barn), t("Jag klättrar över! ... Kanels halsband! Spåren går mot skogen.", "I'll climb over! ... Kanel's collar! The tracks go towards the forest."));
-    if (kan) return sag(talare(barn), t("Byt till ", "Switch to ") + kan.data.namn + " (🔄). " + kan.data.namn + " " + FORMAGOR[kan.data.formaga] + "!");
+    if (kan) return sag(talare(barn), bytTill(kan) + kan.data.namn + " " + FORMAGOR[kan.data.formaga] + "!");
     ledtrad("mjau", talare(barn), t("Vi kommer inte in. Men jamandet går mot skogen!", "We can't get in. But the meowing is heading towards the forest!"));
   },
 });
@@ -1935,57 +1954,80 @@ window.addEventListener("keydown", (e) => {
     if (lage === "spelar") pausa();
     else if (lage === "paus") fortsatt();
   }
-  if ((e.code === "Enter" || e.code === "KeyT") && lage === "spelar") vantandeGor = true;
   if (e.code === "KeyC" && lage === "spelar") vantandeByt = true;
 });
 window.addEventListener("keyup", (e) => { tangenter[e.code] = false; });
 
 const harTouch = "ontouchstart" in window || navigator.maxTouchPoints > 0;
 const joystick = document.getElementById("joystick");
-const pinne = document.getElementById("pinne");
+const joystick2 = document.getElementById("joystick2");
 const hoppknapp = document.getElementById("hopp");
-const spak = { x: 0, y: 0, finger: null };
-let touchHopp = false;
+const hoppknapp2 = document.getElementById("hopp2");
 
-function flyttaSpak(touch) {
-  const ruta = joystick.getBoundingClientRect();
-  const radie = ruta.width / 2;
-  let dx = (touch.clientX - (ruta.left + radie)) / radie;
-  let dy = (touch.clientY - (ruta.top + radie)) / radie;
-  const langd = Math.sqrt(dx * dx + dy * dy);
-  if (langd > 1) { dx /= langd; dy /= langd; }
-  spak.x = dx;
-  spak.y = dy;
-  pinne.style.transform = "translate(" + dx * radie * 0.6 + "px," + dy * radie * 0.6 + "px)";
+// En joystick för tummen. Med två spelare på iPad har man en var.
+function skapaSpak(ruta, pinne) {
+  const spak = { x: 0, y: 0, finger: null };
+  function flytta(touch) {
+    const r = ruta.getBoundingClientRect();
+    const radie = r.width / 2;
+    let dx = (touch.clientX - (r.left + radie)) / radie;
+    let dy = (touch.clientY - (r.top + radie)) / radie;
+    const langd = Math.sqrt(dx * dx + dy * dy);
+    if (langd > 1) { dx /= langd; dy /= langd; }
+    spak.x = dx;
+    spak.y = dy;
+    pinne.style.transform = "translate(" + dx * radie * 0.6 + "px," + dy * radie * 0.6 + "px)";
+  }
+  spak.slapp = () => {
+    spak.x = spak.y = 0;
+    spak.finger = null;
+    pinne.style.transform = "";
+  };
+  ruta.addEventListener("touchstart", (e) => {
+    e.preventDefault();
+    spak.finger = e.changedTouches[0].identifier;
+    flytta(e.changedTouches[0]);
+  }, { passive: false });
+  ruta.addEventListener("touchmove", (e) => {
+    e.preventDefault();
+    for (const touch of e.changedTouches) if (touch.identifier === spak.finger) flytta(touch);
+  }, { passive: false });
+  const sluta = (e) => {
+    for (const touch of e.changedTouches) if (touch.identifier === spak.finger) spak.slapp();
+  };
+  ruta.addEventListener("touchend", sluta);
+  ruta.addEventListener("touchcancel", sluta);
+  return spak;
 }
-function slappSpak() {
-  spak.x = spak.y = 0;
-  spak.finger = null;
-  pinne.style.transform = "";
-}
-joystick.addEventListener("touchstart", (e) => {
-  e.preventDefault();
-  spak.finger = e.changedTouches[0].identifier;
-  flyttaSpak(e.changedTouches[0]);
-}, { passive: false });
-joystick.addEventListener("touchmove", (e) => {
-  e.preventDefault();
-  for (const touch of e.changedTouches) if (touch.identifier === spak.finger) flyttaSpak(touch);
-}, { passive: false });
-const slutaSpak = (e) => {
-  for (const touch of e.changedTouches) if (touch.identifier === spak.finger) slappSpak();
-};
-joystick.addEventListener("touchend", slutaSpak);
-joystick.addEventListener("touchcancel", slutaSpak);
 
-hoppknapp.addEventListener("touchstart", (e) => {
-  e.preventDefault();
-  touchHopp = true;
-  hoppknapp.classList.add("tryckt");
-}, { passive: false });
-const slutaHopp = () => { touchHopp = false; hoppknapp.classList.remove("tryckt"); };
-hoppknapp.addEventListener("touchend", slutaHopp);
-hoppknapp.addEventListener("touchcancel", slutaHopp);
+function skapaHopp(knapp) {
+  const hopp = { nere: false };
+  knapp.addEventListener("touchstart", (e) => {
+    e.preventDefault();
+    hopp.nere = true;
+    knapp.classList.add("tryckt");
+  }, { passive: false });
+  hopp.slapp = () => {
+    hopp.nere = false;
+    knapp.classList.remove("tryckt");
+  };
+  knapp.addEventListener("touchend", hopp.slapp);
+  knapp.addEventListener("touchcancel", hopp.slapp);
+  return hopp;
+}
+
+const spakar = [skapaSpak(joystick, document.getElementById("pinne")), skapaSpak(joystick2, document.getElementById("pinne2"))];
+const hoppar = [skapaHopp(hoppknapp), skapaHopp(hoppknapp2)];
+function slappTouch() {
+  spakar.forEach((s) => s.slapp());
+  hoppar.forEach((h) => h.slapp());
+}
+// Visar knapparna för fingrarna (bara på touchskärmar)
+function visaTouch(synlig) {
+  joystick.hidden = hoppknapp.hidden = !(synlig && harTouch);
+  joystick2.hidden = hoppknapp2.hidden = !(synlig && harTouch && tvaSpelare);
+  bytKnapp.hidden = !synlig || tvaSpelare;
+}
 
 // Dra med fingret (eller musen) på skärmen för att vrida kameran
 let kameraDrag = null;   // { id, x }
@@ -2017,57 +2059,84 @@ function nyttTryck(namn, nere) {
 }
 let anvanderHandkontroll = false;
 
+// Läser tangentbord, touch och handkontroller. Med två spelare:
+//   spelare 1: WASD, mellanslag = hoppa, F = gör, vänster joystick, första handkontrollen
+//   spelare 2: piltangenterna, höger Shift = hoppa, Enter = gör, höger joystick, andra handkontrollen
 function lasStyrning() {
-  let x = 0, y = 0, sving = 0, hopp = false, gor = false, byt = false, paus = false;
-  let navX = 0, navY = 0;
-  if (tangenter.ArrowLeft || tangenter.KeyA) x -= 1;
-  if (tangenter.ArrowRight || tangenter.KeyD) x += 1;
-  if (tangenter.ArrowUp || tangenter.KeyW) y -= 1;
-  if (tangenter.ArrowDown || tangenter.KeyS) y += 1;
+  const sp = [{ x: 0, y: 0, hopp: false, gor: false }, { x: 0, y: 0, hopp: false, gor: false }];
+  const s1 = sp[0], s2 = tvaSpelare ? sp[1] : sp[0];
+  let sving = 0, byt = false, paus = false, valjTryck = false, navX = 0, navY = 0;
+  if (tangenter.KeyA) s1.x -= 1;
+  if (tangenter.KeyD) s1.x += 1;
+  if (tangenter.KeyW) s1.y -= 1;
+  if (tangenter.KeyS) s1.y += 1;
+  if (tangenter.Space) s1.hopp = true;
+  if (tangenter.KeyF || tangenter.KeyT) s1.gor = true;
+  if (tangenter.ArrowLeft) s2.x -= 1;
+  if (tangenter.ArrowRight) s2.x += 1;
+  if (tangenter.ArrowUp) s2.y -= 1;
+  if (tangenter.ArrowDown) s2.y += 1;
+  if (tangenter.ShiftRight || tangenter.Numpad0) s2.hopp = true;
+  if (tangenter.Enter) s2.gor = true;
   if (tangenter.KeyQ) sving += 1;
   if (tangenter.KeyE) sving -= 1;
-  if (tangenter.Space) hopp = true;
-  x += spak.x;
-  y += spak.y;
-  if (touchHopp) hopp = true;
-
-  const kontroller = navigator.getGamepads ? navigator.getGamepads() : [];
-  for (let i = 0; i < kontroller.length; i++) {
-    const k = kontroller[i];
-    if (!k) continue;
-    const axel = (nr) => {
-      const v = k.axes[nr] || 0;
-      return Math.abs(v) > INSTALLNINGAR.dodzon ? v : 0;
-    };
-    const tryckt = (nr) => !!(k.buttons[nr] && k.buttons[nr].pressed);
-    if (k.buttons.some((b) => b.pressed)) anvanderHandkontroll = true;
-    x += axel(0);
-    y += axel(1);
-    sving -= axel(2);
-    if (tryckt(12)) { y -= 1; navY -= 1; }
-    if (tryckt(13)) { y += 1; navY += 1; }
-    if (tryckt(14)) { x -= 1; navX -= 1; }
-    if (tryckt(15)) { x += 1; navX += 1; }
-    if (Math.abs(axel(0)) > 0.6) navX += Math.sign(axel(0));
-    if (Math.abs(axel(1)) > 0.6) navY += Math.sign(axel(1));
-    if (tryckt(0)) hopp = true;                // A
-    if (tryckt(2)) gor = true;                 // X
-    if (tryckt(3)) byt = true;                 // Y
-    if (tryckt(9)) paus = true;                // Start/Meny
+  s1.x += spakar[0].x;
+  s1.y += spakar[0].y;
+  if (hoppar[0].nere) s1.hopp = true;
+  if (tvaSpelare) {
+    s2.x += spakar[1].x;
+    s2.y += spakar[1].y;
+    if (hoppar[1].nere) s2.hopp = true;
   }
 
-  const langd = Math.sqrt(x * x + y * y);
-  if (langd > 1) { x /= langd; y /= langd; }
+  const alla = navigator.getGamepads ? Array.prototype.slice.call(navigator.getGamepads()) : [];
+  alla.filter((k) => k).forEach((k, nr) => {
+    const s = tvaSpelare && nr === 1 ? s2 : s1;
+    const axel = (i) => {
+      const v = k.axes[i] || 0;
+      return Math.abs(v) > INSTALLNINGAR.dodzon ? v : 0;
+    };
+    const tryckt = (i) => !!(k.buttons[i] && k.buttons[i].pressed);
+    if (k.buttons.some((b) => b.pressed)) anvanderHandkontroll = true;
+    s.x += axel(0);
+    s.y += axel(1);
+    sving -= axel(2);                           // höger spak vrider kameran
+    if (tryckt(12)) { s.y -= 1; navY -= 1; }    // styrkorset
+    if (tryckt(13)) { s.y += 1; navY += 1; }
+    if (tryckt(14)) { s.x -= 1; navX -= 1; }
+    if (tryckt(15)) { s.x += 1; navX += 1; }
+    if (Math.abs(axel(0)) > 0.6) navX += Math.sign(axel(0));
+    if (Math.abs(axel(1)) > 0.6) navY += Math.sign(axel(1));
+    if (tryckt(0)) { s.hopp = true; valjTryck = true; }   // A
+    if (tryckt(2)) s.gor = true;                // X
+    if (tryckt(3)) byt = true;                  // Y
+    if (tryckt(9)) paus = true;                 // Start/Meny
+  });
+
+  const spelare = sp.map((s, nr) => {
+    const langd = Math.sqrt(s.x * s.x + s.y * s.y);
+    if (langd > 1) { s.x /= langd; s.y /= langd; }
+    return { x: s.x, y: s.y, hoppNytt: nyttTryck("hopp" + nr, s.hopp), gorNytt: nyttTryck("gor" + nr, s.gor) };
+  });
   // Menyerna: ett steg per tryck
   const nav = (nyttTryck("hoger", navX > 0 || navY > 0) ? 1 : 0) - (nyttTryck("vanster", navX < 0 || navY < 0) ? 1 : 0);
   return {
-    x: x, y: y, sving: Math.max(-1, Math.min(1, sving)),
-    hoppNytt: nyttTryck("hopp", hopp),
-    gorNytt: nyttTryck("gor", gor),
+    spelare: spelare,
+    sving: Math.max(-1, Math.min(1, sving)),
     bytNytt: nyttTryck("byt", byt),
     pausNytt: nyttTryck("paus", paus),
+    valjNytt: nyttTryck("valj", valjTryck),
     nav: nav,
   };
+}
+
+// Finns det en handkontroll? (Den syns för sidan först när man har tryckt på en knapp.)
+const knapphjalp = document.getElementById("knapphjalp");
+function harHandkontroll() {
+  if (anvanderHandkontroll) return true;
+  const alla = navigator.getGamepads ? navigator.getGamepads() : [];
+  for (let i = 0; i < alla.length; i++) if (alla[i]) return true;
+  return false;
 }
 
 // Handkontrollen i menyerna: styrkorset flyttar, A väljer
@@ -2092,7 +2161,8 @@ function menyStyrning(styr) {
   menyFokus = ((menyFokus % knappar.length) + knappar.length) % knappar.length;
   document.querySelectorAll(".fokus").forEach((k) => k.classList.remove("fokus"));
   knappar[menyFokus].classList.add("fokus");
-  if (styr.hoppNytt) {
+  if (styr.nav) knappar[menyFokus].scrollIntoView({ block: "nearest" });   // rutan kan vara högre än skärmen
+  if (styr.valjNytt) {
     knappar[menyFokus].click();
     menyFokus = 0;
   }
@@ -2119,6 +2189,23 @@ const slutruta = document.getElementById("slutruta");
 const valruta = document.getElementById("valruta");
 const kapitelkort = document.getElementById("kapitelkort");
 
+// En eller två spelare
+let antalSpelare = 1;
+document.querySelectorAll(".antalknapp").forEach((k) => {
+  k.addEventListener("click", () => {
+    antalSpelare = Number(k.dataset.antal);
+    visaBarnval();
+  });
+});
+
+// Musiken på/av (i startrutan och pausmenyn)
+const musikKnappar = document.querySelectorAll(".musikknapp");
+function visaMusikKnapp() {
+  musikKnappar.forEach((k) => { k.textContent = Musik.arPa() ? t("🎵 Musik: på", "🎵 Music: on") : t("🔇 Musik: av", "🔇 Music: off"); });
+}
+musikKnappar.forEach((k) => k.addEventListener("click", () => { Musik.vaxla(); visaMusikKnapp(); }));
+visaMusikKnapp();
+
 // Välj två syskon
 let valdaBarn = ["lillebror", "storasyster"];
 const barnval = document.getElementById("barnval");
@@ -2128,7 +2215,7 @@ Object.keys(BARN).forEach((id) => {
   kort.type = "button";
   kort.className = "barnkort";
   kort.dataset.barn = id;
-  kort.innerHTML = '<span class="stor"></span><span class="namn"></span><span class="kan"></span>';
+  kort.innerHTML = '<span class="spelarnr"></span><span class="stor"></span><span class="namn"></span><span class="kan"></span>';
   kort.querySelector(".stor").textContent = b.ikon;
   kort.querySelector(".namn").textContent = b.namn + " (" + b.alder + ")";
   kort.querySelector(".kan").textContent = b.kan;
@@ -2144,7 +2231,18 @@ Object.keys(BARN).forEach((id) => {
   barnval.appendChild(kort);
 });
 function visaBarnval() {
-  barnval.querySelectorAll(".barnkort").forEach((k) => k.classList.toggle("vald", valdaBarn.indexOf(k.dataset.barn) >= 0));
+  barnval.querySelectorAll(".barnkort").forEach((k) => {
+    const nr = valdaBarn.indexOf(k.dataset.barn);
+    k.classList.toggle("vald", nr >= 0);
+    // Med två spelare: vem styr vilket barn
+    k.querySelector(".spelarnr").textContent = antalSpelare === 2 && nr >= 0 ? (nr === 0 ? t("🔵 Spelare 1", "🔵 Player 1") : t("🟠 Spelare 2", "🟠 Player 2")) : "";
+  });
+  document.querySelectorAll(".antalknapp").forEach((k) => k.classList.toggle("vald", Number(k.dataset.antal) === antalSpelare));
+  document.getElementById("startInfo").textContent = antalSpelare === 2
+    ? t("Välj två syskon. Spelare 1 styr det första och spelare 2 det andra. Ni behöver två handkontroller, eller en var sida av iPaden.",
+      "Choose two siblings. Player 1 plays the first and player 2 the second. You need two controllers, or one side of the iPad each.")
+    : t("Välj två syskon. Du styr det ena och det andra följer efter. Du kan byta när du vill!",
+      "Choose two siblings. You play one, and the other follows. You can switch whenever you like!");
   document.getElementById("borja").disabled = valdaBarn.length !== 2;
 }
 visaBarnval();
@@ -2163,14 +2261,16 @@ function borjaSpela(nyttS) {
   startruta.hidden = slutruta.hidden = pausmeny.hidden = true;
   pausKnapp.hidden = false;
   hud.hidden = kylskap.hidden = false;
-  joystick.hidden = hoppknapp.hidden = !harTouch;
-  bytKnapp.hidden = false;
+  tvaSpelare = S.spelare === 2;
+  document.body.classList.toggle("tva", tvaSpelare);
+  visaTouch(true);
+  if (ljud) Musik.starta(ljud);
   startaKapitel(S.kapitel);
 }
 document.getElementById("borja").addEventListener("click", () => {
   if (valdaBarn.length !== 2) return;
   glomSparat();
-  borjaSpela({ kapitel: 1, barn: valdaBarn.slice(), hjartan: 0, kaos: 0, hittat: [], utmarkelser: [] });
+  borjaSpela({ kapitel: 1, barn: valdaBarn.slice(), spelare: antalSpelare, hjartan: 0, kaos: 0, hittat: [], utmarkelser: [] });
 });
 fortsattKnapp.addEventListener("click", () => borjaSpela(lasSparat()));
 document.getElementById("igen").addEventListener("click", () => {
@@ -2234,13 +2334,14 @@ function pausa() {
   if (harTal) speechSynthesis.cancel();
   pausmeny.hidden = false;
   menyFokus = 0;
-  slappSpak();
-  slutaHopp();
+  slappTouch();
+  Musik.paus(true);
 }
 function fortsatt() {
   if (lage !== "paus") return;
   lage = "spelar";
   pausmeny.hidden = true;
+  Musik.paus(false);
 }
 
 function slut() {
@@ -2260,7 +2361,8 @@ function slut() {
   });
   slutruta.hidden = false;
   pausKnapp.hidden = true;
-  joystick.hidden = hoppknapp.hidden = goraKnapp.hidden = bytKnapp.hidden = true;
+  visaTouch(false);
+  goraKnapp.hidden = true;
   menyFokus = 0;
   glomSparat();
   Topplista.nyttResultat("aventyr", totalPoang(), { fordrojning: 1.5 });
@@ -2301,6 +2403,7 @@ function teleportera(x, z, vinkel) {
 }
 
 function bytBarn() {
+  if (tvaSpelare) return;
   aktiv = 1 - aktiv;
   uppdateraBytKnapp();
   const barn = aktivtBarn();
@@ -2308,31 +2411,34 @@ function bytBarn() {
   sag(talare(barn), repliker[Math.floor(Math.random() * repliker.length)]);
 }
 
-function styrBarnet(dt, styr) {
-  const barn = aktivtBarn(), pos = barn.gubbe.grupp.position;
-  const fart = Math.sqrt(styr.x * styr.x + styr.y * styr.y);
+// Hur långt isär barnen får gå när man är två (så att båda syns)
+const MAX_ISAR = { ute: 16, inne: 9 };
+
+function styrBarnet(barn, dt, s, annan) {
+  const pos = barn.gubbe.grupp.position;
+  const fart = Math.sqrt(s.x * s.x + s.y * s.y);
   const radie = 0.35 * barn.data.storlek + 0.1;
-  if (styr.sving) {
-    kameraVinkel += styr.sving * INSTALLNINGAR.kameraSving * dt;
-    senastManuellKamera = speltid;
-  }
   if (fart > 0.05) {
     // Styrningen gäller sett från kameran: uppåt = bort från kameran
-    const riktning = kameraVinkel + Math.atan2(-styr.x, -styr.y);
+    const riktning = kameraVinkel + Math.atan2(-s.x, -s.y);
     const steg = INSTALLNINGAR.springfart * barn.data.fart * fart * dt;
     const nyX = pos.x - Math.sin(riktning) * steg;
     const nyZ = pos.z - Math.cos(riktning) * steg;
     const inne = arInne(pos);
     const minX = inne ? ix(-10) : GRANSER.xMin, maxX = inne ? ix(10) : GRANSER.xMax;
     const minZ = inne ? iz(-7) : GRANSER.zMin, maxZ = inne ? iz(7) : GRANSER.zMax;
-    if (!iVagen(nyX, pos.z, pos.y, radie)) pos.x = Math.max(minX, Math.min(maxX, nyX));
-    if (!iVagen(pos.x, nyZ, pos.y, radie)) pos.z = Math.max(minZ, Math.min(maxZ, nyZ));
+    // Med två spelare: man kan inte springa ifrån varandra
+    const ap = annan ? annan.gubbe.grupp.position : null;
+    const isar = inne ? MAX_ISAR.inne : MAX_ISAR.ute;
+    const forLangt = (x, z) => ap && Math.hypot(x - ap.x, z - ap.z) > isar && Math.hypot(x - ap.x, z - ap.z) > Math.hypot(pos.x - ap.x, pos.z - ap.z);
+    if (!iVagen(nyX, pos.z, pos.y, radie) && !forLangt(nyX, pos.z)) pos.x = Math.max(minX, Math.min(maxX, nyX));
+    if (!iVagen(pos.x, nyZ, pos.y, radie) && !forLangt(pos.x, nyZ)) pos.z = Math.max(minZ, Math.min(maxZ, nyZ));
     let skillnad = riktning - barn.vinkel;
     skillnad = Math.atan2(Math.sin(skillnad), Math.cos(skillnad));
     barn.vinkel += skillnad * Math.min(1, dt * 12);
     barn.steg += dt * 12 * fart;
-    // Kameran svänger långsamt in bakom (om man inte nyss vridit den själv)
-    if (speltid - senastManuellKamera > 1.5) {
+    // Kameran svänger långsamt in bakom (en spelare, om man inte nyss vridit den själv)
+    if (!tvaSpelare && speltid - senastManuellKamera > 1.5) {
       let k = barn.vinkel - kameraVinkel;
       k = Math.atan2(Math.sin(k), Math.cos(k));
       kameraVinkel += k * Math.min(1, dt * 1.2 * fart);
@@ -2341,7 +2447,7 @@ function styrBarnet(dt, styr) {
   barn.gubbe.grupp.rotation.y = barn.vinkel + Math.PI;
 
   // Hopp och tyngdkraft
-  if (styr.hoppNytt) barn.hoppMinne = 0.15;
+  if (s.hoppNytt) barn.hoppMinne = 0.15;
   barn.hoppMinne -= dt;
   if (barn.hoppMinne > 0 && barn.paMarken) {
     barn.hoppMinne = 0;
@@ -2362,25 +2468,56 @@ function styrBarnet(dt, styr) {
   svingaArmarOchBen(barn.gubbe, fart > 0.05 ? Math.sin(barn.steg) * 0.8 * fart : 0);
   if (!barn.paMarken) barn.gubbe.vansterArm.rotation.x = barn.gubbe.hogerArm.rotation.x = Math.PI * 0.9;
   // Titta åt båda hållen vid övergångsstället
-  barn.gubbe.huvud.rotation.y = tittaTid > 0 ? Math.sin((2.4 - tittaTid) * Math.PI * 1.25) * 1.1 : 0;
+  barn.gubbe.huvud.rotation.y = tittaTid > 0 && barn === aktivtBarn() ? Math.sin((2.4 - tittaTid) * Math.PI * 1.25) * 1.1 : 0;
 }
 
-// Kameran följer efter, bakom och lite ovanför (mer uppifrån inne)
+// Det kameran tittar på: barnet, eller mitt emellan barnen när man är två
+const fokus = new THREE.Vector3();
+function kameraFokus() {
+  if (!tvaSpelare) return fokus.copy(aktivtBarn().gubbe.grupp.position);
+  return fokus.copy(lag[0].gubbe.grupp.position).add(lag[1].gubbe.grupp.position).multiplyScalar(0.5);
+}
+
+// Står ett hus mellan barnet och kameran? Svarar hur stor del av vägen som är fri (0–1).
+function friSikt(fran, till) {
+  if (arInne(fran)) return 1;   // inne är väggarna låga
+  for (let i = 1; i <= 16; i++) {
+    const a = i / 16;
+    const x = fran.x + (till.x - fran.x) * a, z = fran.z + (till.z - fran.z) * a;
+    const y = fran.y + 1.4 + (till.y - fran.y - 1.4) * a;
+    for (const h of hinder) {
+      if (h.hb < 0.5 || h.hd < 0.5) continue;   // träd, stolpar och staket skymmer inte mycket
+      if (y < h.hojd + 0.4 && overlappar(x, z, h, 0.4)) return Math.max(0.15, (i - 1) / 16);
+    }
+  }
+  return 1;
+}
+
+// Kameran följer efter, bakom och lite ovanför (mer uppifrån inne).
+// Med två spelare backar den när barnen är långt isär, så att båda syns.
 const kameraMal = new THREE.Vector3();
 let kameraAvstand = INSTALLNINGAR.kameraUte.avstand, kameraHojd = INSTALLNINGAR.kameraUte.hojd;
 function placeraKamera(dt, direkt) {
-  const pos = aktivtBarn().gubbe.grupp.position;
+  const pos = kameraFokus();
   const profil = arInne(pos) ? INSTALLNINGAR.kameraInne : INSTALLNINGAR.kameraUte;
+  const isar = tvaSpelare ? lag[0].gubbe.grupp.position.distanceTo(lag[1].gubbe.grupp.position) : 0;
   const a = direkt ? 1 : Math.min(1, dt * 3);
-  kameraAvstand += (profil.avstand - kameraAvstand) * a;
-  kameraHojd += (profil.hojd - kameraHojd) * a;
+  kameraAvstand += (profil.avstand + isar * 0.55 - kameraAvstand) * a;
+  kameraHojd += (profil.hojd + isar * 0.45 - kameraHojd) * a;
   kameraMal.set(
     pos.x + Math.sin(kameraVinkel) * kameraAvstand,
     pos.y * 0.6 + kameraHojd,
     pos.z + Math.cos(kameraVinkel) * kameraAvstand
   );
+  // Ett hus i vägen: kameran går närmare och tittar mer uppifrån
+  const fri = friSikt(pos, kameraMal);
+  if (fri < 1) {
+    kameraMal.x = pos.x + (kameraMal.x - pos.x) * fri;
+    kameraMal.z = pos.z + (kameraMal.z - pos.z) * fri;
+    kameraMal.y += (1 - fri) * 5;
+  }
   if (direkt) kamera.position.copy(kameraMal);
-  else kamera.position.lerp(kameraMal, Math.min(1, dt * 6));
+  else kamera.position.lerp(kameraMal, Math.min(1, dt * (fri < 1 ? 10 : 6)));
   kamera.lookAt(pos.x, pos.y + 1.4, pos.z);
   sol.position.set(pos.x + 30, 50, pos.z + 20);
   sol.target.position.copy(pos);
@@ -2388,7 +2525,7 @@ function placeraKamera(dt, direkt) {
 
 // Bilarna kör fram och tillbaka och stannar för barnen
 function uppdateraBilar(dt) {
-  const barn = aktivtBarn(), p = barn.gubbe.grupp.position;
+  const barnen = styrda();
   BILAR.forEach((bil) => {
     const langs = bil.axel === "x" ? "x" : "z";
     const tvars = bil.axel === "x" ? "z" : "x";
@@ -2399,10 +2536,14 @@ function uppdateraBilar(dt) {
     g.rotation.y = bil.axel === "x" ? bil.riktning * Math.PI / 2 : (bil.riktning > 0 ? 0 : Math.PI);
     if (bil.vantar > 0) { bil.vantar -= dt; return; }
     // Står ett barn framför bilen? Då stannar den och tutar.
-    const framfor = (p[langs] - bil.pos) * bil.riktning;
-    const iFilen = Math.abs(p[tvars] - g.position[tvars]) < (bil.skogsvag ? 1.2 : 1.6);
+    const iVagenFor = barnen.some((barn) => {
+      const p = barn.gubbe.grupp.position;
+      const framfor = (p[langs] - bil.pos) * bil.riktning;
+      const iFilen = Math.abs(p[tvars] - g.position[tvars]) < (bil.skogsvag ? 1.2 : 1.6);
+      return !arInne(p) && iFilen && framfor > 0 && framfor < 7;
+    });
     bil.tutat = Math.max(0, bil.tutat - dt);
-    if (!arInne(p) && iFilen && framfor > 0 && framfor < 7) {
+    if (iVagenFor) {
       if (!bil.tutat) {
         LJUD.tut();
         bil.tutat = 3;
@@ -2421,8 +2562,11 @@ function uppdateraBilar(dt) {
     }
     g.position[langs] = bil.pos;
     // Skogsvägen: går barnen längst till vänster när bilen kör förbi?
-    if (bil.skogsvag && S.kapitel === 3 && F.valGjort && Math.abs(p.x - SKOGSVAG.x) < 6 && (fore - p.z) * (bil.pos - p.z) <= 0) {
-      kollaVansterSida(barn);
+    if (bil.skogsvag && S.kapitel === 3 && F.valGjort) {
+      barnen.forEach((barn) => {
+        const p = barn.gubbe.grupp.position;
+        if (Math.abs(p.x - SKOGSVAG.x) < 6 && (fore - p.z) * (bil.pos - p.z) <= 0) kollaVansterSida(barn);
+      });
     }
   });
 }
@@ -2442,9 +2586,9 @@ function kollaVansterSida(barn) {
   }
 }
 
-// Det man kan göra där man står
-function narmasteSak() {
-  const p = aktivtBarn().gubbe.grupp.position;
+// Det ett barn kan göra där det står: { sak, avstand } eller null
+function narmasteSak(barn) {
+  const p = barn.gubbe.grupp.position;
   let bast = null, avstand = Infinity;
   saker.forEach((s) => {
     if (!s.aktiv()) return;
@@ -2454,8 +2598,17 @@ function narmasteSak() {
     const poang = d - (s.prioritet || 0) * 5;
     if (d < (s.radie || INSTALLNINGAR.gorAvstand) && poang < avstand) { avstand = poang; bast = s; }
   });
-  return bast;
+  return bast ? { sak: bast, avstand: avstand } : null;
 }
+
+// Färgade ringar under barnen när man är två: blå = spelare 1, orange = spelare 2
+const ringar = [0x4aa0ff, 0xff9a3a].map((farg) => {
+  const ring = new THREE.Mesh(new THREE.RingGeometry(0.55, 0.75, 20), new THREE.MeshBasicMaterial({ color: farg }));
+  ring.rotation.x = -Math.PI / 2;
+  ring.visible = false;
+  scen.add(ring);
+  return ring;
+});
 
 function uppdatera(dt, styr) {
   speltid += dt;
@@ -2463,16 +2616,28 @@ function uppdatera(dt, styr) {
   tittaTid = Math.max(0, tittaTid - dt);
   if (styr.bytNytt || vantandeByt) bytBarn();
   vantandeByt = false;
-  styrBarnet(dt, styr);
+  if (styr.sving) {
+    kameraVinkel += styr.sving * INSTALLNINGAR.kameraSving * dt;
+    senastManuellKamera = speltid;
+  }
 
-  // Syskonet följer efter, och sedan djuren i en rad
-  const ledare = aktivtBarn().gubbe.grupp.position;
-  const syskon = andraBarnet();
-  syskon.fast = syskon.fast || 0;
-  const gar = gaEfter(syskon.gubbe.grupp, ledare, 1.6, INSTALLNINGAR.springfart * 1.1, dt, syskon);
-  syskon.steg += gar ? dt * 12 : 0;
-  svingaArmarOchBen(syskon.gubbe, gar ? Math.sin(syskon.steg) * 0.7 : 0);
-  let framfor = syskon.gubbe.grupp.position;
+  if (tvaSpelare) {
+    lag.forEach((barn, nr) => styrBarnet(barn, dt, styr.spelare[nr], lag[1 - nr]));
+  } else {
+    styrBarnet(aktivtBarn(), dt, styr.spelare[0], null);
+    // Syskonet följer efter
+    const syskon = andraBarnet();
+    syskon.fast = syskon.fast || 0;
+    const gar = gaEfter(syskon.gubbe.grupp, aktivtBarn().gubbe.grupp.position, 1.6, INSTALLNINGAR.springfart * 1.1, dt, syskon);
+    syskon.steg += gar ? dt * 12 : 0;
+    svingaArmarOchBen(syskon.gubbe, gar ? Math.sin(syskon.steg) * 0.7 : 0);
+  }
+  ringar.forEach((ring, nr) => {
+    ring.visible = tvaSpelare;
+    if (tvaSpelare) ring.position.copy(lag[nr].gubbe.grupp.position).setY(lag[nr].gubbe.grupp.position.y + 0.06);
+  });
+  // Djuren går efter i en rad
+  let framfor = (tvaSpelare ? lag[1] : andraBarnet()).gubbe.grupp.position;
   foljare.forEach((f) => {
     gaEfter(f.grupp, framfor, f.avstand, INSTALLNINGAR.springfart * 1.15, dt, f);
     framfor = f.grupp.position;
@@ -2488,17 +2653,38 @@ function uppdatera(dt, styr) {
   if (kapitel) kapitel.uppdatera(dt);
   uppdateraBilar(dt);
 
-  // Knappen för det man kan göra
-  const s = filmPagar ? null : narmasteSak();
-  goraKnapp.hidden = !s;
-  if (s) {
-    const text = s.etikett();
-    if (goraKnapp.textContent !== text) goraKnapp.textContent = text;
-    if (styr.gorNytt || vantandeGor) s.gor();
+  // Knappen för det man kan göra. Med två spelare gör den som tryckte,
+  // och knappen på skärmen gäller den som står närmast något.
+  const forslag = filmPagar ? [] : styrda().map((barn) => narmasteSak(barn));
+  let visad = null, visadNr = 0;
+  forslag.forEach((f, nr) => {
+    if (f && (!visad || f.avstand < visad.avstand)) { visad = f; visadNr = nr; }
+  });
+  goraKnapp.hidden = !visad;
+  if (visad) {
+    // Med handkontroll står X på knappen (X = gör/prata)
+    const text = (tvaSpelare ? (visadNr === 0 ? "🔵 " : "🟠 ") : "") + visad.sak.etikett();
+    const nyckel = text + (anvanderHandkontroll ? "/x" : "");
+    if (goraKnapp.dataset.text !== nyckel) {
+      goraKnapp.dataset.text = nyckel;
+      goraKnapp.innerHTML = anvanderHandkontroll ? '<span class="xk x">X</span>' : "";
+      goraKnapp.appendChild(document.createTextNode(text));
+    }
   }
+  const gor = (nr, f) => {
+    if (tvaSpelare) aktiv = nr;   // den som gör saken är den som pratar
+    f.sak.gor();
+  };
+  let gjort = false;
+  styr.spelare.forEach((s, nr) => {
+    const f = forslag[tvaSpelare ? nr : 0];
+    if (!gjort && s.gorNytt && f) { gor(nr, f); gjort = true; }
+  });
+  if (!gjort && vantandeGor && visad) gor(visadNr, visad);
   vantandeGor = false;
 
   // Målet och pilen
+  const ledare = kameraFokus();
   const mal = kapitel && !filmPagar ? kapitel.mal() : null;
   malRuta.hidden = !mal;
   if (mal) {
@@ -2508,7 +2694,7 @@ function uppdatera(dt, styr) {
     let mp = mal.plats;
     if (arInne(mp) !== arInne(ledare)) mp = arInne(ledare) ? PLATS.dorrInne : PLATS.dorrUte;
     pil.visible = Math.hypot(mp.x - ledare.x, mp.z - ledare.z) > 1.5;
-    pil.position.set(ledare.x, ledare.y + 2.9 * aktivtBarn().data.storlek + 0.5 + Math.sin(speltid * 4) * 0.1, ledare.z);
+    pil.position.set(ledare.x, ledare.y + (tvaSpelare ? 3.4 : 2.9 * aktivtBarn().data.storlek + 0.5) + Math.sin(speltid * 4) * 0.1, ledare.z);
     pil.rotation.y = Math.atan2(mp.x - ledare.x, mp.z - ledare.z);
   } else {
     pil.visible = false;
@@ -2627,6 +2813,9 @@ function ruta(nu) {
   } else if (lage === "paus" && styr.pausNytt) fortsatt();
   if (lage === "spelar" || lage === "val" || lage === "kort") uppdateraRepliker(dt);
   if (!iMeny) document.querySelectorAll(".fokus").forEach((k) => k.classList.remove("fokus"));
+  // Xbox-knapparna syns i start- och pausrutan när en handkontroll är inkopplad
+  const visaHjalp = (lage === "start" || lage === "paus") && harHandkontroll();
+  if (knapphjalp.hidden === visaHjalp) knapphjalp.hidden = !visaHjalp;
   if (lage !== "paus") animera(dt);
   renderare.render(scen, kamera);
   kvalitet.rakna(verkligTid);
