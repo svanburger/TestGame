@@ -28,7 +28,7 @@ const FILER = [
   "apple-touch-icon.png",
   "ikon-192.png",
   "ikon-512.png",
-  ...["stjarnor", "parkour", "pappa", "hund", "fis", "bord", "godis", "bajsbyn"].flatMap((spel) => [spel + "/", spel + "/game.js"]),
+  ...["stjarnor", "parkour", "pappa", "hund", "fis", "bord", "godis", "aventyr", "bajsbyn"].flatMap((spel) => [spel + "/", spel + "/game.js"]),
   // 3D-testsidan (finns inte i menyn)
   "test3d/",
   "test3d/test3d.js",

@@ -20,6 +20,7 @@ inget att installera. Startsidan är en meny där man väljer spel.
 | `fis/`       | Spelet "Lagom tryck".                                     |
 | `bord/`      | Spelet "Bordsplaceringen".                                |
 | `godis/`     | Spelet "Bus eller godis".                                 |
+| `aventyr/`   | Äventyret "Ensamma hemma på lördag", i 3D (kapitel 1–3). Storyn finns i `aventyr/STORY.md`. |
 | `bajsbyn/`   | Spelet "Bajsbyn", i 3D.                                   |
 | `test3d/`    | Testsida för 3D (inte i menyn): visar vad iPad/Xbox klarar. |
 | `three.min.js` | Three.js r159, som 3D-spelen använder (MIT-licens, se `three-LICENSE.txt`). |

@@ -48,7 +48,8 @@
     { id: "hund", ikon: "🐕", namn: t("Hundpromenaden", "Dog Walk") },
     { id: "fis", ikon: "💨", namn: t("Lagom tryck", "Just the Right Push") },
     { id: "godis", ikon: "🎃", namn: t("Bus eller godis", "Trick or Treat"), enhet: "🍬" },
-    { id: "bajsbyn", ikon: "🏡", namn: t("Bajsbyn", "Poop Village") },
+    { id: "aventyr", ikon: "🏠", namn: t("Ensamma hemma på lördag", "Home Alone on Saturday") },
+    { id: "bajsbyn", ikon: "💩", namn: t("Bajsbyn", "Poop Village") },
   ];
 
   const MEDALJER = ["🥇", "🥈", "🥉"];
