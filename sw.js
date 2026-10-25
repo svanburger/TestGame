@@ -22,6 +22,7 @@ const FILER = [
   "sprak.js",
   "offline.js",
   "topplista.js",
+  "musik.js",
   "manifest.webmanifest",
   "favicon.svg",
   "favicon.png",

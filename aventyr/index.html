@@ -133,7 +133,7 @@
       touch-action: manipulation;
     }
 
-    #joystick {
+    #joystick, #joystick2 {
       position: fixed;
       left: calc(var(--sakert-vanster) + 28px);
       bottom: calc(var(--sakert-botten) + 28px);
@@ -143,7 +143,8 @@
       background: rgba(255, 255, 255, 0.18);
       border: 3px solid rgba(255, 255, 255, 0.5);
     }
-    #pinne {
+    #joystick2 { left: auto; right: calc(var(--sakert-hoger) + 28px); }
+    #pinne, #pinne2 {
       position: absolute;
       left: 45px;
       top: 45px;
@@ -153,7 +154,7 @@
       background: rgba(255, 255, 255, 0.8);
       pointer-events: none;
     }
-    #hopp {
+    #hopp, #hopp2 {
       position: fixed;
       right: calc(var(--sakert-hoger) + 36px);
       bottom: calc(var(--sakert-botten) + 44px);
@@ -166,16 +167,41 @@
       color: #2b1d0e;
       background: rgba(255, 217, 94, 0.9);
     }
-    #hopp.tryckt { background: #7be07b; }
+    #hopp.tryckt, #hopp2.tryckt { background: #7be07b; }
+
+    /* Två spelare på iPad: spelare 1 (blå) till vänster, spelare 2 (orange) till höger */
+    body.tva #joystick { border-color: #4aa0ff; }
+    body.tva #joystick2 { border-color: #ff9a3a; }
+    body.tva #hopp, body.tva #hopp2 { width: 90px; height: 90px; bottom: calc(var(--sakert-botten) + 40px); font-size: 18px; }
+    body.tva #hopp { right: auto; left: calc(var(--sakert-vanster) + 196px); background: rgba(74, 160, 255, 0.9); }
+    body.tva #hopp2 { right: calc(var(--sakert-hoger) + 196px); background: rgba(255, 154, 58, 0.9); }
+    body.tva #prata { bottom: calc(var(--sakert-botten) + 170px); }
+
+    #antal { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+    .antalknapp {
+      padding: 10px 18px;
+      border: 4px solid transparent;
+      border-radius: 999px;
+      font: inherit;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #2b1d0e;
+      background: #fff4d6;
+      touch-action: manipulation;
+    }
+    .antalknapp.vald { border-color: #3fa34d; background: #d9f5d0; }
+    .barnkort .spelarnr { font-size: 0.85rem; font-weight: 800; min-height: 1em; }
 
     #hud[hidden], #kylskap[hidden], #sms[hidden], #bubbla[hidden], #prata[hidden], #byt[hidden],
-    #joystick[hidden], #hopp[hidden], #barnval[hidden], #fortsattSparat[hidden] { display: none; }
+    #joystick[hidden], #hopp[hidden], #joystick2[hidden], #hopp2[hidden], #barnval[hidden], #fortsattSparat[hidden] { display: none; }
 
     /* Rutorna (start, val, kapitel, slut) bygger på pausmenyn i spel.css */
-    .pausruta p { margin: 0; font-size: 1.15rem; text-align: center; max-width: 36ch; }
-    .pausruta { max-height: calc(100vh - 32px); overflow-y: auto; }
+    .pausruta p { margin: 0; font-size: 1.15rem; text-align: center; max-width: 36ch; justify-self: center; }
+    .pausruta { max-height: calc(100vh - 32px); overflow-y: auto; box-sizing: border-box; }
+    /* Start, val och slut har mer innehåll än pausmenyn och får vara bredare */
+    #startruta .pausruta, #valruta .pausruta, #slutruta .pausruta { width: min(580px, 100%); }
 
-    #barnval { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: min(520px, 86vw); }
+    #barnval { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     .barnkort {
       display: flex;
       flex-direction: column;
@@ -193,6 +219,14 @@
     .barnkort .namn { font-size: 1.15rem; font-weight: 800; }
     .barnkort .kan { font-size: 0.9rem; }
     .barnkort.vald { border-color: #3fa34d; background: #d9f5d0; }
+    /* Låga skärmar (Xbox, iPad på tvären): mindre barnkort så att allt får plats */
+    @media (max-height: 800px) {
+      .barnkort { padding: 6px; }
+      .barnkort .stor { font-size: 30px; }
+      .barnkort .kan { font-size: 0.8rem; }
+      #startruta .pausruta { gap: 8px; padding: 14px 18px; }
+      #startruta h2 { font-size: 1.6rem; }
+    }
 
     /* Valet: två stora bilder */
     #valknappar { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; }
@@ -236,6 +270,8 @@
   <button id="byt" type="button" hidden aria-label="Byt barn" data-en-aria-label="Switch child"></button>
   <div id="joystick" hidden><div id="pinne"></div></div>
   <button id="hopp" type="button" hidden data-en="JUMP">HOPP</button>
+  <div id="joystick2" hidden><div id="pinne2"></div></div>
+  <button id="hopp2" type="button" hidden data-en="JUMP">HOPP</button>
 
   <div class="knappar">
     <a id="hem" class="rund-knapp" href="../" aria-label="Till menyn" data-en-aria-label="Back to the menu">🏠</a>
@@ -248,10 +284,15 @@
     <div class="pausruta" role="dialog" aria-labelledby="starttitel">
       <h2 id="starttitel" data-en="🏠 Home Alone on Saturday">🏠 Ensamma hemma på lördag</h2>
       <p id="startInfo" data-en="Choose two siblings. You play one, and the other follows. You can switch whenever you like!">Välj två syskon. Du styr det ena och det andra följer efter. Du kan byta när du vill!</p>
+      <div id="antal">
+        <button type="button" class="antalknapp" data-antal="1" data-en="👤 One player">👤 En spelare</button>
+        <button type="button" class="antalknapp" data-antal="2" data-en="👥 Two players">👥 Två spelare</button>
+      </div>
       <div id="barnval"></div>
       <button id="borja" class="menyknapp" type="button" data-en="▶ Start">▶ Börja</button>
       <button id="fortsattSparat" class="menyknapp sekundar" type="button" hidden></button>
       <button class="menyknapp sekundar" type="button" data-topplista="aventyr" data-en="🏆 High scores">🏆 Topplista</button>
+      <button class="menyknapp sekundar musikknapp" type="button"></button>
     </div>
   </div>
 
@@ -274,6 +315,7 @@
       <h2 id="paustitel" data-en="Paused">Paus</h2>
       <button id="fortsatt" class="menyknapp" type="button" data-en="▶ Continue">▶ Fortsätt</button>
       <button id="borjaOmKapitel" class="menyknapp sekundar" type="button" data-en="↻ Restart chapter">↻ Börja om kapitlet</button>
+      <button class="menyknapp sekundar musikknapp" type="button"></button>
       <button class="menyknapp sekundar" type="button" data-topplista="aventyr" data-en="🏆 High scores">🏆 Topplista</button>
       <a class="menyknapp sekundar" href="../" data-en="🏠 Back to menu">🏠 Till menyn</a>
     </div>
@@ -295,6 +337,7 @@
   <script src="../topplista.js"></script>
   <!-- Three.js r159 (MIT-licens, se ../three-LICENSE.txt) -->
   <script src="../three.min.js"></script>
+  <script src="../musik.js"></script>
   <script src="game.js"></script>
 </body>
 </html>
