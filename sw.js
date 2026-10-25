@@ -28,11 +28,12 @@ const FILER = [
   "apple-touch-icon.png",
   "ikon-192.png",
   "ikon-512.png",
-  ...["stjarnor", "parkour", "pappa", "hund", "fis", "bord", "godis"].flatMap((spel) => [spel + "/", spel + "/game.js"]),
+  ...["stjarnor", "parkour", "pappa", "hund", "fis", "bord", "godis", "bajsbyn"].flatMap((spel) => [spel + "/", spel + "/game.js"]),
   // 3D-testsidan (finns inte i menyn)
   "test3d/",
   "test3d/test3d.js",
-  "test3d/three.min.js",
+  // Three.js, för 3D-spelen (MIT-licens, se three-LICENSE.txt)
+  "three.min.js",
 ];
 
 // Så länge väntar vi på internet innan vi tar det sparade i stället (millisekunder)

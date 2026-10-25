@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="sv">
+<head>
+  <meta charset="utf-8">
+  <!-- Gör att spelet fyller skärmen på iPad/telefon och inte går att zooma -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <!-- Gör att spelet startar i helskärm när man lagt det på hemskärmen -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Bajsbyn" data-en-content="Poop Village">
+  <meta name="theme-color" content="#9fd8ff">
+  <title data-en="Poop Village">Bajsbyn</title>
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="../favicon.png" sizes="64x64" type="image/png">
+  <link rel="apple-touch-icon" href="../apple-touch-icon.png">
+  <link rel="stylesheet" href="../spel.css">
+  <style>
+    canvas { position: fixed; left: 0; top: 0; width: 100%; height: 100%; }
+
+    /* Antal guldbajsar och tiden, uppe i mitten */
+    #hud {
+      position: fixed;
+      top: calc(var(--sakert-topp) + 14px);
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 6px 18px;
+      border-radius: 999px;
+      font: bold 26px system-ui, -apple-system, sans-serif;
+      color: #fff;
+      background: rgba(0, 0, 0, 0.4);
+      white-space: nowrap;
+      pointer-events: none;
+    }
+
+    /* Det figurerna säger */
+    #bubbla {
+      position: fixed;
+      top: calc(var(--sakert-topp) + 76px);
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(560px, calc(100vw - 32px));
+      box-sizing: border-box;
+      padding: 12px 18px;
+      border-radius: 18px;
+      font: 20px/1.35 system-ui, -apple-system, sans-serif;
+      color: #2b1d0e;
+      background: #fffbe8;
+      box-shadow: 0 6px 0 rgba(0, 0, 0, 0.2);
+      pointer-events: none;
+    }
+    #bubbla b { display: block; font-size: 16px; color: #8b5a2b; }
+
+    /* Knappen som syns när man står nära någon man kan prata med */
+    #prata {
+      position: fixed;
+      left: 50%;
+      bottom: calc(var(--sakert-botten) + 28px);
+      transform: translateX(-50%);
+      padding: 14px 24px;
+      border: 0;
+      border-radius: 999px;
+      font: bold 22px system-ui, -apple-system, sans-serif;
+      color: #2b1d0e;
+      background: #fffbe8;
+      box-shadow: 0 6px 0 rgba(0, 0, 0, 0.25);
+      touch-action: manipulation;
+    }
+
+    /* Joysticken för vänster tumme och hoppknappen för höger */
+    #joystick {
+      position: fixed;
+      left: calc(var(--sakert-vanster) + 28px);
+      bottom: calc(var(--sakert-botten) + 28px);
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.18);
+      border: 3px solid rgba(255, 255, 255, 0.5);
+    }
+    #pinne {
+      position: absolute;
+      left: 45px;
+      top: 45px;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.8);
+      pointer-events: none;
+    }
+    #hopp {
+      position: fixed;
+      right: calc(var(--sakert-hoger) + 36px);
+      bottom: calc(var(--sakert-botten) + 44px);
+      width: 110px;
+      height: 110px;
+      border: 0;
+      border-radius: 50%;
+      font: bold 22px system-ui, -apple-system, sans-serif;
+      color: #2b1d0e;
+      background: rgba(255, 217, 94, 0.9);
+    }
+    #hopp.tryckt { background: #7be07b; }
+    #bubbla[hidden], #prata[hidden], #joystick[hidden], #hopp[hidden], #hud[hidden] { display: none; }
+
+    .pausruta p { margin: 0; font-size: 1.15rem; text-align: center; max-width: 34ch; }
+  </style>
+</head>
+<body>
+  <canvas id="spel"></canvas>
+  <div id="hud" hidden></div>
+  <div id="bubbla" hidden><b id="vemPratar"></b><span id="repliken"></span></div>
+  <button id="prata" type="button" hidden></button>
+  <div id="joystick" hidden><div id="pinne"></div></div>
+  <button id="hopp" type="button" hidden data-en="JUMP">HOPP</button>
+
+  <div class="knappar">
+    <a id="hem" class="rund-knapp" href="../" aria-label="Till menyn" data-en-aria-label="Back to the menu">🏠</a>
+    <button id="paus" class="rund-knapp" type="button" aria-label="Pausa" data-en-aria-label="Pause" hidden>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="4" width="5" height="16" rx="1.5"/><rect x="14" y="4" width="5" height="16" rx="1.5"/></svg>
+    </button>
+  </div>
+
+  <div id="startruta" class="pausmeny">
+    <div class="pausruta" role="dialog" aria-labelledby="starttitel">
+      <h2 id="starttitel" data-en="🏡 Poop Village">🏡 Bajsbyn</h2>
+      <p data-en="Grandpa has lost ten golden poops around the village. Find them all and go back to Grandpa!">Morfar har tappat tio guldbajsar runt om i byn. Hitta alla och gå tillbaka till morfar!</p>
+      <button id="spela" class="menyknapp" type="button" data-en="▶ Play">▶ Spela</button>
+      <button class="menyknapp sekundar" type="button" data-topplista="bajsbyn" data-en="🏆 High scores">🏆 Topplista</button>
+    </div>
+  </div>
+
+  <div id="pausmeny" class="pausmeny" hidden>
+    <div class="pausruta" role="dialog" aria-labelledby="paustitel">
+      <h2 id="paustitel" data-en="Paused">Paus</h2>
+      <button id="fortsatt" class="menyknapp" type="button" data-en="▶ Continue">▶ Fortsätt</button>
+      <button id="borjaOm" class="menyknapp sekundar" type="button" data-en="↻ Start over">↻ Börja om</button>
+      <button class="menyknapp sekundar" type="button" data-topplista="bajsbyn" data-en="🏆 High scores">🏆 Topplista</button>
+      <a class="menyknapp sekundar" href="../" data-en="🏠 Back to menu">🏠 Till menyn</a>
+    </div>
+  </div>
+
+  <div id="slutruta" class="pausmeny" hidden>
+    <div class="pausruta" role="dialog" aria-labelledby="sluttitel">
+      <h2 id="sluttitel" data-en="🎉 Well done!">🎉 Bra jobbat!</h2>
+      <p id="slutText"></p>
+      <button id="igen" class="menyknapp" type="button" data-en="↻ Play again">↻ Spela igen</button>
+      <button class="menyknapp sekundar" type="button" data-topplista="bajsbyn" data-en="🏆 High scores">🏆 Topplista</button>
+      <a class="menyknapp sekundar" href="../" data-en="🏠 Back to menu">🏠 Till menyn</a>
+    </div>
+  </div>
+
+  <script src="../sprak.js"></script>
+  <script src="../offline.js"></script>
+  <script src="../topplista.js"></script>
+  <!-- Three.js r159 (MIT-licens, se ../three-LICENSE.txt) -->
+  <script src="../three.min.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>

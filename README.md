@@ -20,7 +20,9 @@ inget att installera. Startsidan är en meny där man väljer spel.
 | `fis/`       | Spelet "Lagom tryck".                                     |
 | `bord/`      | Spelet "Bordsplaceringen".                                |
 | `godis/`     | Spelet "Bus eller godis".                                 |
-| `test3d/`    | Testsida för 3D (inte i menyn): visar vad iPad/Xbox klarar. Three.js r159 ligger i `three.min.js`. |
+| `bajsbyn/`   | Spelet "Bajsbyn", i 3D.                                   |
+| `test3d/`    | Testsida för 3D (inte i menyn): visar vad iPad/Xbox klarar. |
+| `three.min.js` | Three.js r159, som 3D-spelen använder (MIT-licens, se `three-LICENSE.txt`). |
 
 Varje spel är en egen mapp med en `index.html` och en `game.js`. Det mesta
 man vill ändra finns i `INSTALLNINGAR` högst upp i `game.js`. Spara filen

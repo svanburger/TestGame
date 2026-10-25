@@ -24,7 +24,7 @@ const INSTALLNINGAR = {
   dodzon: 0.2,            // Så mycket man kan luta spaken utan att något händer
   // Det figurerna säger
   bajsis: { mening: "Hej! Jag heter Bajsis och jag älskar att hoppa!", rostlage: 1.6, tempo: 1.15 },
-  morfar: { mening: "Goddag, goddag. Jag är morfar, och jag går lite långsamt.", rostlage: 0.6, tempo: 0.8 },
+  morfar: { mening: "Goddag, goddag. Jag är morfar, och jag går lite långsamt.", rostlage: 0.8, tempo: 0.9 },
 };
 
 // ---------------------------------------------------------------------
