@@ -360,7 +360,7 @@ function uppdatera(dt) {
 
   if (fart > 0.05) {
     // Styrningen gäller sett från kameran: uppåt = bort från kameran
-    const riktning = kameraVinkel + Math.atan2(styr.x, -styr.y);
+    const riktning = kameraVinkel + Math.atan2(-styr.x, -styr.y);
     const steg = INSTALLNINGAR.springfart * fart * dt;
     const nyX = figur.position.x - Math.sin(riktning) * steg;
     const nyZ = figur.position.z - Math.cos(riktning) * steg;
