@@ -695,39 +695,73 @@ function stallVader(namn) {
 //  Ljud och tal
 // ---------------------------------------------------------------------
 
-let ljud = null;
+let ljud = null, eko = null;
 function startaLjud() {
   try {
-    if (!ljud) ljud = new (window.AudioContext || window.webkitAudioContext)();
-    if (ljud.state === "suspended") ljud.resume();
+    if (!ljud) {
+      ljud = new (window.AudioContext || window.webkitAudioContext)();
+      // Ett kort eko gör plingen mjukare och rundare
+      eko = ljud.createDelay(1);
+      eko.delayTime.value = 0.16;
+      const tillbaka = ljud.createGain(), mork = ljud.createBiquadFilter();
+      tillbaka.gain.value = 0.3;
+      mork.type = "lowpass";
+      mork.frequency.value = 2500;
+      eko.connect(mork);
+      mork.connect(tillbaka);
+      tillbaka.connect(eko);
+      mork.connect(ljud.destination);
+    }
+    Musik.lasUpp(ljud);   // startar ljudet, och gör att det hörs även när iPaden står på ljudlöst
   } catch (e) {
     ljud = null;   // Inget ljud – spelet fungerar ändå
   }
 }
-function pling(toner, typ, langd, volym) {
+// iPad och Xbox startar ljudet först när man har tryckt någonstans
+["pointerdown", "touchend", "keydown"].forEach((h) => document.addEventListener(h, startaLjud, true));
+
+// En mjuk klockton: grundton och en svag överton som klingar ut, med eko
+function klang(toner, mellanrum, volym, langd) {
   if (!ljud) return;
-  toner.forEach((ton, nr) => {
-    const osc = ljud.createOscillator(), v = ljud.createGain();
-    const start = ljud.currentTime + nr * 0.08;
-    osc.type = typ || "triangle";
-    osc.frequency.value = ton;
-    v.gain.setValueAtTime(volym || 0.22, start);
-    v.gain.exponentialRampToValueAtTime(0.001, start + (langd || 0.3));
-    osc.connect(v).connect(ljud.destination);
-    osc.start(start);
-    osc.stop(start + (langd || 0.3));
+  toner.forEach((frekvens, nr) => {
+    const start = ljud.currentTime + 0.01 + nr * mellanrum;
+    [[1, 1], [3, 0.12]].forEach(([gange, andel]) => {
+      const osc = ljud.createOscillator(), v = ljud.createGain(), till = ljud.createGain();
+      osc.type = "sine";
+      osc.frequency.value = frekvens * gange;
+      v.gain.setValueAtTime(0.0001, start);
+      v.gain.exponentialRampToValueAtTime(volym * andel, start + 0.008);
+      v.gain.exponentialRampToValueAtTime(0.0001, start + langd * (gange === 1 ? 1 : 0.5));
+      till.gain.value = 0.35;
+      osc.connect(v);
+      v.connect(ljud.destination);
+      v.connect(till).connect(eko);
+      osc.start(start);
+      osc.stop(start + langd + 0.05);
+    });
   });
 }
+function hz(ton) {
+  return 440 * Math.pow(2, (ton - 69) / 12);
+}
+// Plingen går ett steg upp i en glad skala för varje bajs man tar i rad
+const SKALA = [72, 74, 76, 79, 81, 84, 86, 88];
+let iRad = 0, senastTagen = -10;
 const LJUD = {
-  guld: () => pling([660, 880, 1320]),
-  diamant: () => pling([880, 1100, 1320, 1760, 2200], "sine", 0.4),
-  klocka: () => pling([1200, 900, 1200, 900], "square", 0.08, 0.12),
-  hopp: () => pling([330], "triangle", 0.15, 0.15),
-  tick: () => pling([1000], "square", 0.05, 0.1),
-  nedrakning: () => pling([520], "sine", 0.25),
-  kor: () => pling([780, 1040], "sine", 0.35),
-  vinst: () => pling([523, 659, 784, 1047, 784, 1047], "triangle", 0.35),
-  slut: () => pling([400, 300, 200], "triangle", 0.4),
+  guld: () => {
+    iRad = speltid - senastTagen < 3 ? Math.min(iRad + 1, SKALA.length - 1) : 0;
+    senastTagen = speltid;
+    const ton = SKALA[iRad];
+    klang([hz(ton), hz(ton + 7)], 0.07, 0.16, 0.8);
+  },
+  diamant: () => klang([79, 84, 88, 91, 96].map(hz), 0.06, 0.13, 1),
+  klocka: () => klang([hz(84), hz(79), hz(84), hz(79)], 0.12, 0.1, 0.25),
+  hopp: () => klang([hz(67)], 0, 0.05, 0.18),
+  tick: () => klang([hz(93)], 0, 0.07, 0.12),
+  nedrakning: () => klang([hz(72)], 0, 0.14, 0.5),
+  kor: () => klang([hz(72), hz(76), hz(79), hz(84)], 0.05, 0.13, 0.9),
+  vinst: () => klang([72, 76, 79, 84, 88, 91].map(hz), 0.09, 0.14, 1.1),
+  slut: () => klang([79, 76, 72].map(hz), 0.15, 0.12, 0.8),
 };
 
 const harTal = "speechSynthesis" in window;
@@ -898,7 +932,10 @@ function lasStyrning() {
       return Math.abs(v) > INSTALLNINGAR.dodzon ? v : 0;
     };
     const tryckt = (i) => !!(k.buttons[i] && k.buttons[i].pressed);
-    if (k.buttons.some((b) => b.pressed)) anvanderHandkontroll = true;
+    if (k.buttons.some((b) => b.pressed)) {
+      anvanderHandkontroll = true;
+      if (!ljud || ljud.state !== "running") startaLjud();
+    }
     x += axel(0);
     y += axel(1);
     sving -= axel(2);
@@ -1078,7 +1115,7 @@ function visaSpelknappar(synlig) {
 function avslutaRunda() {
   visaSpelknappar(false);
   nedrakningRuta.hidden = true;
-  Musik.tempo(100);
+  Musik.tempo(96);
 }
 
 // ---------------------------------------------------------------------
@@ -1162,7 +1199,7 @@ function startaRunda(lageId, bana) {
   visaSpelknappar(true);
   Musik.starta(ljud);
   Musik.paus(false);
-  Musik.tempo(100);
+  Musik.tempo(96);
   // Morfar (eller Bajsis) berättar uppdraget, sedan 3, 2, 1, KÖR!
   const text = lageId === "banor" ? t("Bana ", "Level ") + (bana + 1) + ": " + def.text
     : lageId === "jakt" ? t("Jag har tappat hundra guldbajsar! Hur många hinner du hitta?", "I've dropped a hundred golden poops! How many can you find?")
@@ -1468,7 +1505,7 @@ function uppdatera(dt, styr) {
     const sekund = Math.ceil(runda.tid);
     if (sekund <= 5 && sekund !== runda.forraSekund && sekund > 0) LJUD.tick();
     runda.forraSekund = sekund;
-    Musik.tempo(runda.tid < 10 ? 120 : 100);
+    Musik.tempo(runda.tid < 10 ? 116 : 96);
   }
 
   // Ta bajsar
