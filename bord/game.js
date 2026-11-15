@@ -1539,6 +1539,11 @@ function visaResultat() {
   }
   if (hemligOk && fel === 0) hemligHittad = true;
   resultat = { antal, fel, hemligOk, nytt: antal > forra, forstaGangen: forra === 0 };
+  // Sista banan i festen: alla stjärnor man har samlat går till topplistan
+  // (en gång per genomspelad fest, inte efter varje bana)
+  if (banNr === S.fester[festNr].banor.length - 1 && window.Topplista) {
+    Topplista.nyttResultat("bord", allaStjarnor(), { fordrojning: 1.5 });
+  }
   bytLage("resultat");
   gorLayout();
   effekt(fel === 0 ? "fanfar" : "tuta");
@@ -1558,6 +1563,11 @@ function nastaBana() {
   const fest = S.fester[festNr];
   if (banNr + 1 < fest.banor.length) startaBana(festNr, banNr + 1);
   else bytLage("meny");
+}
+
+// Stjärnorna från alla fester tillsammans
+function allaStjarnor() {
+  return S.fester.reduce((summa, _, fNr) => summa + totalaStjarnor(fNr), 0);
 }
 
 function totalaStjarnor(fNr) {
@@ -1698,6 +1708,8 @@ canvas.addEventListener("pointerup", slapp);
 canvas.addEventListener("pointercancel", slapp);
 
 window.addEventListener("keydown", (e) => {
+  // När man skriver sitt namn i topplistan ska tangenterna inte styra spelet
+  if (window.Topplista && Topplista.arOppen()) return;
   if (e.key === "p" || e.key === "Escape") {
     if (lage === "paus") fortsatt();
     else pausa();
