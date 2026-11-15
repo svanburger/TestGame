@@ -10,7 +10,7 @@
 //    🔗 Kedjan  – en bajs i taget, hinn till nästa innan tiden tar slut
 //    🌼 Lugnt   – ingen tid, leta i lugn och ro
 //
-//  💎 Diamantbajs = 5 poäng. ⏰ Klockbajs = 5 sekunder extra.
+//  💎 Diamantbajs (en bajskorv av diamant) = 5 poäng. ⏰ Klocka = 5 sekunder extra.
 //  Allt i 3D byggs av kod med Three.js (../three.min.js), utan modellfiler.
 // =====================================================================
 
@@ -27,7 +27,7 @@ const INSTALLNINGAR = {
   dodzon: 0.25,
   vardeGuld: 1,
   vardeDiamant: 5,
-  klockTid: 5,            // sekunder extra för en klockbajs
+  klockTid: 5,            // sekunder extra för en klocka
   stjarnor: [0.25, 0.5],  // så stor del av tiden som ska vara kvar för ⭐⭐ och ⭐⭐⭐
   storlek: 55,            // staketet står så här långt från mitten åt alla håll
 };
@@ -35,7 +35,7 @@ const INSTALLNINGAR = {
 // Lägena. guld/diamanter/klockor = hur många som läggs ut. torn = lådtorn att hoppa upp på.
 // hoga = så stor del av bajsarna som ligger högt upp. omrade: "nara" (vid torget) eller "kant" (vid staketet).
 const LAGEN = {
-  banor: { ikon: "🗺️", namn: t("Banor", "Levels"), om: t("Tio uppdrag från Morfar. Klara dem med tre stjärnor!", "Ten missions from Grandpa. Get three stars on all of them!") },
+  banor: { ikon: "🗺️", namn: t("Banor", "Levels"), om: t("Uppdrag från Morfar. Klara dem med tre stjärnor!", "Missions from Grandpa. Get three stars on all of them!") },
   jakt: { ikon: "⏱️", namn: t("Jakten", "The Hunt"), om: t("100 bajsar. Hur många hinner du ta på 90 sekunder?", "100 poops. How many can you grab in 90 seconds?"),
     guld: 90, diamanter: 6, klockor: 4, tid: 90, torn: 8, hoga: 0.15 },
   kedja: { ikon: "🔗", namn: t("Kedjan", "The Chain"), om: t("En bajs i taget. Hinn till nästa innan tiden tar slut!", "One poop at a time. Reach the next one before time runs out!"),
@@ -44,7 +44,9 @@ const LAGEN = {
     guld: 15, diamanter: 1, torn: 6, hoga: 0.2 },
 };
 
-// Banorna. krav: "guld" (hitta alla guld) eller "diamanter" (hitta alla diamanter). vader: "dimma" eller "kvall".
+// Banorna. Nya banor läggs till sist i listan.
+// krav: "guld" (hitta alla guld) eller "diamanter" (hitta alla diamanter).
+// vader: "dimma", "kvall" eller "sno". robot: true = robotgräsklipparen kör runt och flyttar bajsar.
 const BANOR = [
   { namn: t("Första jakten", "The first hunt"), text: t("Jag har tappat 5 guldbajsar nära torget. Kan du hitta dem?", "I've dropped 5 golden poops near the square. Can you find them?"),
     guld: 5, tid: 90, omrade: "nara" },
@@ -54,7 +56,7 @@ const BANOR = [
     guld: 6, tid: 120, hoga: 1, torn: 8 },
   { namn: t("Diamantjakt", "Diamond hunt"), text: t("Någonstans finns 3 diamantbajsar. Hitta dem! Guldbajsarna ger extra poäng.", "Somewhere there are 3 diamond poops. Find them! Golden ones give bonus points."),
     guld: 15, diamanter: 3, krav: "diamanter", tid: 120 },
-  { namn: t("Bråttom!", "Hurry!"), text: t("12 guldbajsar på 45 sekunder! Klockbajsarna ger mer tid.", "12 golden poops in 45 seconds! Clock poops give you more time."),
+  { namn: t("Bråttom!", "Hurry!"), text: t("12 guldbajsar på 45 sekunder! Klockorna ger mer tid.", "12 golden poops in 45 seconds! The clocks give you more time."),
     guld: 12, klockor: 4, tid: 45, omrade: "nara" },
   { namn: t("Vid staketet", "By the fence"), text: t("Bajsarna har rullat ut till staketet. Hitta 10!", "The poops have rolled out to the fence. Find 10!"),
     guld: 10, tid: 110, omrade: "kant" },
@@ -64,8 +66,13 @@ const BANOR = [
     guld: 10, tid: 120, vader: "kvall" },
   { namn: t("Tornstaden", "Tower town"), text: t("Lådtorn överallt! Hitta 10. De flesta ligger högt upp.", "Box towers everywhere! Find 10. Most of them are up high."),
     guld: 10, tid: 150, hoga: 0.7, torn: 12 },
-  { namn: t("Stora finalen", "The grand finale"), text: t("Allt på en gång: 20 guldbajsar i kvällsmörkret, med diamanter och klockor. Lycka till!", "Everything at once: 20 golden poops in the dark, with diamonds and clocks. Good luck!"),
+  { namn: t("Allt på en gång", "Everything at once"), text: t("20 guldbajsar i kvällsmörkret, med diamantbajsar och klockor. Lycka till!", "20 golden poops in the dark, with diamond poops and clocks. Good luck!"),
     guld: 20, diamanter: 2, klockor: 3, tid: 150, hoga: 0.3, torn: 8, vader: "kvall" },
+  { namn: t("Första snön", "First snow"), text: t("Första snön! Allt är vitt, men guldbajsarna syns ändå. Hitta 10!", "First snow! Everything is white, but the golden poops still show. Find 10!"),
+    guld: 10, tid: 120, vader: "sno" },
+  { namn: t("Robotgräsklipparen", "The robot mower"), text: t("Min nya robotgräsklippare flyttar bajsarna den kör på. Den har en app. Appen säger att allt går jättebra. Hitta 10!",
+    "My new robot mower moves every poop it runs over. It has an app. The app says everything is going great. Find 10!"),
+    guld: 10, tid: 150, robot: true },
 ];
 
 // ---------------------------------------------------------------------
@@ -442,7 +449,7 @@ let hogaPlatser = [];   // toppen av varje lådtorn: { x, y, z }
 // Ett torn är en trappa av tre lådor (0,8, 1,6 och 2,4 meter höga)
 function byggTorn(antal, r) {
   while (tornGrupp.children.length) tornGrupp.remove(tornGrupp.children[0]);
-  rorliga = [];
+  rorliga = sno.visible ? snoHinder.slice() : [];   // snögubbarna står i vägen när det är snö
   hogaPlatser = [];
   const s = INSTALLNINGAR.storlek - 4, sida = 1.4;
   for (let forsok = 0; hogaPlatser.length < antal && forsok < 600; forsok++) {
@@ -506,12 +513,16 @@ const FORMER = {
     [kula(0.09, -0.11, 0.36, 0.25), 0xffffff], [kula(0.09, 0.11, 0.36, 0.25), 0xffffff],
     [kula(0.045, -0.11, 0.36, 0.33), 0x222222], [kula(0.045, 0.11, 0.36, 0.33), 0x222222],
   ]),
-  // Diamantbajs: en glittrande kristall
+  // Diamantbajs: en bajskorv av glittrande diamant (kantiga kulor)
   diamant: slaIhop([
-    [new THREE.OctahedronGeometry(0.45, 0).scale(1, 1.35, 1).translate(0, 0.3, 0), 0x6ff0ff],
-    [kula(0.08, -0.12, 0.38, 0.32), 0xffffff], [kula(0.08, 0.12, 0.38, 0.32), 0xffffff],
+    [new THREE.IcosahedronGeometry(0.4, 0).scale(1, 0.75, 1), 0x6ff0ff],
+    [new THREE.IcosahedronGeometry(0.3, 0).scale(1, 0.75, 1).translate(0, 0.32, 0), 0x9ff8ff],
+    [new THREE.IcosahedronGeometry(0.18, 0).scale(1, 0.75, 1).translate(0, 0.56, 0), 0xc8fcff],
+    [new THREE.OctahedronGeometry(0.1, 0).scale(1, 1.8, 1).translate(0, 0.75, 0), 0xffffff],
+    [kula(0.09, -0.11, 0.36, 0.25), 0xffffff], [kula(0.09, 0.11, 0.36, 0.25), 0xffffff],
+    [kula(0.045, -0.11, 0.36, 0.33), 0x222222], [kula(0.045, 0.11, 0.36, 0.33), 0x222222],
   ]),
-  // Klockbajs: en röd väckarklocka
+  // Klocka: en röd väckarklocka (ingen bajs)
   klocka: slaIhop([
     [new THREE.CylinderGeometry(0.42, 0.42, 0.22, 16).rotateX(Math.PI / 2).translate(0, 0.35, 0), 0xe0413a],
     [new THREE.CylinderGeometry(0.34, 0.34, 0.05, 16).rotateX(Math.PI / 2).translate(0, 0.35, 0.12), 0xffffff],
@@ -529,7 +540,8 @@ const RINGFARG = { guld: 0xffc83d, diamant: 0x6ff0ff, klocka: 0xff6b5a };
 
 const bajsMesh = {};
 TYPER.forEach((typ) => {
-  const m = new THREE.MeshPhongMaterial({ vertexColors: true, flatShading: true, shininess: 80, specular: 0x777777, emissive: GLOD[typ] });
+  const glans = typ === "diamant";   // diamanten blänker mer
+  const m = new THREE.MeshPhongMaterial({ vertexColors: true, flatShading: true, shininess: glans ? 160 : 80, specular: glans ? 0xffffff : 0x777777, emissive: GLOD[typ] });
   allaMaterial.push(m);
   const mesh = new THREE.InstancedMesh(FORMER[typ], m, KAPACITET[typ]);
   mesh.castShadow = true;
@@ -666,13 +678,114 @@ const pil = new THREE.Group();
 })();
 scen.add(pil);
 
+// Snön (banan "Första snön"): ett vitt täcke, snögubbar och snöflingor som faller
+const sno = new THREE.Group();
+sno.visible = false;
+scen.add(sno);
+const snoHinder = [];
+const FLINGOR = 1200;
+const flingor = (function byggSno() {
+  const tacke = new THREE.Mesh(new THREE.PlaneGeometry(124, 124), material(0xf4f8fc, 0x3a3e44));
+  tacke.rotation.x = -Math.PI / 2;
+  tacke.position.y = 0.07;
+  tacke.receiveShadow = true;
+  sno.add(tacke);
+  [[-6, 14], [30, -10], [-30, 12], [12, -26], [-18, -36]].forEach(([x, z]) => {
+    const g = new THREE.Group();
+    [[0.7, 0.6], [0.5, 1.5], [0.35, 2.15]].forEach(([radie, y]) => {
+      const k = new THREE.Mesh(new THREE.SphereGeometry(radie, 10, 7), material(0xffffff));
+      k.position.y = y;
+      k.castShadow = true;
+      g.add(k);
+    });
+    const nasa = new THREE.Mesh(new THREE.ConeGeometry(0.07, 0.35, 6), material(0xff7a1a));
+    nasa.rotation.x = Math.PI / 2;
+    nasa.position.set(0, 2.15, 0.45);
+    g.add(nasa);
+    lada(0.08, 0.08, 0.05, 0x222222, -0.12, 2.27, 0.32, g);
+    lada(0.08, 0.08, 0.05, 0x222222, 0.12, 2.27, 0.32, g);
+    lada(0.5, 0.3, 0.5, 0x333333, 0, 2.6, 0, g);   // hatt
+    g.position.set(x, 0, z);
+    sno.add(g);
+    snoHinder.push(nyttHinder(x, z, 1.3, 1.3, HOGT, 2.8));
+  });
+  const pos = new Float32Array(FLINGOR * 3);
+  for (let i = 0; i < FLINGOR; i++) {
+    pos[i * 3] = (Math.random() - 0.5) * 60;
+    pos[i * 3 + 1] = Math.random() * 25;
+    pos[i * 3 + 2] = (Math.random() - 0.5) * 60;
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+  // Runda, mjuka flingor (samma mjuka bild som skenet under bajsarna)
+  const p = new THREE.Points(g, new THREE.PointsMaterial({ color: 0xffffff, size: 0.25, map: skenTextur, transparent: true, depthWrite: false }));
+  p.frustumCulled = false;
+  sno.add(p);
+  return p;
+})();
+function uppdateraSno(dt) {
+  if (!sno.visible) return;
+  const pos = flingor.geometry.attributes.position;
+  for (let i = 0; i < FLINGOR; i++) {
+    let y = pos.getY(i) - dt * (1.2 + (i % 4) * 0.25);
+    if (y < 0) y += 25;
+    pos.setY(i, y);
+    pos.setX(i, pos.getX(i) + Math.sin(klocka + i) * dt * 0.3);
+  }
+  pos.needsUpdate = true;
+  flingor.position.set(spelare.grupp.position.x, 0, spelare.grupp.position.z);
+}
+
+// Robotgräsklipparen (en bana): kör runt i byn och flyttar bajsarna den kör på
+const robot = new THREE.Group();
+lada(1.3, 0.35, 1, 0x3fa34d, 0, 0.32, 0, robot);
+lada(0.9, 0.14, 0.7, 0x2f7a30, 0, 0.56, -0.05, robot);
+lada(0.18, 0.12, 0.12, 0xff7a1a, 0, 0.68, 0.25, robot);
+[[-0.6, -0.35], [0.6, -0.35], [-0.6, 0.35], [0.6, 0.35]].forEach(([x, z]) => {
+  const hjul = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.12, 10), material(0x222222));
+  hjul.rotation.z = Math.PI / 2;
+  hjul.position.set(x, 0.2, z);
+  robot.add(hjul);
+});
+robot.visible = false;
+scen.add(robot);
+const robotInfo = { mal: null, flyttade: 0 };
+const ROBOT_REPLIKER = [
+  t("Appen säger att allt går jättebra.", "The app says everything is going great."),
+  t("Den har fått en uppdatering. Nu flyttar den bajsar snabbare.", "It got an update. Now it moves poops faster."),
+  t("Jag har läst manualen. Alla trehundra sidor. Ingen av dem handlar om bajs.", "I read the manual. All three hundred pages. None of them are about poop."),
+  t("Den var billigare än en trädgårdsmästare. Säger jag till mormor.", "It was cheaper than a gardener. That's what I tell Grandma."),
+];
+function uppdateraRobot(dt) {
+  if (!robot.visible) return;
+  const r = robot.position;
+  if (!robotInfo.mal || Math.hypot(robotInfo.mal.x - r.x, robotInfo.mal.z - r.z) < 1) robotInfo.mal = markPlats(Math.random, null, []) || { x: 0, z: 0 };
+  const dx = robotInfo.mal.x - r.x, dz = robotInfo.mal.z - r.z, d = Math.hypot(dx, dz) || 1;
+  const nx = r.x + dx / d * 3.5 * dt, nz = r.z + dz / d * 3.5 * dt;
+  if (iVagen(nx, nz, 0, 0.7)) robotInfo.mal = null;   // något i vägen: kör någon annanstans
+  else r.set(nx, 0, nz);
+  robot.rotation.y = Math.atan2(dx, dz);
+  // Bajsar på marken som roboten kör på hamnar någon annanstans
+  bajsar.forEach((b) => {
+    if (b.tagen || b.y > 1 || Math.hypot(b.x - r.x, b.z - r.z) > 1.1) return;
+    const ny = markPlats(runda.r, null, bajsar);
+    if (!ny) return;
+    gnistra(b.x, b.y, b.z, 0x3fa34d);
+    b.x = ny.x;
+    b.z = ny.z;
+    klang([hz(48), hz(43)], 0.1, 0.12, 0.3);
+    if (robotInfo.flyttade++ % 3 === 0) sag(MORFAR, ROBOT_REPLIKER[Math.floor(robotInfo.flyttade / 3) % ROBOT_REPLIKER.length]);
+  });
+}
+
 // ---------------------------------------------------------------------
-//  Väder: dag, dimma och kväll
+//  Väder: dag, dimma, kväll och snö
 // ---------------------------------------------------------------------
 
 const VADER = {
   dag: { topp: 0x3d8fe0, horisont: 0xcfeaff, dimma: 0xcfeaff, nara: 0.35, langt: 1, himmel: 0.95, sol: 1.7, solFarg: 0xfff0d0, lampa: 0x000000, glod: 1, moln: 0xffffff },
   dimma: { topp: 0xb8c4cc, horisont: 0xd8dde0, dimma: 0xd8dde0, nara: 0.03, langt: 0.3, himmel: 0.9, sol: 0.8, solFarg: 0xffffff, lampa: 0x000000, glod: 1.6, moln: 0xdddddd },
+  sno: { topp: 0xaebfd0, horisont: 0xeef3f8, dimma: 0xeef3f8, nara: 0.12, langt: 0.65, himmel: 1, sol: 1.2, solFarg: 0xffffff, lampa: 0x000000, glod: 1.4, moln: 0xffffff },
   kvall: { topp: 0x0d1838, horisont: 0x3a3a6a, dimma: 0x1a2040, nara: 0.2, langt: 0.8, himmel: 0.5, sol: 0.45, solFarg: 0x8aa0ff, lampa: 0xffd060, glod: 3, moln: 0x444466 },
 };
 function stallVader(namn) {
@@ -689,6 +802,10 @@ function stallVader(namn) {
   TYPER.forEach((typ) => bajsMesh[typ].material.emissive.setHex(GLOD[typ]).multiplyScalar(v.glod));
   skenMaterial.opacity = Math.min(1, 0.6 * v.glod);
   moln.forEach((g) => g.children.forEach((b) => b.material.color.setHex(v.moln)));
+  // Snö: vitt täcke och frusen damm
+  sno.visible = namn === "sno";
+  damm.position.y = sno.visible ? 0.09 : 0.05;
+  vattenMaterial.color.setHex(sno.visible ? 0xc8e8f8 : 0x3d8fd6);
 }
 
 // ---------------------------------------------------------------------
@@ -1194,6 +1311,10 @@ function startaRunda(lageId, bana) {
   } else {
     laggUt(def, r);
   }
+  robot.visible = !!def.robot;
+  robot.position.set(10, 0, 10);
+  robotInfo.mal = null;
+  robotInfo.flyttade = 0;
   placeraKamera(1, true);
   visaRuta(null);
   visaSpelknappar(true);
@@ -1364,7 +1485,14 @@ function slut(klarade) {
         spara("bajsbyn-stjarnor", stjarnor);
       }
       nasta.hidden = runda.bana >= BANOR.length - 1;
+      // Sista banan: alla stjärnor man har samlat går till topplistan
+      // (inte efter varje bana, annars fyller ett barn hela listan)
+      if (runda.bana === BANOR.length - 1) {
+        Topplista.nyttResultat("bajsbanor", stjarnor.reduce((summa, n) => summa + (n || 0), 0), { fordrojning: 1.5 });
+      }
     }
+    tl.dataset.topplista = "bajsbanor";
+    tl.hidden = false;
     for (let i = 0; i < 3; i++) stjarnRuta.insertAdjacentHTML("beforeend", i < n ? "<span>⭐</span>" : '<span class="tom">⭐</span>');
     titel.textContent = klarade ? t("🎉 Bana klar!", "🎉 Level complete!") : t("⏱ Tiden tog slut!", "⏱ Time's up!");
     textRuta.textContent = klarade
@@ -1464,7 +1592,11 @@ function friSikt(fran, till) {
     const x = fran.x + (till.x - fran.x) * a, z = fran.z + (till.z - fran.z) * a;
     const y = fran.y + 1.4 + (till.y - fran.y - 1.4) * a;
     for (const h of hinder) {
-      if (h.hb < 0.5 || h.hd < 0.5) continue;
+      // Trädens kronor är mycket bredare än stammen (stolparna är bara smala)
+      if (h.hb < 0.5 || h.hd < 0.5) {
+        if (h.hojd >= 5 && y > 1.5 && y < h.hojd + 0.4 && overlappar(x, z, h, 1.4)) return Math.max(0.15, (i - 1) / 16);
+        continue;
+      }
       if (y < h.hojd + 0.4 && overlappar(x, z, h, 0.4)) return Math.max(0.15, (i - 1) / 16);
     }
   }
@@ -1497,6 +1629,7 @@ function placeraKamera(dt, direkt) {
 function uppdatera(dt, styr) {
   speltid += dt;
   styrSpelaren(dt, styr);
+  uppdateraRobot(dt);
   const p = spelare.grupp.position;
 
   // Tiden
@@ -1579,6 +1712,7 @@ function animera(dt) {
   gnistMesh.instanceMatrix.needsUpdate = true;
   if (gnistMesh.instanceColor) gnistMesh.instanceColor.needsUpdate = true;
 
+  uppdateraSno(dt);
   // Molnen, dammen, Bajsis och Morfar
   moln.forEach((g, nr) => {
     g.position.x += dt * (1 + nr % 3);
