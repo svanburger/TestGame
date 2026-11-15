@@ -898,11 +898,13 @@ let ljud = null;
 function startaLjud() {
   try {
     if (!ljud) ljud = new (window.AudioContext || window.webkitAudioContext)();
-    if (ljud.state === "suspended") ljud.resume();
+    Musik.lasUpp(ljud);   // startar ljudet, och gör att det hörs även när iPaden står på ljudlöst
   } catch (e) {
     ljud = null;   // Inget ljud – spelet fungerar ändå
   }
 }
+// iPad och Xbox startar ljudet först när man har tryckt någonstans
+["pointerdown", "touchend", "keydown"].forEach((h) => document.addEventListener(h, startaLjud, true));
 function pling(toner, typ, langd) {
   if (!ljud) return;
   toner.forEach((ton, nr) => {
@@ -2107,7 +2109,10 @@ function lasStyrning() {
       return Math.abs(v) > INSTALLNINGAR.dodzon ? v : 0;
     };
     const tryckt = (i) => !!(k.buttons[i] && k.buttons[i].pressed);
-    if (k.buttons.some((b) => b.pressed)) anvanderHandkontroll = true;
+    if (k.buttons.some((b) => b.pressed)) {
+      anvanderHandkontroll = true;
+      if (!ljud || ljud.state !== "running") startaLjud();
+    }
     s.x += axel(0);
     s.y += axel(1);
     sving -= axel(2);                           // höger spak vrider kameran

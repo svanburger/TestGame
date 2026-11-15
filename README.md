@@ -654,14 +654,14 @@ närmaste bajs.
 
 | Läge | Hur det går till |
 |---|---|
-| 🗺️ Banor | Tio uppdrag från Morfar. 1–3 ⭐ beroende på hur mycket tid som är kvar. Nästa bana låses upp när man klarar en. |
+| 🗺️ Banor | Uppdrag från Morfar, bland annat dimma, kväll, första snön och en robotgräsklippare som flyttar bajsarna. 1–3 ⭐ beroende på hur mycket tid som är kvar. Nästa bana låses upp när man klarar en. När man klarar sista banan kommer alla stjärnor med på topplistan. |
 | ⏱️ Jakten | 100 bajsar. Hur många poäng hinner du ta på 90 sekunder? Egen topplista. |
 | 🔗 Kedjan | En bajs i taget. Varje bajs ger mer tid, men de hamnar längre bort. Egen topplista. |
 | 🌼 Lugnt läge | Ingen tid. Bajsis hejar. Bra för de minsta. |
 
-🟡 Guldbajs = 1 poäng, 💎 diamantbajs = 5 poäng, ⏰ klockbajs = 5 sekunder
-extra. Banorna och tiderna finns i `BANOR` och `LAGEN` högst upp i
-`bajsbyn/game.js`. Stjärnorna och rekorden sparas på enheten.
+🟡 Guldbajs = 1 poäng, 💎 diamantbajs (en bajskorv av diamant) = 5 poäng,
+⏰ klocka = 5 sekunder extra. Banorna och tiderna finns i `BANOR` och
+`LAGEN` högst upp i `bajsbyn/game.js`. Nya banor läggs till sist i `BANOR`. Stjärnorna och rekorden sparas på enheten.
 
 Styrning: joystick + HOPP på iPad, piltangenter/WASD + mellanslag på
 datorn, och vänster spak + A på Xbox-handkontrollen (höger spak vrider
