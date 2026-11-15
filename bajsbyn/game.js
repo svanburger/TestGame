@@ -28,6 +28,7 @@ const INSTALLNINGAR = {
   vardeGuld: 1,
   vardeDiamant: 5,
   klockTid: 5,            // sekunder extra för en klocka
+  robotFart: 6,           // robotgräsklipparen (barnet springer 8,5)
   stjarnor: [0.25, 0.5],  // så stor del av tiden som ska vara kvar för ⭐⭐ och ⭐⭐⭐
   storlek: 55,            // staketet står så här långt från mitten åt alla håll
 };
@@ -740,7 +741,12 @@ function uppdateraSno(dt) {
 const robot = new THREE.Group();
 lada(1.3, 0.35, 1, 0x3fa34d, 0, 0.32, 0, robot);
 lada(0.9, 0.14, 0.7, 0x2f7a30, 0, 0.56, -0.05, robot);
-lada(0.18, 0.12, 0.12, 0xff7a1a, 0, 0.68, 0.25, robot);
+// Antenn med en orange flagga och en lampa som blinkar, så att man ser den på håll
+lada(0.05, 1.4, 0.05, 0x333333, -0.4, 1.2, -0.35, robot);
+lada(0.45, 0.3, 0.04, 0xff7a1a, -0.17, 1.75, -0.35, robot);
+const robotLampa = new THREE.MeshLambertMaterial({ color: 0xff7a1a, emissive: 0xff5000 });
+allaMaterial.push(robotLampa);
+lada(0.2, 0.14, 0.14, robotLampa, 0, 0.7, 0.25, robot);
 [[-0.6, -0.35], [0.6, -0.35], [-0.6, 0.35], [0.6, 0.35]].forEach(([x, z]) => {
   const hjul = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.12, 10), material(0x222222));
   hjul.rotation.z = Math.PI / 2;
@@ -749,22 +755,44 @@ lada(0.18, 0.12, 0.12, 0xff7a1a, 0, 0.68, 0.25, robot);
 });
 robot.visible = false;
 scen.add(robot);
-const robotInfo = { mal: null, flyttade: 0 };
+const robotInfo = { mal: null, flyttade: 0, tid: 0 };
 const ROBOT_REPLIKER = [
   t("Appen säger att allt går jättebra.", "The app says everything is going great."),
   t("Den har fått en uppdatering. Nu flyttar den bajsar snabbare.", "It got an update. Now it moves poops faster."),
   t("Jag har läst manualen. Alla trehundra sidor. Ingen av dem handlar om bajs.", "I read the manual. All three hundred pages. None of them are about poop."),
   t("Den var billigare än en trädgårdsmästare. Säger jag till mormor.", "It was cheaper than a gardener. That's what I tell Grandma."),
 ];
+// Vart roboten ska: oftast till en bajs nära barnet (så att man stöter på den),
+// annars till en plats en bit från barnet
+function nyttRobotMal() {
+  const p = spelare.grupp.position;
+  const nara = bajsar.filter((b) => !b.tagen && b.y < 1 && Math.hypot(b.x - p.x, b.z - p.z) < 20);
+  if (nara.length && Math.random() < 0.7) {
+    const b = nara[Math.floor(Math.random() * nara.length)];
+    return { x: b.x, z: b.z };
+  }
+  return markPlats(Math.random, null, [], { x: p.x, z: p.z, min: 4, max: 14 }) || markPlats(Math.random, null, []) || { x: 0, z: 0 };
+}
 function uppdateraRobot(dt) {
   if (!robot.visible) return;
-  const r = robot.position;
-  if (!robotInfo.mal || Math.hypot(robotInfo.mal.x - r.x, robotInfo.mal.z - r.z) < 1) robotInfo.mal = markPlats(Math.random, null, []) || { x: 0, z: 0 };
+  const r = robot.position, p = spelare.grupp.position;
+  // Nytt mål när den är framme, och var fjärde sekund (barnet har ju sprungit vidare)
+  robotInfo.tid -= dt;
+  if (!robotInfo.mal || robotInfo.tid <= 0 || Math.hypot(robotInfo.mal.x - r.x, robotInfo.mal.z - r.z) < 1) {
+    robotInfo.mal = nyttRobotMal();
+    robotInfo.tid = 4;
+  }
+  // Långt från barnet kör den fortare, så att den kommer ikapp
+  const fart = INSTALLNINGAR.robotFart * (Math.hypot(p.x - r.x, p.z - r.z) > 25 ? 1.8 : 1);
   const dx = robotInfo.mal.x - r.x, dz = robotInfo.mal.z - r.z, d = Math.hypot(dx, dz) || 1;
-  const nx = r.x + dx / d * 3.5 * dt, nz = r.z + dz / d * 3.5 * dt;
-  if (iVagen(nx, nz, 0, 0.7)) robotInfo.mal = null;   // något i vägen: kör någon annanstans
-  else r.set(nx, 0, nz);
+  const nx = r.x + dx / d * fart * dt, nz = r.z + dz / d * fart * dt;
+  // Något i vägen: den glider längs med det, och står den helt still väljer den ett nytt mål
+  let rorde = false;
+  if (!iVagen(nx, r.z, 0, 0.7)) { r.x = nx; rorde = true; }
+  if (!iVagen(r.x, nz, 0, 0.7)) { r.z = nz; rorde = true; }
+  if (!rorde) robotInfo.mal = null;
   robot.rotation.y = Math.atan2(dx, dz);
+  robotLampa.emissive.setHex(Math.floor(klocka * 3) % 2 ? 0xff5000 : 0x220800);
   // Bajsar på marken som roboten kör på hamnar någon annanstans
   bajsar.forEach((b) => {
     if (b.tagen || b.y > 1 || Math.hypot(b.x - r.x, b.z - r.z) > 1.1) return;
@@ -1312,8 +1340,9 @@ function startaRunda(lageId, bana) {
     laggUt(def, r);
   }
   robot.visible = !!def.robot;
-  robot.position.set(10, 0, 10);
+  robot.position.set(4, 0, -1);   // syns framför barnet när banan börjar
   robotInfo.mal = null;
+  robotInfo.tid = 0;
   robotInfo.flyttade = 0;
   placeraKamera(1, true);
   visaRuta(null);
