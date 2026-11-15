@@ -40,13 +40,14 @@
   };
 
   // Spelen som har en topplista, i samma ordning som i menyn.
-  // Bordsplaceringen är ett pussel utan poäng, så den har ingen topplista.
+  // Bordsplaceringen räknar stjärnor: alla man har samlat, när man har spelat klart en fest.
   const SPELEN = [
     { id: "stjarnor", ikon: "⭐", namn: t("Fånga stjärnorna", "Catch the Stars") },
     { id: "parkour", ikon: "🐱", namn: t("Parkourkatten", "Parkour Cat") },
     { id: "pappa", ikon: "🛋️", namn: t("Låt pappa vila", "Let Dad Rest") },
     { id: "hund", ikon: "🐕", namn: t("Hundpromenaden", "Dog Walk") },
     { id: "fis", ikon: "💨", namn: t("Lagom tryck", "Just the Right Push") },
+    { id: "bord", ikon: "🍽️", namn: t("Bordsplaceringen", "The Seating Plan"), enhet: "⭐" },
     { id: "godis", ikon: "🎃", namn: t("Bus eller godis", "Trick or Treat"), enhet: "🍬" },
     { id: "aventyr", ikon: "🏠", namn: t("Ensamma hemma på lördag", "Home Alone on Saturday") },
     { id: "bajsjakt", ikon: "⏱️", namn: t("Bajsbyn – Jakten", "Poop Village – The Hunt") },

@@ -61,8 +61,9 @@ Varje spel laddar `sprak.js` före sin `game.js`.
 
 ## Topplista 🏆
 
-Varje spel (utom Bordsplaceringen, som är ett pussel utan poäng) har en
-topplista med de 10 bästa resultaten.
+Varje spel har en topplista med de 10 bästa resultaten. Bordsplaceringen
+är ett pussel utan poäng, så där räknas stjärnorna: när man har spelat
+sista banan i en fest kommer alla stjärnor man har samlat med.
 
 - När spelet är slut och man har kommit med på topplistan får man **skriva
   sitt namn**. Namnen man har skrivit förut syns som knappar, så att man
