@@ -49,7 +49,8 @@
     { id: "fis", ikon: "💨", namn: t("Lagom tryck", "Just the Right Push") },
     { id: "godis", ikon: "🎃", namn: t("Bus eller godis", "Trick or Treat"), enhet: "🍬" },
     { id: "aventyr", ikon: "🏠", namn: t("Ensamma hemma på lördag", "Home Alone on Saturday") },
-    { id: "bajsbyn", ikon: "💩", namn: t("Bajsbyn", "Poop Village") },
+    { id: "bajsjakt", ikon: "⏱️", namn: t("Bajsbyn – Jakten", "Poop Village – The Hunt") },
+    { id: "bajskedja", ikon: "🔗", namn: t("Bajsbyn – Kedjan", "Poop Village – The Chain"), enhet: "🔗" },
   ];
 
   const MEDALJER = ["🥇", "🥈", "🥉"];

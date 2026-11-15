@@ -16,34 +16,71 @@
   <link rel="apple-touch-icon" href="../apple-touch-icon.png">
   <link rel="stylesheet" href="../spel.css">
   <style>
+    body { font-family: system-ui, -apple-system, sans-serif; }
     canvas { position: fixed; left: 0; top: 0; width: 100%; height: 100%; }
 
-    /* Antal guldbajsar och tiden, uppe i mitten */
+    /* Poäng och tid, uppe i mitten */
     #hud {
       position: fixed;
-      top: calc(var(--sakert-topp) + 14px);
+      top: calc(var(--sakert-topp) + 12px);
       left: 50%;
       transform: translateX(-50%);
-      padding: 6px 18px;
-      border-radius: 999px;
-      font: bold 26px system-ui, -apple-system, sans-serif;
-      color: #fff;
-      background: rgba(0, 0, 0, 0.4);
-      white-space: nowrap;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
       pointer-events: none;
     }
+    #raknare, #uppdrag {
+      padding: 6px 18px;
+      border-radius: 999px;
+      color: #fff;
+      background: rgba(0, 0, 0, 0.45);
+      white-space: nowrap;
+    }
+    #raknare { font-size: 26px; font-weight: 800; }
+    #raknare .tid.brattom { color: #ff6b5a; }
+    #uppdrag { font-size: 17px; }
+
+    /* 3, 2, 1, KÖR! mitt på skärmen */
+    #nedrakning {
+      position: fixed;
+      left: 50%;
+      top: 30%;
+      transform: translate(-50%, -50%);
+      font-size: min(24vw, 150px);
+      font-weight: 900;
+      color: #ffd23f;
+      text-shadow: 0 6px 0 #8b5a2b, 0 0 30px rgba(0, 0, 0, 0.4);
+      pointer-events: none;
+    }
+    #nedrakning.puls { animation: puls 0.9s ease-out; }
+    @keyframes puls { from { transform: translate(-50%, -50%) scale(1.6); opacity: 0; } 30% { opacity: 1; } to { transform: translate(-50%, -50%) scale(1); } }
+
+    /* "+1" som hoppar upp när man tar en bajs */
+    .plopp {
+      position: fixed;
+      font-size: 34px;
+      font-weight: 900;
+      color: #ffd23f;
+      text-shadow: 0 3px 0 #8b5a2b;
+      pointer-events: none;
+      animation: plopp 0.9s ease-out forwards;
+    }
+    @keyframes plopp { from { transform: translate(-50%, 0) scale(0.6); opacity: 1; } to { transform: translate(-50%, -90px) scale(1.2); opacity: 0; } }
 
     /* Det figurerna säger */
     #bubbla {
       position: fixed;
-      top: calc(var(--sakert-topp) + 76px);
+      top: calc(var(--sakert-topp) + 100px);
       left: 50%;
       transform: translateX(-50%);
-      width: min(560px, calc(100vw - 32px));
+      width: min(540px, calc(100vw - 32px));
       box-sizing: border-box;
       padding: 12px 18px;
       border-radius: 18px;
-      font: 20px/1.35 system-ui, -apple-system, sans-serif;
+      font-size: 20px;
+      line-height: 1.35;
       color: #2b1d0e;
       background: #fffbe8;
       box-shadow: 0 6px 0 rgba(0, 0, 0, 0.2);
@@ -51,23 +88,6 @@
     }
     #bubbla b { display: block; font-size: 16px; color: #8b5a2b; }
 
-    /* Knappen som syns när man står nära någon man kan prata med */
-    #prata {
-      position: fixed;
-      left: 50%;
-      bottom: calc(var(--sakert-botten) + 28px);
-      transform: translateX(-50%);
-      padding: 14px 24px;
-      border: 0;
-      border-radius: 999px;
-      font: bold 22px system-ui, -apple-system, sans-serif;
-      color: #2b1d0e;
-      background: #fffbe8;
-      box-shadow: 0 6px 0 rgba(0, 0, 0, 0.25);
-      touch-action: manipulation;
-    }
-
-    /* Joysticken för vänster tumme och hoppknappen för höger */
     #joystick {
       position: fixed;
       left: calc(var(--sakert-vanster) + 28px);
@@ -96,21 +116,112 @@
       height: 110px;
       border: 0;
       border-radius: 50%;
-      font: bold 22px system-ui, -apple-system, sans-serif;
+      font-size: 22px;
+      font-weight: bold;
       color: #2b1d0e;
       background: rgba(255, 217, 94, 0.9);
     }
     #hopp.tryckt { background: #7be07b; }
-    #bubbla[hidden], #prata[hidden], #joystick[hidden], #hopp[hidden], #hud[hidden] { display: none; }
+    @media (max-width: 700px) {
+      #hud { top: calc(var(--sakert-topp) + 74px); }
+      #bubbla { top: calc(var(--sakert-topp) + 160px); font-size: 18px; }
+      #joystick { width: 120px; height: 120px; left: calc(var(--sakert-vanster) + 16px); bottom: calc(var(--sakert-botten) + 20px); }
+      #pinne { left: 32px; top: 32px; width: 50px; height: 50px; }
+      #hopp { width: 88px; height: 88px; right: calc(var(--sakert-hoger) + 20px); bottom: calc(var(--sakert-botten) + 36px); }
+    }
 
-    .pausruta p { margin: 0; font-size: 1.15rem; text-align: center; max-width: 34ch; }
+    [hidden] { display: none !important; }
+
+    /* Rutorna (start, banor, slut) bygger på pausmenyn i spel.css */
+    .pausruta { max-height: calc(100vh - 32px); overflow-y: auto; box-sizing: border-box; touch-action: pan-y; }
+    .stor-ruta { width: min(620px, 100%); }
+    .pausruta p { margin: 0; font-size: 1.1rem; text-align: center; justify-self: center; max-width: 38ch; }
+
+    /* Lägena: fyra stora kort */
+    #lagen { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .lageskort, .banknapp {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      padding: 12px 8px;
+      border: 0;
+      border-radius: 20px;
+      font: inherit;
+      color: #2b1d0e;
+      box-shadow: 0 5px 0 rgba(0, 0, 0, 0.2);
+      touch-action: manipulation;
+    }
+    .lageskort .ikon { font-size: 44px; line-height: 1.1; }
+    .lageskort .namn { font-size: 1.25rem; font-weight: 800; }
+    .lageskort .om { font-size: 0.9rem; }
+    .lageskort .basta { font-size: 0.85rem; font-weight: 700; color: #8b5a2b; min-height: 1em; }
+    .l-banor { background: #ffd95e; }
+    .l-jakt { background: #ffab6b; }
+    .l-kedja { background: #9fd8c9; }
+    .l-lugnt { background: #d7c6f2; }
+
+    /* Banorna: rutnät med stjärnor */
+    #banor { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+    .banknapp { padding: 8px 4px; background: #fff4d6; font-size: 1.3rem; font-weight: 800; }
+    .banknapp .stjarnor { font-size: 0.8rem; letter-spacing: -1px; }
+    .banknapp.last { background: #e2e2e2; color: #888; }
+    #slutStjarnor { font-size: 48px; text-align: center; letter-spacing: 6px; }
+    #slutStjarnor .tom { opacity: 0.25; }
+
+    /* Xbox-knapparna, till vänster om menyerna */
+    #knapphjalp {
+      position: fixed;
+      z-index: 5;
+      left: calc(var(--sakert-vanster) + 12px);
+      bottom: calc(var(--sakert-botten) + 12px);
+      width: min(280px, calc((100vw - 660px) / 2));
+      min-width: 210px;
+      padding: 12px 14px;
+      border-radius: 18px;
+      font-size: 15px;
+      line-height: 1.3;
+      color: #2b1d0e;
+      background: #fffbe8;
+      box-shadow: 0 6px 0 rgba(0, 0, 0, 0.25);
+    }
+    #knapphjalp h3 { margin: 0 0 8px; font-size: 17px; }
+    #knapphjalp ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 5px; }
+    .xk {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      font-size: 14px;
+      font-weight: 800;
+      color: #fff;
+      background: #333;
+      vertical-align: middle;
+    }
+    .xk.a { background: #3fa34d; }
+    .xk.spak { border: 2px solid #999; width: 20px; height: 20px; }
+    .xk.meny { border-radius: 6px; }
+
+    @media (max-height: 520px) {
+      .pausruta { padding: 12px 16px; gap: 8px; }
+      .pausruta h2 { font-size: 1.4rem; }
+      #lagen { grid-template-columns: repeat(4, 1fr); }
+      .lageskort .om { display: none; }
+      .lageskort .ikon { font-size: 32px; }
+      .menyknapp { padding: 8px 14px; }
+    }
+
+    /* Det handkontrollen pekar på i menyerna */
+    .fokus { outline: 5px solid #ff7a1a !important; outline-offset: 3px; }
   </style>
 </head>
 <body>
   <canvas id="spel"></canvas>
-  <div id="hud" hidden></div>
+  <div id="hud" hidden><div id="raknare"></div><div id="uppdrag"></div></div>
+  <div id="nedrakning" hidden></div>
   <div id="bubbla" hidden><b id="vemPratar"></b><span id="repliken"></span></div>
-  <button id="prata" type="button" hidden></button>
   <div id="joystick" hidden><div id="pinne"></div></div>
   <button id="hopp" type="button" hidden data-en="JUMP">HOPP</button>
 
@@ -121,12 +232,24 @@
     </button>
   </div>
 
+  <!-- Välj läge -->
   <div id="startruta" class="pausmeny">
-    <div class="pausruta" role="dialog" aria-labelledby="starttitel">
+    <div class="pausruta stor-ruta" role="dialog" aria-labelledby="starttitel">
       <h2 id="starttitel" data-en="💩 Poop Village">💩 Bajsbyn</h2>
-      <p data-en="Grandpa has lost ten golden poops around the village. Find them all and go back to Grandpa!">Morfar har tappat tio guldbajsar runt om i byn. Hitta alla och gå tillbaka till morfar!</p>
-      <button id="spela" class="menyknapp" type="button" data-en="▶ Play">▶ Spela</button>
-      <button class="menyknapp sekundar" type="button" data-topplista="bajsbyn" data-en="🏆 High scores">🏆 Topplista</button>
+      <p data-en="Grandpa keeps losing his golden poops. How do you want to play?">Morfar tappar sina guldbajsar hela tiden. Hur vill du spela?</p>
+      <div id="lagen"></div>
+      <button class="menyknapp sekundar" type="button" data-topplista="" data-en="🏆 High scores">🏆 Topplista</button>
+      <button class="menyknapp sekundar musikknapp" type="button"></button>
+    </div>
+  </div>
+
+  <!-- Välj bana -->
+  <div id="banruta" class="pausmeny" hidden>
+    <div class="pausruta stor-ruta" role="dialog" aria-labelledby="bantitel">
+      <h2 id="bantitel" data-en="🗺️ Levels">🗺️ Banor</h2>
+      <p id="banInfo"></p>
+      <div id="banor"></div>
+      <button class="menyknapp sekundar tillLagen" type="button" data-en="⬅ Choose mode">⬅ Välj läge</button>
     </div>
   </div>
 
@@ -134,20 +257,34 @@
     <div class="pausruta" role="dialog" aria-labelledby="paustitel">
       <h2 id="paustitel" data-en="Paused">Paus</h2>
       <button id="fortsatt" class="menyknapp" type="button" data-en="▶ Continue">▶ Fortsätt</button>
-      <button id="borjaOm" class="menyknapp sekundar" type="button" data-en="↻ Start over">↻ Börja om</button>
-      <button class="menyknapp sekundar" type="button" data-topplista="bajsbyn" data-en="🏆 High scores">🏆 Topplista</button>
+      <button class="menyknapp sekundar igenKnapp" type="button" data-en="↻ Start over">↻ Börja om</button>
+      <button class="menyknapp sekundar tillLagen" type="button" data-en="⬅ Choose mode">⬅ Välj läge</button>
+      <button class="menyknapp sekundar musikknapp" type="button"></button>
       <a class="menyknapp sekundar" href="../" data-en="🏠 Back to menu">🏠 Till menyn</a>
     </div>
   </div>
 
   <div id="slutruta" class="pausmeny" hidden>
     <div class="pausruta" role="dialog" aria-labelledby="sluttitel">
-      <h2 id="sluttitel" data-en="🎉 Well done!">🎉 Bra jobbat!</h2>
+      <h2 id="sluttitel"></h2>
+      <div id="slutStjarnor"></div>
       <p id="slutText"></p>
-      <button id="igen" class="menyknapp" type="button" data-en="↻ Play again">↻ Spela igen</button>
-      <button class="menyknapp sekundar" type="button" data-topplista="bajsbyn" data-en="🏆 High scores">🏆 Topplista</button>
-      <a class="menyknapp sekundar" href="../" data-en="🏠 Back to menu">🏠 Till menyn</a>
+      <button id="nastaBana" class="menyknapp" type="button" data-en="▶ Next level">▶ Nästa bana</button>
+      <button class="menyknapp igenKnapp" type="button" data-en="↻ Play again">↻ Spela igen</button>
+      <button id="slutTopplista" class="menyknapp sekundar" type="button" data-en="🏆 High scores">🏆 Topplista</button>
+      <button class="menyknapp sekundar tillLagen" type="button" data-en="⬅ Choose mode">⬅ Välj läge</button>
     </div>
+  </div>
+
+  <!-- Xbox-knapparna. Syns i menyerna när en handkontroll är inkopplad. -->
+  <div id="knapphjalp" hidden>
+    <h3 data-en="🎮 Controller">🎮 Handkontrollen</h3>
+    <ul>
+      <li><span class="xk spak">L</span> <span data-en="Left stick or D-pad: run">Vänster spak eller styrkorset: spring</span></li>
+      <li><span class="xk a">A</span> <span data-en="Jump (and choose in menus)">Hoppa (och välj i menyerna)</span></li>
+      <li><span class="xk spak">R</span> <span data-en="Right stick: turn the camera">Höger spak: vrid kameran</span></li>
+      <li><span class="xk meny">☰</span> <span data-en="Menu button: pause">Menyknappen: paus</span></li>
+    </ul>
   </div>
 
   <script src="../sprak.js"></script>
@@ -155,6 +292,7 @@
   <script src="../topplista.js"></script>
   <!-- Three.js r159 (MIT-licens, se ../three-LICENSE.txt) -->
   <script src="../three.min.js"></script>
+  <script src="../musik.js"></script>
   <script src="game.js"></script>
 </body>
 </html>

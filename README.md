@@ -21,7 +21,7 @@ inget att installera. Startsidan är en meny där man väljer spel.
 | `bord/`      | Spelet "Bordsplaceringen".                                |
 | `godis/`     | Spelet "Bus eller godis".                                 |
 | `aventyr/`   | Äventyret "Ensamma hemma på lördag", i 3D (kapitel 1–3). Storyn finns i `aventyr/STORY.md`. |
-| `bajsbyn/`   | Spelet "Bajsbyn", i 3D.                                   |
+| `bajsbyn/`   | Spelet "Bajsbyn", i 3D: banor, jakten, kedjan och lugnt läge. |
 | `test3d/`    | Testsida för 3D (inte i menyn): visar vad iPad/Xbox klarar. |
 | `three.min.js` | Three.js r159, som 3D-spelen använder (MIT-licens, se `three-LICENSE.txt`). |
 
@@ -644,6 +644,27 @@ Testa att ändra i `godis/game.js`:
 - sms:en (`sms`), vad man säger om de konstiga sakerna (`skrap`) och vad
   pappa säger (`pappa`)
 - musiken: längst ner i `game.js` finns `MUSIK`
+
+## Bajsbyn 💩
+
+Morfar tappar sina guldbajsar hela tiden. De hamnar på nya ställen varje
+gång, och några ligger uppe på lådtornen. Den gula pilen visar vägen till
+närmaste bajs.
+
+| Läge | Hur det går till |
+|---|---|
+| 🗺️ Banor | Tio uppdrag från Morfar. 1–3 ⭐ beroende på hur mycket tid som är kvar. Nästa bana låses upp när man klarar en. |
+| ⏱️ Jakten | 100 bajsar. Hur många poäng hinner du ta på 90 sekunder? Egen topplista. |
+| 🔗 Kedjan | En bajs i taget. Varje bajs ger mer tid, men de hamnar längre bort. Egen topplista. |
+| 🌼 Lugnt läge | Ingen tid. Bajsis hejar. Bra för de minsta. |
+
+🟡 Guldbajs = 1 poäng, 💎 diamantbajs = 5 poäng, ⏰ klockbajs = 5 sekunder
+extra. Banorna och tiderna finns i `BANOR` och `LAGEN` högst upp i
+`bajsbyn/game.js`. Stjärnorna och rekorden sparas på enheten.
+
+Styrning: joystick + HOPP på iPad, piltangenter/WASD + mellanslag på
+datorn, och vänster spak + A på Xbox-handkontrollen (höger spak vrider
+kameran, menyknappen pausar).
 
 ## Ensamma hemma på lördag 🏠
 
