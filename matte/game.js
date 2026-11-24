@@ -706,8 +706,7 @@ function ritaFraga(efterFel = false) {
     ${topprad()}
     <div class="fragyta">
       ${text}
-      ${bildHtml ? `<div class="bild">${bildHtml}</div>` : ""}
-      ${hjalp ? `<div class="bild hjalpbild">${ritaBild(q.hjalp)}</div>` : ""}
+      ${bildHtml || hjalp ? `<div class="bild">${bildHtml}${hjalp ? `<div class="hjalpbild">${ritaBild(q.hjalp)}</div>` : ""}</div>` : ""}
     </div>
     ${efterFel ? "" : knappsats ? knappsatsHtml(q) : svarsknapparHtml(q)}
     <div class="goran fraggoran" style="left:10px; bottom:10px; width:200px; height:170px;">${goranSvg("vaken")}</div>
@@ -733,17 +732,17 @@ function ritaFraga(efterFel = false) {
 function krympBild(el) {
   const yta = el.querySelector(".fragyta");
   if (!yta) return;
-  requestAnimationFrame(() => {
-    for (const bild of yta.querySelectorAll(".bild")) {
-      const ledigt = yta.clientWidth;
-      const ledigtH = yta.clientHeight - (yta.scrollHeight - bild.offsetHeight);
-      const skala = Math.min(1, ledigt / bild.scrollWidth, Math.max(0.35, ledigtH / bild.offsetHeight));
-      if (skala < 1) {
-        bild.style.transform = `scale(${skala})`;
-        bild.style.margin = `${(-bild.offsetHeight * (1 - skala)) / 2}px 0`;
-      }
-    }
-  });
+  const bild = yta.querySelector(":scope > .bild");
+  if (!bild) return;
+  // Hur mycket plats som finns kvar när texten och de andra delarna har fått sitt
+  const andra = [...yta.children].filter((c) => c !== bild);
+  const gap = 14 * andra.length;
+  const ledigtH = yta.clientHeight - andra.reduce((h, c) => h + c.offsetHeight, 0) - gap;
+  const skala = Math.min(1, yta.clientWidth / bild.scrollWidth, Math.max(0.3, ledigtH / bild.offsetHeight));
+  if (skala < 1) {
+    bild.style.transform = `scale(${skala})`;
+    bild.style.margin = `${(-bild.offsetHeight * (1 - skala)) / 2}px ${(-bild.scrollWidth * (1 - skala)) / 2}px`;
+  }
 }
 
 function svarsknapparHtml(q) {

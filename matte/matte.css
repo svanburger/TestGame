@@ -167,7 +167,7 @@ button {
   text-align: center;
 }
 .lastext { font-size: 30px; font-weight: 700; max-width: 640px; text-align: center; line-height: 1.35; }
-.bild { display: flex; justify-content: center; align-items: center; max-width: 100%; }
+.bild { display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 10px; flex-shrink: 0; }
 .hjalpbild { opacity: 0.9; border-top: 3px dashed rgba(0, 0, 0, 0.2); padding-top: 6px; }
 
 .svarsrad {
