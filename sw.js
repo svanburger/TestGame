@@ -29,7 +29,10 @@ const FILER = [
   "apple-touch-icon.png",
   "ikon-192.png",
   "ikon-512.png",
-  ...["stjarnor", "parkour", "pappa", "hund", "fis", "bord", "godis", "aventyr", "bajsbyn"].flatMap((spel) => [spel + "/", spel + "/game.js"]),
+  ...["stjarnor", "parkour", "pappa", "hund", "fis", "bord", "godis", "aventyr", "bajsbyn", "matte"].flatMap((spel) => [spel + "/", spel + "/game.js"]),
+  // Katten Görans matteresa har två filer till
+  "matte/fragor.js",
+  "matte/matte.css",
   // 3D-testsidan (finns inte i menyn)
   "test3d/",
   "test3d/test3d.js",

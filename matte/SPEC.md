@@ -1,6 +1,6 @@
-# Professor Görans matteresa 🐱🎓 – specifikation
+# Katten Görans matteresa 🐱🎓 – specifikation
 
-*Engelska: "Professor Gerald's Maths Trip". I Bordsplaceringen heter Göran
+*Engelska: "Gerald the Cat's Maths Trip". I Bordsplaceringen heter Göran
 "Gerald" på engelska, så vi behåller det.*
 
 Ett lugnt mattespel för barn som är 5–12 år. Man väljer sin ålder, följer
@@ -8,7 +8,9 @@ katten Göran på en karta och klarar en nivå i taget. Spelet har ingen
 tidsgräns, och det blir inte lättare om man svarar fel. Alla som har samma
 ålder får samma trappa av nivåer, så att resultaten går att jämföra.
 
-> **Status:** Detta är bara en specifikation. Inget är byggt än.
+> **Status:** Spelet är byggt efter den här specifikationen (`index.html`,
+> `game.js`, `fragor.js`, `matte.css`). Andreas svar på de öppna frågorna
+> står i avsnitt 9.
 > Det som är **vår egen tolkning** står som *Tolkning:* eller i kolumnen
 > "Tolkning". Det som bygger på Skolverket har en källa (se avsnitt 2.1).
 
@@ -17,24 +19,24 @@ tidsgräns, och det blir inte lättare om man svarar fel. Alla som har samma
 ## 1. Flödet, skärm för skärm
 
 ### 1.1 Start och ålder
-- Överst står spelets namn, och Professor Göran ligger och sover på en kudde.
+- Överst står spelets namn, och Göran ligger och sover på en kudde.
   Han vaknar när man trycker någonstans ("Jag vilade bara ögonen. Det heter
   att tänka.").
 - **Välj ålder:** åtta stora runda knappar med siffrorna **5 6 7 8 9 10 11 12**
   (och texten "år"). Det behövs ingen läsning, bara siffran.
 - Den senast valda åldern är förvald och syns med en ring runt sig (den
   sparas på enheten).
-- Om det finns en **sparad runda** (se 1.6) syns en knapp **▶ Fortsätt** med
-  åldern och nivån, till exempel "7 år · nivå 4".
+- Bredvid **▶ Börja** finns 🏆, som visar topplistan för den valda åldern.
+- Man får välja en annan ålder än sin egen. En runda spelas alltid på en
+  gång och sparas inte till senare.
 - Uppe till vänster finns 🏠 och ⏸, som i alla spel. I pausmenyn finns
-  *Fortsätt*, *Börja om*, *🏆 Topplista* (för den valda åldern), 🔊/🔇 och
-  *Menyn*.
+  *Fortsätt*, *Börja om*, *🏆 Topplista* (för den valda åldern), ♪ Musik
+  på/av, 🔊 Ljud på/av och *Till menyn*.
 
 ### 1.2 Kartan
-- En karta med **10 platser** som ligger längs en slingrig stig (se 5.4).
-  Göran står på den plats man är på nu.
-- Klarade platser har en ✔ och tre små stjärnor. Platserna längre fram är
-  grå och har ett 🔒.
+- En karta med en plats per nivå (6–10 platser) längs en slingrig stig
+  (se 5.4). Göran står på den plats man är på nu.
+- Klarade platser har en ✅. Platserna längre fram är grå och har ett 🔒.
 - Uppe till höger syns **poängen** för rundan.
 - Göran säger en replik om platsen ("Här luktar det fisk. Det är ett gott
   tecken.").
@@ -91,7 +93,7 @@ exemplet att se igen när man vill.
 - Göran säger något stolt ("Jag sa ju att du var ett geni. Jag sa det inte
   högt, men jag tänkte det.").
 - **▶** tar en till kartan, där Göran går till nästa plats.
-- Efter **nivå 10** kommer slutet (1.5b).
+- Efter **sista nivån** (6–10 beroende på ålder) kommer slutet (1.5b).
 
 ### 1.5 Slut och topplistan
 **a) Tredje fisken är borta.** Göran säger något tröstande ("Även jag missar
@@ -106,17 +108,9 @@ stora knappar:
   sitt namn som i de andra spelen. Därefter visas topplistan för den
   åldern, och man kommer tillbaka till startskärmen.
 
-**b) Nivå 10 klar.** Göran hittar sin **guldbjällra** (se 5.4). En liten
+**b) Sista nivån klar.** Göran hittar sin **guldbjällra** (se 5.4). En liten
 filmscen visar hur han sätter fast den på flugan, och bjällran plingar.
 Sedan räknas poängen ihop och topplistan visas, som ovan.
-
-### 1.6 Avbryta och fortsätta senare
-*Tolkning (öppen fråga 1):* En hel runda är 80–100 frågor, vilket är för
-långt för en femåring på en gång. Därför sparas rundan på enheten
-**mellan nivåerna**: ålder, nivå och poäng (`localStorage`,
-`matte-runda`). Startskärmen visar då *▶ Fortsätt*. Nivån man håller på
-med sparas inte halvvägs, utan man börjar den från noll stjärnor. Det
-följer regeln att inget sparas mellan försöken.
 
 ---
 
@@ -163,144 +157,157 @@ Ett barn som är 6 år i oktober går ofta i förskoleklass, så trappan för
 6 år börjar lätt.
 
 ### 2.2 Så läser man tabellerna
-- Varje ålder har **10 nivåer**. Nivå 10 är där bjällran hittas.
+- **Antal nivåer:** yngre barn har färre nivåer (Andreas beslut): 5 år har
+  6, 6 år 7, 7 år 8, 8 år 9 och 9–12 år 10. Bjällran hittas på sista
+  nivån.
 - Varje nivå har ett **recept**: en eller två frågetyper (se 3) och
   talområdet. Har en nivå två typer kommer de om vartannat, alltid i samma
-  ordning (A B A B …). Då blir varje försök lika svårt.
+  ordning (A B A B …), så att varje försök blir lika svårt.
 - **Svar:** 🔘3 = tre svarsknappar, 🔘4 = fyra svarsknappar, ⌨ =
   sifferknappsats.
-- **Talområdet** gäller både talen i frågan och svaret, om inget annat står.
+- Exakt samma recept står i `NIVAER` i `fragor.js`. Ändrar man där ska
+  tabellerna här ändras också.
 
-### 2.3 Fem år (K-FK, BS)
+### 2.3 Fem år, 6 nivåer (K-FK, BS)
 
 | Nivå | Frågetyp(er) | Talområde | Svar | Källa |
 |---|---|---|---|---|
-| 1 | `rakna` (räkna saker, i tärningsmönster) | 1–5 | 🔘3 | K-FK, BS |
-| 2 | `rakna` (utspridda saker) | 1–8 | 🔘3 | K-FK, BS |
-| 3 | `flest` (vilken grupp har flest/minst?) | 1–8 | 🔘2–3 bilder | K-FK, BS |
-| 4 | `siffraAntal` (vilken bild har lika många som siffran?) | 1–10 | 🔘3 bilder | K-FK |
-| 5 | `talrad` (vilket tal saknas på stigen?) | 0–10 | 🔘3 | K-FK (ordning) |
-| 6 | `monster` (bildmönster: vad kommer sedan?) | ABAB, AAB, ABC | 🔘3 bilder | K-FK (mönster) |
-| 7 | `enTillEnMindre` (en fisk till / en fisk mindre) | 0–10 | 🔘3 | K-FK |
-| 8 | `plusBild` | summa ≤ 5 | 🔘3 | K-FK, BS |
-| 9 | `minusBild` (Göran äter upp några) | 0–5 | 🔘3 | K-FK, BS |
-| 10 | `delHelhet` (hur många gömmer sig i lådan?) | helhet ≤ 6 | 🔘3 | K-FK ("del av helhet") |
+| 1 | `rakna` (räkna saker i tärningsmönster) | 1–5 | 🔘3 | K-FK, BS |
+| 2 | `rakna` (utspridda saker) + `flest` | 1–8 | 🔘3 / 🔘2 bilder | K-FK, BS |
+| 3 | `siffraAntal` (vilken bild har lika många som siffran?) | 1–10 | 🔘3 bilder | K-FK |
+| 4 | `talrad` (vilket tal saknas på stigen?) + `monster` (bildmönster) | 0–10 | 🔘3 | K-FK (ordning, mönster) |
+| 5 | `plusBild` | summa ≤ 5 | 🔘3 | K-FK, BS |
+| 6 | `minusBild` (Göran äter upp några) + `delHelhet` (hur många är i lådan?) | ≤ 5 | 🔘3 | K-FK ("del av helhet") |
 
 *Tolkning:* Plus och minus med symboler står inte som innehåll i
 förskoleklassen. Därför visas `+` och `−` för 5 år alltid med bilder
 under, och talen hålls inom 5.
 
-### 2.4 Sex år
+### 2.4 Sex år, 7 nivåer
 
 | Nivå | Frågetyp(er) | Talområde | Svar | Källa |
 |---|---|---|---|---|
 | 1 | `rakna` (i tioruta) | 1–10 | 🔘4 | K-FK, BS |
-| 2 | `jamforTal` (vilket tal är störst?) | 0–20 | 🔘2–3 | K13-T |
+| 2 | `jamforTal` (vilket tal är störst/minst?) | 0–20 | 🔘3 | K13-T |
 | 3 | `talrad` | 0–20 | 🔘4 | K13-T |
 | 4 | `plusBild` | summa ≤ 10 | 🔘4 | K13-T |
-| 5 | `minusBild` | 0–10 | 🔘4 | K13-T |
-| 6 | `tiokamrat` (vad blir tio tillsammans med 7?) | 10 | 🔘4 | K13-T |
-| 7 | `dubbeltHalften` | dubbelt ≤ 10, hälften av jämna tal ≤ 10 | 🔘4 | K13-S |
-| 8 | `talmonster` (hoppa 2 steg: 2, 4, 6, ?) | 0–20 | 🔘4 | K13-A |
-| 9 | `plus` + `minus` utan tiotalsövergång | 0–20 | 🔘4 | K13-T |
-| 10 | `saknadTerm` (3 + ? = 7) | 0–10 | 🔘4 | K13-A (likhetstecknet) |
+| 5 | `minusBild` + `tiokamrat` (7 + ? = 10) | ≤ 10 | 🔘4 | K13-T |
+| 6 | `dubbeltHalften` + `talmonster` (hoppa 2 steg) | ≤ 20 | 🔘4 | K13-S, K13-A |
+| 7 | `saknadTerm` (3 + ? = 7) | ≤ 10 | 🔘4 | K13-A (likhetstecknet) |
 
-### 2.5 Sju år (åk 1)
+### 2.5 Sju år (åk 1), 8 nivåer
 
 | Nivå | Frågetyp(er) | Talområde | Svar | Källa |
 |---|---|---|---|---|
-| 1 | `tiotalEntal` (buntar med 10 och lösa pinnar) | 10–99 | ⌨ | K13-T (positionssystemet) |
+| 1 | `tiotalEntal` (buntar med 10 och lösa pinnar) | 11–99 | ⌨ | K13-T (positionssystemet) |
 | 2 | `plus` + `minus` utan tiotalsövergång | 0–20 | ⌨ | K13-T |
-| 3 | `plus` med tiotalsövergång (8 + 5) | 0–20 | ⌨ | K13-T |
-| 4 | `minus` med tiotalsövergång (13 − 5) | 0–20 | ⌨ | K13-T |
-| 5 | `jamforTal` + `talrad` | 0–100 | 🔘3 / ⌨ | K13-T |
-| 6 | `saknadTerm` | 0–20 | ⌨ | K13-A |
-| 7 | `talmonster` (+2, +5, +10, −1) | 0–100 | ⌨ | K13-A |
-| 8 | `plus` tvåsiffrigt + ensiffrigt utan växling (34 + 5) | 0–100 | ⌨ | K13-T |
-| 9 | `brakPizza` (halv, en fjärdedel) | ½, ¼ | 🔘3 bilder | K13-T (bråk, del av helhet) |
-| 10 | `dubbeltHalften` + `minus` tvåsiffrigt − ensiffrigt utan växling | 0–100 | ⌨ | K13-S, K13-T |
+| 3 | `plus` + `minus` med tiotalsövergång (8 + 5, 13 − 5) | 0–20 | ⌨ | K13-T |
+| 4 | `jamforTal` + `talrad` | 0–100 | 🔘3 / ⌨ | K13-T |
+| 5 | `saknadTerm` | ≤ 20 | ⌨ | K13-A |
+| 6 | `talmonster` (+2, +5, +10, −1) | ≤ 100 | ⌨ | K13-A |
+| 7 | `plus` + `minus` tvåsiffrigt och ensiffrigt utan växling (34 + 5) | ≤ 99 | ⌨ | K13-T |
+| 8 | `brakPizza` (½, ¼) + `dubbeltHalften` | ≤ 20 | 🔘 bilder / ⌨ | K13-T (bråk), K13-S |
 
-### 2.6 Åtta år (åk 2)
+### 2.6 Åtta år (åk 2), 9 nivåer
 
 | Nivå | Frågetyp(er) | Talområde | Svar | Källa |
 |---|---|---|---|---|
-| 1 | `plus` + `minus` med hela tiotal (40 + 30) | 0–100 | ⌨ | K13-T |
-| 2 | `plus` tvåsiffrigt + tvåsiffrigt utan växling | 0–100 | ⌨ | K13-T |
-| 3 | `plus` med växling (38 + 27) | 0–100 | ⌨ | K13-T |
-| 4 | `minus` utan växling, sedan med växling | 0–100 | ⌨ | K13-T |
-| 5 | `gangerGrupp` (2:ans, 5:ans och 10:ans tabell) | ≤ 50 | ⌨ | K13-T (de fyra räknesätten) |
-| 6 | `delatDelning` (dela 12 fiskar lika på 3 katter) | ≤ 30 | ⌨ | K13-T |
-| 7 | `brakPizza` (½, ⅓, ¼) + `brakAvAntal` (hälften av 8) | ≤ 20 | 🔘4 / ⌨ | K13-T |
-| 8 | `tallinje` (var pekar pilen? streck vid varje tiotal) | 0–100 | ⌨ | K13-T |
-| 9 | `talmonster` (+3, +4, −5, −10) | 0–200 | ⌨ | K13-A |
-| 10 | `saknadTerm` (? + 15 = 40) | 0–100 | ⌨ | K13-A |
+| 1 | `plus` + `minus` med hela tiotal (40 + 30) | ≤ 100 | ⌨ | K13-T |
+| 2 | `plus` tvåsiffrigt utan växling | ≤ 99 | ⌨ | K13-T |
+| 3 | `plus` tvåsiffrigt med växling (38 + 27) | ≤ 100 | ⌨ | K13-T |
+| 4 | `minus` tvåsiffrigt, med och utan växling | ≤ 100 | ⌨ | K13-T |
+| 5 | `gangerGrupp` (2:ans, 5:ans och 10:ans tabell) | ≤ 100 | ⌨ | K13-T |
+| 6 | `delatDelning` (dela fiskar lika på katter) | ≤ 100 | ⌨ | K13-T |
+| 7 | `brakPizza` (½, ⅓, ¼) + `brakAvAntal` (⅓ av 12) | ≤ 20 | 🔘 bilder / ⌨ | K13-T (del av helhet och del av antal) |
+| 8 | `tallinje` (var pekar pilen?) | 0–100 | ⌨ | K13-T |
+| 9 | `saknadTerm` + `talmonster` (+3, +4, −5, −10) | ≤ 100 | ⌨ | K13-A |
 
-### 2.7 Nio år (åk 3)
+Inga lästal för 8 år (Andreas beslut).
+
+### 2.7 Nio år (åk 3), 10 nivåer
 
 | Nivå | Frågetyp(er) | Talområde | Svar | Källa |
 |---|---|---|---|---|
-| 1 | `tiotalEntal` med hundratal (plattor, stavar, kuber) | 100–999 | ⌨ | K13-T |
-| 2 | `plus` + `minus` med hela hundratal och tiotal (300 + 40, 520 − 200) | 0–1 000 | ⌨ | K13-T |
-| 3 | `plus` + `minus` tvåsiffrigt med växling | 0–200 | ⌨ | K13-T, KR3 |
-| 4 | `gangerGrupp` (tabellerna 2, 3, 4, 5, 10) | ≤ 50 | ⌨ | K13-T |
-| 5 | `delatDelning` inom samma tabeller | ≤ 50 | ⌨ | K13-T |
-| 6 | `brakAvAntal` (⅓ av 12 fiskar) | ≤ 30 | ⌨ | K13-T (del av antal) |
+| 1 | `tiotalEntal` med hundratal (plattor, stavar, kuber) | 101–999 | ⌨ | K13-T |
+| 2 | `plus` + `minus` med hela tiotal och hundratal (520 − 200) | ≤ 1 000 | ⌨ | K13-T |
+| 3 | `plus` + `minus` med växling | ≤ 200 | ⌨ | K13-T, KR3 |
+| 4 | `gangerGrupp` (tabellerna 2, 3, 4, 5, 10) | ≤ 100 | ⌨ | K13-T |
+| 5 | `delatDelning` inom samma tabeller | ≤ 100 | ⌨ | K13-T |
+| 6 | `brakAvAntal` (⅔ av 12) | ≤ 30 | ⌨ | K13-T (del av antal) |
 | 7 | `tallinje` | 0–1 000 | ⌨ | K13-T |
-| 8 | `talmonster` (även ×2) | 0–200 | ⌨ | K13-A |
-| 9 | `saknadFaktor` (4 · ? = 20) + `saknadTerm` | ≤ 100 | ⌨ | K13-A |
-| 10 | `lastal` (ett steg, med bild) | ≤ 100 | ⌨ | K13-P |
+| 8 | `talmonster` (även ·2) | ≤ 200 | ⌨ | K13-A |
+| 9 | `saknadFaktor` (4 · ? = 20) + `saknadTerm` | ≤ 200 | ⌨ | K13-A |
+| 10 | `plus` med växling + `gangerGrupp` (3, 4, 6) blandat | ≤ 1 000 | ⌨ | K13-T |
 
-*Tolkning:* Nivå 3 och 7 är satta efter "0–200", som är det tal som
-syntes i Skolverkets material (Lgr11). Det ska stämmas av mot KR3.
+*Tolkning:* Nivå 3 är satt efter "0–200", som är talet i Skolverkets
+material för åk 3 (Lgr11). Det ska stämmas av mot KR3.
 
-### 2.8 Tio år (åk 4)
-
-| Nivå | Frågetyp(er) | Talområde | Svar | Källa |
-|---|---|---|---|---|
-| 1 | `tiotalEntal` (tusental) + `tallinje` | 0–10 000 | ⌨ | K46-T |
-| 2 | `gangerGrupp` (alla tabeller 1–10) | ≤ 100 | ⌨ | K46-T |
-| 3 | `delatDelning` (alla tabeller, utan rest) | ≤ 100 | ⌨ | K46-T |
-| 4 | `decimalTallinje` (tiondelar) | 0–2 | ⌨ med `,` | K46-T (decimalform) |
-| 5 | `brakPizza` (jämför bråk med samma nämnare) + `brakTallinje` | nämnare 2–8 | 🔘4 | K46-T |
-| 6 | `negativTermometer` | −10–10 | ⌨ med `−` | K46-T (negativa tal) |
-| 7 | `ganger` tvåsiffrigt × ensiffrigt (23 · 3) | ≤ 300 | ⌨ | K46-T |
-| 8 | `talmonster` (hitta regeln: 3, 7, 11, ?) | 0–200 | ⌨ | K46-A |
-| 9 | `vag` (ekvation som våg: 3 · x + 2 = 14) | x ≤ 10 | ⌨ | K46-A |
-| 10 | `lastal` (ett–två steg) | ≤ 500 | ⌨ | K46-P |
-
-### 2.9 Elva år (åk 5)
+### 2.8 Tio år (åk 4), 10 nivåer
 
 | Nivå | Frågetyp(er) | Talområde | Svar | Källa |
 |---|---|---|---|---|
-| 1 | `jamforTal` med decimaltal (0,25 eller 0,3?) | hundradelar | 🔘2–4 | K46-T |
+| 1 | `tiotalEntal` (tusental) + `tallinje` | ≤ 10 000 | ⌨ | K46-T |
+| 2 | `gangerGrupp` (tabellerna 3, 4, 6, 7, 8, 9) | ≤ 90 | ⌨ | K46-T |
+| 3 | `delatDelning` (samma tabeller, utan rest) | ≤ 90 | ⌨ | K46-T |
+| 4 | `tallinje` med tiondelar | 0–2 | ⌨ med `,` | K46-T (decimalform) |
+| 5 | `brakPizza` (pizzan visas, välj bråket) + `brakTallinje` | nämnare 3–8 | 🔘4 | K46-T |
+| 6 | `negativ` (över noll på en termometer) | −10–10 | ⌨ med `−` | K46-T (negativa tal) |
+| 7 | `ganger` tvåsiffrigt · ensiffrigt (23 · 3) | ≤ 300 | ⌨ | K46-T |
+| 8 | `talmonster` (hitta regeln: 3, 7, 11, ?) | ≤ 200 | ⌨ | K46-A |
+| 9 | `vag` (3x + 2 = 14) | x ≤ 10 | ⌨ | K46-A |
+| 10 | `lastal` (ett steg) | ≤ 100 | ⌨ | K46-P |
+
+### 2.9 Elva år (åk 5), 10 nivåer
+
+| Nivå | Frågetyp(er) | Talområde | Svar | Källa |
+|---|---|---|---|---|
+| 1 | `jamforTal` med decimaltal (0,3 eller 0,25?) | hundradelar | 🔘3 | K46-T |
 | 2 | `plus` + `minus` med decimaltal (1,5 + 2,3) | tiondelar, ≤ 20 | ⌨ med `,` | K46-T |
-| 3 | `sammaTal` (½ = 0,5, ¼ = 0,25, ¾, 1⁄10) | – | 🔘4 | K46-T |
-| 4 | `procentRutnat` (50 %, 25 %, 10 %, 75 %) | – | 🔘4 / ⌨ | K46-T (procent) |
-| 5 | `negativTermometer` (−3 + 5, 2 − 6) | −20–20 | ⌨ med `−` | K46-T |
-| 6 | `gangerTio` (× och / med 10 och 100) | decimaler | ⌨ | K46-T |
+| 3 | `sammaTal` (½ = 0,5 = 50 %) | – | 🔘4 | K46-T |
+| 4 | `procentRutnat` (50 %, 25 %, 10 % …) | – | 🔘4 | K46-T (procent) |
+| 5 | `negativ` (−3 + 5, 2 − 6) | −20–20 | ⌨ med `−` | K46-T |
+| 6 | `gangerTio` (· och / med 10 och 100) | decimaltal | ⌨ | K46-T |
 | 7 | `brakAvAntal` (¾ av 20) | ≤ 100 | ⌨ | K46-T |
-| 8 | `vag` (två steg) | x ≤ 20 | ⌨ | K46-A |
-| 9 | `proportion` (recept: 2 fiskar räcker till 3 katter …) | ≤ 100 | ⌨ | K46-S |
-| 10 | `lastal` (två steg) | ≤ 1 000 | ⌨ | K46-P |
+| 8 | `vag` | x ≤ 20 | ⌨ | K46-A |
+| 9 | `proportion` (recept: fiskar till katter) | ≤ 100 | ⌨ | K46-S |
+| 10 | `lastal` (ett eller två steg) | ≤ 100 | ⌨ | K46-P |
 
-### 2.10 Tolv år (åk 6)
+### 2.10 Tolv år (åk 6), 10 nivåer
 
 | Nivå | Frågetyp(er) | Talområde | Svar | Källa |
 |---|---|---|---|---|
-| 1 | `jamforTal` med decimaltal (tusendelar) + `decimalTallinje` | 0–10 | 🔘4 / ⌨ | K46-T |
-| 2 | `ganger` decimaltal × heltal (0,5 · 6; 1,2 · 3) | ≤ 50 | ⌨ | K46-T |
+| 1 | `jamforTal` med decimaltal (tusendelar) + `tallinje` | 0–1 | 🔘4 / ⌨ | K46-T |
+| 2 | `ganger` decimaltal · heltal (0,5 · 6) | ≤ 100 | ⌨ | K46-T |
 | 3 | `procentAvAntal` (25 % av 80) | ≤ 1 000 | ⌨ | K46-T, K46-S |
-| 4 | `sammaTal` (bråk, decimal, procent: ¾ = 0,75 = 75 %) | – | 🔘4 | K46-T |
-| 5 | `negativTermometer` (−4 − 3) | −50–50 | ⌨ | K46-T |
-| 6 | `medelvarde` (staplar med fiskar) + `typvardeMedian` | ≤ 20 | ⌨ | K46-SS |
-| 7 | `chans` (påse med fiskar: vilken är troligast? hur många av?) | – | 🔘3 / ⌨ | K46-SS |
-| 8 | `vag` (x på båda sidor, enkla tal) | x ≤ 20 | ⌨ | K46-A |
-| 9 | `proportion` (dubbla receptet, pris per styck utan pengar: "fiskpinnar per katt") | ≤ 200 | ⌨ | K46-S |
-| 10 | `lastal` (två–tre steg, blandat) | ≤ 1 000 | ⌨ | K46-P |
+| 4 | `sammaTal` (bråk, decimal, procent) | – | 🔘4 | K46-T |
+| 5 | `negativ` | −50–50 | ⌨ | K46-T |
+| 6 | `medelvarde` + `typvardeMedian` | ≤ 20 | ⌨ | K46-SS |
+| 7 | `chans` (hur stor är chansen att få en fisk ur påsen?) | – | 🔘4 | K46-SS |
+| 8 | `vag` (x på båda sidor: 5x + 2 = 3x + 10) | x ≤ 12 | ⌨ | K46-A |
+| 9 | `proportion` | ≤ 200 | ⌨ | K46-S |
+| 10 | `lastal` (ett till tre steg) | ≤ 200 | ⌨ | K46-P |
 
 *Tolkning:* Geometri, mätning, klockan och pengar är medvetet utelämnade
-(klockan och pengar blir egna spel). Därför täcker trappan inte hela
+(klockan och pengar blir egna spel). Trappan täcker därför inte hela
 kursplanen, bara taluppfattning, algebra, samband och lite statistik.
+
+### 2.11 Lästal: vår bedömning
+
+Andreas bad oss kolla vad Skolverket säger och göra en egen bedömning.
+
+- **Vad kursplanen säger** (K13-P och K46-P, enligt sökresultaten från
+  skolverket.se, inte lästa direkt): problemlösning ska utgå från
+  *vardagliga situationer*. Kursplanen kräver inte att problemen är
+  skrivna som text. De kan lika gärna visas med bilder.
+- **Vår bedömning:** många 9-åringar läser fortfarande långsamt, och spelet
+  ska fungera för barn som inte läser så bra. Därför:
+  - **5–9 år:** inga lästal. Vardagsproblemen visas med bilder i stället
+    (dela fiskar på katter, Göran äter upp några).
+  - **10 år:** lästal med ett steg, högst två korta meningar, bara på sista
+    nivån.
+  - **11–12 år:** lästal med två eller tre steg på sista nivån.
+- Alla lästal handlar om Göran och mat och går att läsa högt för en
+  sjuåring.
 
 ---
 
@@ -395,7 +402,7 @@ Exempel:
 - En klarad nivå ger alltså `8 · 10n + 20n = 100n`. Efter k klarade
   nivåer har man **`50 · k · (k + 1)`** poäng.
 - **Rundans poäng** = poängen för klarade nivåer + de rätt svaren i sista
-  försöket på nivån där rundan tog slut.
+  försöket på nästa nivå (där rundan tog slut).
 - Fel drar inte av något. Misslyckade försök som man har gjort om ger
   inga poäng. Det finns ingen tidsbonus.
 - Poängen är oberoende av ålder. Eftersom varje ålder har sin egen
@@ -403,71 +410,51 @@ Exempel:
 
 **Räkneexempel:**
 
-| Vad som hände | Uträkning | Poäng |
-|---|---|---|
-| Klarade nivå 1–6 och fick 5 rätt i sista försöket på nivå 7 | 50 · 6 · 7 + 5 · 70 = 2 100 + 350 | **2 450** |
-| Klarade nivå 1–3, misslyckades två gånger på nivå 4, och fick 2 rätt i sista försöket | 50 · 3 · 4 + 2 · 40 = 600 + 80 | **680** |
-| Klarade alla 10 nivåer | 50 · 10 · 11 | **5 500** (högst möjliga) |
-| Fick 3 rätt på nivå 1 och skrev sedan in sig | 3 · 10 | **30** |
+| Vad som hände | Uträkning | Poäng | Nivå på listan |
+|---|---|---|---|
+| Klarade nivå 1–6 och fick 3 rätt i sista försöket på nivå 7 | 50 · 6 · 7 + 3 · 70 = 2 100 + 210 | **2 310** | 6 |
+| Klarade nivå 1–3, misslyckades två gånger på nivå 4, och fick 2 rätt i sista försöket | 50 · 3 · 4 + 2 · 40 = 600 + 80 | **680** | 3 |
+| 9 år: klarade alla 10 nivåer | 50 · 10 · 11 | **5 500** (högst möjliga) | 10 |
+| 5 år: klarade alla 6 nivåer | 50 · 6 · 7 | **2 100** (högst för 5 år) | 6 |
+| Fick 3 rätt på nivå 1 och skrev sedan in sig | 3 · 10 | **30** | 0 |
 
 ### 4.2 Topplista per ålder
 - En topplista **per ålder**, alltså 8 listor. Varje rad visar
-  **namn · nivå · poäng**, till exempel `Elsa · nivå 7 · 2 450 poäng`.
-- *Nivå* är **den nivå man kom till**, alltså den man spelade när rundan
-  tog slut (11 betyder "klarade alla" och visas som 🔔 i stället för en
-  siffra). Se öppen fråga 3.
+  **namn · nivå · poäng**, till exempel `Elsa · nivå 6 · 2 310 poäng`.
+- *Nivå* är **den högsta nivån man klarade** (Andreas beslut). Har man
+  inte klarat någon nivå står det "nivå 0".
 - Listan sorteras på poäng. Eftersom poängen alltid ökar med nivån hamnar
   de som har kommit längre överst.
+- Resultat från testlänkar (se 8) kommer inte med.
 
 ### 4.3 Ändringar i `topplista.js` och `supabase.sql`
 
 1. **Nya rader i `SPELEN`**, en per ålder. Supabase godkänner bara spel-id
-   med **bokstäver a–z** (`check (spel ~ '^[a-z]{2,20}$')` i
-   `supabase.sql`), så siffror fungerar inte i id:t:
-
-   ```js
-   { id: "mattefem",  ikon: "🐱", namn: t("Görans matteresa – 5 år", "Gerald's Maths Trip – age 5"), niva: true },
-   { id: "mattesex",  ... "6 år" ... },
-   // mattesju, matteatta, mattenio, mattetio, matteelva, mattetolv
-   ```
-
-   `niva: true` betyder att raden ska visa nivån.
-
-2. **`nyttResultat(spelId, poang, val)`** tar emot `val.niva` och skickar
-   det vidare till `fragaNamn` och `laggTill`, så att raden blir
-   `{ namn, poang, tid, niva }`.
-
-3. **`ritaLista`**: om `spel.niva` och `rad.niva` finns läggs ett
-   `<span class="tl-niva">` till mellan namn och poäng: `nivå 7` (`level 7`),
-   eller `🔔` när rundan är klar.
-
-4. **Supabase:** en ny kolumn och funktionerna med nivån.
-
-   ```sql
-   alter table public.topplista add column if not exists niva smallint
-     check (niva is null or niva between 1 and 99);
-   -- spara_resultat får en sjätte parameter p_niva smallint default null.
-   -- Ta bort den gamla funktionen först (drop function), annars finns två
-   -- versioner och anropen blir tvetydiga.
-   -- hamta_topplista returnerar också niva.
-   ```
-
-   `anropa("spara_resultat", …)` i `skicka()` skickar med `p_niva` när den
-   finns, och raderna från `hamta_topplista` behåller `niva`.
-   **Andreas behöver köra den nya SQL:en i Supabase** (SQL Editor → Run),
-   precis som i README. Tills dess fungerar listorna, men nivån visas bara
-   på enheten där resultatet sparades.
-
-5. **Menyns 🏆 Topplista** visar då 8 nya rader. *Förslag:* en enda rad
-   "Görans matteresa" som öppnar en liten rad med åldersknappar
-   (5–12). Det kräver en `grupp: "matte"` i `SPELEN` och några rader i
-   `visa()`. Se öppen fråga 4.
-
-Detta påverkar inte de andra spelen. Rader utan `niva` ser ut som förut.
+   med **bokstäver a–z** (`check (spel ~ '^[a-z]{2,20}$')`), så siffror
+   fungerar inte i id:t: `mattefem`, `mattesex`, `mattesju`, `matteatta`,
+   `mattenio`, `mattetio`, `matteelva`, `mattetolv`. Raderna har
+   `grupp: "matte"`, `etikett: "7"` (åldern) och `niva: true`.
+2. **`nyttResultat(spelId, poang, { niva })`** skickar nivån vidare till
+   `fragaNamn` och `laggTill`, så att raden blir `{ namn, poang, tid, niva }`.
+3. **`ritaLista`** visar `nivå 6` (`level 6`) mellan namn och poäng när
+   spelet har `niva: true`.
+4. **Menyns 🏆 Topplista** (beslut: överskådligt, inte kladdigt): de åtta
+   listorna har **en enda flik** (🐱). Under rubriken finns en rad med små
+   åldersknappar (5–12), och man trycker på den ålder man vill se. Samma
+   rad syns när topplistan öppnas från spelet.
+5. **Supabase** (`supabase.sql`): en ny kolumn `niva`. Funktionen
+   `spara_resultat` får en sjätte parameter `p_niva` (som kan utelämnas),
+   och `hamta_topplista` returnerar också `niva`. De gamla versionerna av
+   funktionerna tas bort först, så att det bara finns en av varje.
+   - **Innan Andreas har kört den nya SQL:en** sparas matteresultaten ändå:
+     om Supabase inte känner igen `p_niva` skickar `topplista.js` samma
+     resultat igen utan nivån. Nivån syns då bara på enheten där
+     resultatet sparades.
+   - Gamla resultat och de andra spelen påverkas inte (deras `niva` är tom).
 
 ---
 
-## 5. Professor Göran
+## 5. Katten Göran
 
 ### 5.1 Så beskrivs han i Bordsplaceringen (`bord/game.js`)
 - "Katten Göran" / "Gerald the cat", ansikte 🐱, sak 🎀, tröjfärg
@@ -499,7 +486,7 @@ samma pälsfärg (`#f5cba7`, ljust orange).
   glasögonen glittrar), sover (Zzz, efter 20 sekunder utan tryck. Han
   vaknar direkt när man trycker. Det finns ingen tidsgräns, det är bara
   för att det är roligt).
-- **Ritas med kod** (cirklar och former på canvas), inte med emoji, så att
+- **Ritas med kod** (former i SVG), inte med emoji, så att
   glasögonen och flugan syns.
 
 ### 5.3 Repliker
@@ -563,25 +550,24 @@ som stör talen).
 
 ---
 
-## 6. Ljud
-Ljudet skapas med Web Audio i koden, som i de andra spelen. Det finns inga
-ljudfiler och inget tal. Det kan stängas av i pausmenyn (sparas på
-enheten).
+## 6. Ljud och musik
+Ljuden skapas med Web Audio i koden, som i de andra spelen. Det finns inga
+ljudfiler och inget tal.
 
 | När | Ljud |
 |---|---|
-| Rätt svar | Ett kort, ljust *pling* (sinus, ungefär 880 Hz, 0,15 s). |
-| Rätt i rad | Plinget blir **en ton högre för varje rätt i rad** (stegvis i en durskala, upp till åtta steg). Det börjar om vid fel. |
-| Nivå klar | En kort fanfar: fyra stigande toner och en lång ackordton (cirka 1,5 s). |
-| Fel svar | Ett mjukt, dovt *bonk* (låg sinus, 220 → 180 Hz, mjuk start). Inget surr och inget "fel"-ljud. |
+| Rätt svar | Ett kort, ljust *pling* (sinus, ungefär 880 Hz). |
+| Rätt i rad | Plinget blir **en ton högre för varje rätt i rad** (i en durskala). Det börjar om vid fel. |
+| Nivå klar | En kort fanfar: fyra stigande toner och ett ackord. |
+| Fel svar | Ett mjukt, dovt *bonk* (låg sinus som sjunker lite). Inget surr. |
 | Fisken simmar bort | Ett litet *blubb*. |
-| Knapptryck | Ett tyst *klick*, så att man märker att det tog. |
-| Bjällran hittas | Tre klara bjällerklangar (höga sinustoner med lång avklingning). |
-| Göran snarkar | En väldigt tyst, långsam brus-"snarkning" när han sover på startskärmen. |
+| Knapptryck | Ett tyst *klick*. |
+| Bjällran hittas | Tre klara bjällerklangar. |
 
-Ljudet börjar först efter första trycket (Safari kräver det).
-Bakgrundsmusik finns inte, eftersom barnen ska kunna koncentrera sig. Se
-öppen fråga 6.
+**Musik** (Andreas beslut): den gemensamma lugna melodin i `musik.js`
+spelas i bakgrunden, lite långsammare än i de andra spelen (tempo 84).
+I pausmenyn kan man stänga av musiken (*♪ Musik*) och ljuden (*🔊 Ljud*)
+var för sig. Ljudet startar först efter första trycket (Safari kräver det).
 
 ---
 
@@ -591,95 +577,78 @@ Bakgrundsmusik finns inte, eftersom barnen ska kunna koncentrera sig. Se
 ```
 matte/
   SPEC.md      ← den här filen
-  index.html   ← som i de andra spelen: spel.css, sprak.js, topplista.js, game.js
-  game.js      ← allt spelet
-  test.js      ← testskript för frågorna (körs med node, se 8)
+  index.html   ← laddar spel.css, matte.css, sprak.js, offline.js,
+                 topplista.js, musik.js, fragor.js och game.js
+  matte.css    ← utseendet
+  fragor.js    ← nivåtrappan (NIVAER) och frågetyperna (TYPER)
+  game.js      ← skärmarna, Göran, ljuden, kartan och poängen
+  test.js      ← testar frågorna (körs med node, se 8)
+  skisser/     ← skisserna som Andreas godkände
 ```
 
-`game.js` byggs som de andra spelen, med `uppdatera()` och `rita()` på
-canvas och `INSTALLNINGAR` högst upp:
-
-```js
-const INSTALLNINGAR = {
-  stjarnorForAttKlara: 8,
-  fiskar: 3,
-  poangPerRatt: 10,   // gånger nivån
-  bonusPerNiva: 20,   // gånger nivån
-  visaRattSvarTid: 0, // 0 = barnet trycker ▶ själv
-  hjalpEfterFel: true,
-  sovEfter: 20,       // sekunder innan Göran somnar
-};
-const NIVAER = {      // recepten i avsnitt 2
-  5: [
-    { typer: ["rakna"], fran: 1, till: 5, svar: "knappar", knappar: 3, layout: "tarning" },
-    // …
-  ],
-  // 6 … 12
-};
-const FRAGETYPER = {  // en funktion per typ som skapar en fråga
-  rakna: { skapa(recept, slump) { … return { visa, svar, alternativ, felbild }; } },
-  // …
-};
-const PLATSER = [ … ];   // kartan, avsnitt 5.4
-const REPLIKER = { … };  // avsnitt 5.3
-```
-
-- `skapa()` får en **slumpgenerator** som argument (inte `Math.random`
-  direkt). Då kan testskriptet och `?fro=123` ge samma frågor varje gång.
+- **Allt ritas med HTML och SVG**, inte på canvas som de andra spelen.
+  Det är lättare att göra stora tydliga knappar, bråk och tallinjer så.
+  Hela spelet ligger i en scen som är 1024 × 768 (liggande) eller
+  768 × 1024 (stående) och skalas så att den fyller skärmen.
+- **Göran** ritas som SVG, efter skisserna: ljust orange (`#f5cba7`), runda
+  glasögon, röd fluga och ett guldband på halsen utan bjällra. På sista
+  skärmen sitter bjällran på bandet.
+- **`fragor.js`** fungerar både i webbläsaren och i node. Varje frågetyp
+  får receptet för nivån och en slumpgenerator med frö, så att testerna och
+  `?fro=42` ger samma frågor varje gång. Decimaltal rundas med
+  `Fragor.runda`, så att det inte blir avrundningsfel som 0,30000000004.
+- Det man vill ändra finns högst upp i `game.js`: `INSTALLNINGAR` (antal
+  stjärnor och fiskar, poängen, musikens tempo), `PLATSER` och `REPLIKER`.
 - Allt som syns finns på **svenska och engelska** med `t("sv", "en")`.
-- Siffror skrivs med `toLocaleString` (decimalkomma på svenska).
-- **Tillgänglighet:** stora tryckytor, hög kontrast och siffror som är
-  minst 48 px. Rätt och fel visas med mer än färg (✔, fisken simmar bort).
 
 ### 7.2 Utanför mappen
-- **`index.html` (menyn):** ett nytt kort `<a class="kort kort-matte"
-  href="matte/">` med 🐱🎓, "Görans matteresa" och
-  `data-en="Gerald's Maths Trip"`.
-- **`sw.js`:** lägg till `"matte"` i listan på rad 32
-  (`["stjarnor", …, "bajsbyn", "matte"]`), så att spelet fungerar
-  offline. Spelet behöver inga andra filer.
+- **`index.html` (menyn):** ett nytt kort, "Katten Görans matteresa".
+- **`sw.js`:** `"matte"` finns i listan med spel, och `matte/fragor.js`
+  och `matte/matte.css` finns i `FILER`, så att spelet fungerar offline.
 - **`topplista.js` och `supabase.sql`:** se 4.3.
-- **`README.md`:** en rad i tabellen och ett avsnitt "Görans matteresa 🐱🎓"
-  med vad man kan ändra i `game.js`.
+- **`README.md`:** en rad i tabellen och ett avsnitt om spelet.
 
 ### 7.3 Det som sparas på enheten
 | Nyckel | Vad |
 |---|---|
 | `matte-alder` | senast valda ålder |
-| `matte-runda` | `{ alder, niva, poang }` för en påbörjad runda (raderas när rundan är slut) |
-| `matte-ljud` | på/av |
+| `matte-ljud` | ljuden på/av |
+| `musik` | musiken på/av (gemensam för alla spel med `musik.js`) |
+
+Rundan sparas inte (Andreas beslut). Går man till menyn mitt i en runda
+börjar man om nästa gång.
 
 ---
 
 ## 8. Så testar man
 
-1. **Testskriptet** `node matte/test.js` skapar 2 000 frågor för varje
+1. **Testskriptet:** `node matte/test.js` skapar 1 500 frågor för varje
    ålder och nivå och kontrollerar att:
-   - det rätta svaret stämmer (räknas om på ett annat sätt)
-   - felalternativen är olika, inte samma som det rätta, inom talområdet
-     och inte negativa när de inte får vara det
-   - talen i frågan ligger inom receptet
-   - det inte blir några decimalfel (till exempel `0,30000000004`)
-   - det finns minst 10 olika frågor per nivå (så att det inte blir
-     upprepning)
-   - en nivå med två typer växlar A B A B.
-2. **Testlänkar** (bara för oss):
+   - varje ålder har rätt antal nivåer (6, 7, 8, 9, 10, 10, 10, 10)
+   - det rätta svaret finns bland knapparna och att knapparna är olika
+     (även bråk som betyder samma sak, som 1/2 och 2/4)
+   - svaret stämmer när det räknas om från frågan (`38 + 27 = ?`)
+   - det inte blir negativa svar där det inte ska vara negativa tal, och
+     att svaren håller sig inom talområdet
+   - det inte blir avrundningsfel
+   - det finns minst 10 olika frågor per nivå
+   - typerna på en nivå kommer i rätt ordning (A B A B)
+   - `0,5`, `0.5` och `−3` läses rätt.
+2. **Testlänkar** (resultaten kommer inte med på topplistan):
    - `matte/?alder=9&niva=7` startar direkt på en nivå
    - `matte/?fro=42` ger samma frågor varje gång
    - `matte/?test` visar det rätta svaret i ett hörn.
-   Resultat från testlänkar skickas inte till topplistan.
 3. **Spela igenom för hand** (`python3 -m http.server 8000`, öppna
    `http://localhost:8000/matte/`):
    - Klara en nivå: 8 stjärnor ger en fanfar, kartan och rätt poäng.
-   - Svara fel 3 gånger: knapparna *Försök igen* och *Skriv in mig*
-     visas. Försök igen börjar från noll stjärnor och rundans poäng är
+   - Svara fel 3 gånger: knapparna *Försök igen* och *Skriv in mig* visas.
+     Försök igen börjar från noll stjärnor, och rundans poäng är
      oförändrad.
    - Svara fel en gång: rätt svar visas med en bild, och nästa fråga av
      samma sort har en hjälpbild.
    - Antalet fel syns ingenstans.
-   - Topplistan: rätt ålder, och raden visar "nivå".
+   - Topplistan: rätt ålder, och raden visar nivån.
    - Byt språk: alla texter är översatta.
-   - Prova med 🏠 mitt i en nivå och *▶ Fortsätt*.
 4. **iPad och telefon:** stående och liggande, knapparna går lätt att
    träffa, och ljudet hörs efter första trycket.
 5. **Utan internet:** öppna en gång med internet, slå på flygläge och ladda
@@ -689,27 +658,17 @@ const REPLIKER = { … };  // avsnitt 5.3
 
 ---
 
-## 9. Öppna frågor till Andreas
+## 9. Andreas svar på de öppna frågorna
 
-1. **Fortsätta senare:** ska rundan sparas mellan nivåerna (förslaget i
-   1.6), eller ska en runda alltid spelas på en gång?
-2. **10 nivåer per ålder:** är det lagom, eller blir det för långt för de
-   minsta? Ett alternativ är 6 nivåer för 5–6 år.
-3. **"Nivå" på topplistan:** den nivå man kom till (förslaget), eller den
-   högsta nivån man klarade?
-4. **Menyns topplista:** 8 rader (en per ålder), eller en rad
-   "Görans matteresa" med åldersknappar (förslaget)?
-5. **Supabase:** är det okej att lägga till kolumnen `niva` och köra ny
-   SQL (4.3)? Annars kan nivån bara visas på den egna enheten.
-6. **Musik:** ingen bakgrundsmusik (förslaget), eller en väldigt lugn
-   melodi som går att stänga av?
-7. **Skolverket:** vill du att jag läser kursplanen direkt på skolverket.se
-   och stämmer av avsnitt 2? Då behöver `www.skolverket.se` tillåtas i
-   miljöns nätverksinställningar.
-8. **Spelets namn:** "Görans matteresa" / "Gerald's Maths Trip", eller
-   något annat?
-9. **Ålder eller nivå:** ska man få välja en annan ålder än sin egen
-   (till exempel en sjuåring som vill spela "6 år")? Förslaget är ja,
-   eftersom det är listan för den åldern man hamnar på.
-10. **Lästal:** är det okej med lästal redan på nivå 10 för 9 år, eller
-    bara för 10–12 år?
+| Fråga | Beslut |
+|---|---|
+| 1. Fortsätta senare? | Nej. En runda spelas alltid på en gång. |
+| 2. Antal nivåer | Färre för de yngsta: 6, 7, 8, 9 och sedan 10 från 9 år. |
+| 3. Nivån på topplistan | Den högsta nivån man klarade. Poängen är de klarade nivåerna plus de rätt svaren på nästa nivå. |
+| 4. Menyns topplista | Vårt val: en flik med åldersknappar (se 4.3). |
+| 5. Supabase | Ny SQL är okej. Andreas kör den själv. |
+| 6. Musik | Ja, en lugn melodi som går att stänga av. |
+| 7. Skolverket | Läs kursplanen och stäm av avsnitt 2. **Inte gjort:** sidan gick inte att öppna från den här miljön, så källorna i 2.1 bygger fortfarande på sökresultat. |
+| 8. Namn | "Katten Görans matteresa". |
+| 9. Annan ålder | Ja, man får välja en annan ålder än sin egen. |
+| 10. Lästal | Kolla Skolverket och gör en egen bedömning, definitivt inte för 8-åringar. Se 2.11. |

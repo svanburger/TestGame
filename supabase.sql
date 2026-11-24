@@ -27,29 +27,36 @@ create index if not exists topplista_familj_spel on public.topplista (familj, sp
 alter table public.topplista enable row level security;
 revoke all on table public.topplista from anon, authenticated;
 
--- Sparar ett resultat
-create or replace function public.spara_resultat(p_familj text, p_spel text, p_namn text, p_poang integer, p_tid bigint)
+-- Nivån man klarade (används av Katten Görans matteresa, tom för de andra spelen)
+alter table public.topplista add column if not exists niva smallint check (niva is null or niva between 0 and 99);
+
+-- De gamla funktionerna (utan nivå) tas bort, så att det bara finns en av varje
+drop function if exists public.spara_resultat(text, text, text, integer, bigint);
+drop function if exists public.hamta_topplista(text);
+
+-- Sparar ett resultat. p_niva kan utelämnas.
+create or replace function public.spara_resultat(p_familj text, p_spel text, p_namn text, p_poang integer, p_tid bigint, p_niva smallint default null)
 returns void
 language sql
 security definer
 set search_path = ''
 as $$
-  insert into public.topplista (familj, spel, namn, poang, tid)
-  values (upper(p_familj), p_spel, btrim(p_namn), p_poang, p_tid)
+  insert into public.topplista (familj, spel, namn, poang, tid, niva)
+  values (upper(p_familj), p_spel, btrim(p_namn), p_poang, p_tid, p_niva)
   on conflict (familj, spel, tid, namn) do nothing;
 $$;
 
 -- Hämtar de 10 bästa i varje spel för en familj
 create or replace function public.hamta_topplista(p_familj text)
-returns table (spel text, namn text, poang integer, tid bigint)
+returns table (spel text, namn text, poang integer, tid bigint, niva smallint)
 language sql
 stable
 security definer
 set search_path = ''
 as $$
-  select t.spel, t.namn, t.poang, t.tid
+  select t.spel, t.namn, t.poang, t.tid, t.niva
   from (
-    select r.spel, r.namn, r.poang, r.tid,
+    select r.spel, r.namn, r.poang, r.tid, r.niva,
            row_number() over (partition by r.spel order by r.poang desc, r.tid asc) as plats
     from public.topplista r
     where r.familj = upper(p_familj)
@@ -58,7 +65,7 @@ as $$
   order by t.spel, t.plats;
 $$;
 
-revoke all on function public.spara_resultat(text, text, text, integer, bigint) from public;
+revoke all on function public.spara_resultat(text, text, text, integer, bigint, smallint) from public;
 revoke all on function public.hamta_topplista(text) from public;
-grant execute on function public.spara_resultat(text, text, text, integer, bigint) to anon, authenticated;
+grant execute on function public.spara_resultat(text, text, text, integer, bigint, smallint) to anon, authenticated;
 grant execute on function public.hamta_topplista(text) to anon, authenticated;
