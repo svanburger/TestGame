@@ -346,3 +346,48 @@ button {
 .svarsknapp .saker-ruta, .svarsknapp .sakrad { pointer-events: none; }
 .topprad > span { white-space: nowrap; }
 .staende .topprad { font-size: 30px; letter-spacing: 0; }
+
+/* ---------- Tydligare (efter granskningen) ---------- */
+/* Felbilden och exemplet: bubblan bredvid Göran, så att bilden får plats */
+.utan-svar .fragyta { bottom: 150px; }
+.utan-svar .bubbla.fragbubbla { left: 220px !important; bottom: 40px !important; max-width: 430px; }
+.staende .utan-svar .fragyta { bottom: 170px; }
+.staende .utan-svar .bubbla.fragbubbla { max-width: 290px; }
+.utan-svar .vidare { bottom: 34px; }
+/* Glasögonen uppe till höger, så att de inte ligger på en svarsknapp */
+.glasogon { top: 84px; bottom: auto !important; right: 24px; width: 64px; height: 64px; font-size: 32px; }
+.med-knappsats .glasogon { top: auto; bottom: 30px !important; }
+.staende .med-knappsats .glasogon { top: auto; bottom: 600px !important; }
+.svarsknapp { white-space: nowrap; }
+/* Plus mellan grupperna, och varje grupp i en ram */
+.sakgrupper.med-tecken { gap: 18px; }
+.sakgrupper.med-tecken .sakgrupp { padding: 10px 14px 18px; border: 3px dashed #c9b79c; border-radius: 20px; background: rgba(255, 255, 255, 0.55); }
+.tecken { font-size: 72px; font-weight: 900; line-height: 1; }
+/* Det Göran har ätit: tydligt rött kryss */
+.sak.struken { opacity: 0.65; }
+.sak.struken::after { font-size: 1em; font-weight: 900; color: #d0021b; text-shadow: 0 0 3px #fff, 0 0 3px #fff; }
+/* Fiskarna i skålarna: större och i jämna rader */
+.skalinne { display: grid; justify-content: center; font-size: 28px; max-width: none; }
+.rodpil { color: #e0533d; }
+/* 🔊 läser upp frågan: bredvid 👓 */
+.lasknapp { position: absolute; top: 84px; right: 100px; width: 64px; height: 64px; border-radius: 50%; font-size: 30px; }
+.med-knappsats .lasknapp { top: auto; right: auto; left: 310px; bottom: 30px; }
+.staende .med-knappsats .lasknapp { left: auto; right: 100px; bottom: 600px; }
+
+/* ---------- Animering: bilden som visar hur man tänker byggs upp steg för steg ---------- */
+.animerar .bild [data-steg] {
+  animation: steg-in 0.35s ease-out both;
+  animation-delay: calc(0.3s + var(--i, 0) * var(--takt, 0.5s));
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.animerar .fragtext .svarstal { animation: steg-in 0.4s ease-out both; animation-delay: var(--slut, 0.3s); display: inline-block; }
+/* "scale" i stället för "transform", så att elementens egen placering (t.ex. siffrorna under sakerna) behålls */
+@keyframes steg-in {
+  from { opacity: 0; scale: 0.4; }
+  70% { opacity: 1; scale: 1.15; }
+  to { opacity: 1; scale: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .animerar .bild [data-steg], .animerar .fragtext .svarstal { animation: none; }
+}

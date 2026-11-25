@@ -550,9 +550,18 @@ som stör talen).
 
 ---
 
-## 6. Ljud och musik
+## 6. Ljud, röst och musik
 Ljuden skapas med Web Audio i koden, som i de andra spelen. Det finns inga
-ljudfiler och inget tal.
+ljudfiler.
+
+**Röst** (Andreas beslut efter att ha provat spelet): frågan kan läsas
+upp med enhetens egen talsyntes, till exempel "Vad blir 3 plus 2?" eller
+"Vilken tallrik har flest?".
+- För barn upp till 8 år läses frågan upp av sig själv när den visas.
+- Alla kan trycka på 🔊 bredvid 👓 för att höra frågan igen.
+- I pausmenyn kan man stänga av uppläsningen (*🗣️ Läs upp frågan*).
+- Finns ingen svensk (eller engelsk) röst på enheten syns ingen 🔊.
+- Texterna som läses upp skrivs i `lasText` i `game.js`.
 
 | När | Ljud |
 |---|---|
@@ -563,6 +572,14 @@ ljudfiler och inget tal.
 | Fisken simmar bort | Ett litet *blubb*. |
 | Knapptryck | Ett tyst *klick*. |
 | Bjällran hittas | Tre klara bjällerklangar. |
+
+**Animering** (Andreas beslut): i Görans exempel och i felbilden byggs
+bilden upp steg för steg. Hoppen på tallinjen kommer ett i taget, sakerna
+räknas, fiskarna delas ut till katterna och pizzabitarna fylls i. Det
+gröna svaret i frågan kommer sist. Hela animeringen tar högst cirka
+4 sekunder. Själva frågorna är stilla, så att barnen kan titta i lugn och
+ro. Element som ska animeras har `data-steg="0, 1, 2 …"` i `BILDER` i
+`game.js`, och `animera()` sätter takten.
 
 **Musik** (Andreas beslut): den gemensamma lugna melodin i `musik.js`
 spelas i bakgrunden, lite långsammare än i de andra spelen (tempo 84).

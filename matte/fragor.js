@@ -99,7 +99,7 @@
 
   // ---------- Saker att räkna ----------
 
-  const SAKER = ["🐟", "🧶", "🐭", "🍤", "🥛", "🧀", "🐦", "🦴", "🍰", "🥕"];
+  const SAKER = ["🐟", "🧶", "🐭", "🍤", "🍓", "🧀", "🐦", "🍪", "🍰", "🥕"];
   const MONSTERSAKER = ["🍎", "🍌", "🐟", "🧶", "⭐", "🌸", "🧀", "🔵"];
 
   // ---------- Frågetyperna ----------
@@ -135,7 +135,7 @@
       const sak = s.valj(SAKER);
       return {
         nyckel: "f" + tal.join("-") + flest,
-        text: flest ? "🔝 " + tt("flest?", "most?") : "🔻 " + tt("minst?", "fewest?"),
+        text: flest ? "⬆️ " + tt("flest", "most") : "⬇️ " + tt("minst", "fewest"),
         bild: null,
         svar: ratt,
         knappar: tal.map((n) => ({ varde: n, bild: { typ: "saker", grupper: [{ antal: n, sak }], layout: "spritt", liten: true } })),
@@ -207,7 +207,7 @@
       return {
         nyckel: "pb" + a + "+" + b,
         text: `${a} + ${b} = ?`,
-        bild: { typ: "saker", grupper: [{ antal: a, sak }, { antal: b, sak }], layout: "grupper" },
+        bild: { typ: "saker", grupper: [{ antal: a, sak }, { antal: b, sak }], layout: "grupper", tecken: "+" },
         svar: ratt,
         knappar: knappar(s, ratt, felSvar(s, ratt, [ratt + 1, ratt - 1], (p.knappar || 3) - 1, 0, p.max + 2, 3)),
         felbild: { typ: "saker", grupper: [{ antal: a, sak }, { antal: b, sak, farg: true }], layout: "rad", numrera: true },
@@ -238,8 +238,8 @@
       const ratt = hel - synliga;
       return {
         nyckel: "dh" + hel + "-" + synliga,
-        text: `${hel} = ${synliga} + ?`,
-        bild: { typ: "saker", grupper: [{ antal: synliga, sak: "🐭" }, { lada: true }], layout: "grupper" },
+        text: `${synliga} + ? = ${hel}`,
+        bild: { typ: "saker", grupper: [{ antal: synliga, sak: "🐭" }, { lada: true }], layout: "grupper", tecken: "+" },
         svar: ratt,
         knappar: knappar(s, ratt, felSvar(s, ratt, [hel, synliga, ratt + 1], (p.knappar || 3) - 1, 0, p.max, 3)),
         felbild: { typ: "saker", grupper: [{ antal: synliga, sak: "🐭" }, { antal: ratt, sak: "🐭", farg: true }], layout: "rad", numrera: true },
@@ -262,7 +262,7 @@
 
     // Dubbelt och hälften
     dubbeltHalften(p, s) {
-      const sak = s.valj(["🐟", "🍤", "🧀", "🥛"]);
+      const sak = s.valj(["🐟", "🍤", "🧀", "🍓"]);
       if (s() < 0.5) {
         const n = s.heltal(1, Math.floor(p.max / 2));
         const ratt = 2 * n;
@@ -272,7 +272,7 @@
           bild: { typ: "saker", grupper: [{ antal: n, sak }, { antal: n, sak }], layout: "spegel" },
           svar: ratt,
           knappar: p.knappsats ? null : knappar(s, ratt, felSvar(s, ratt, [ratt + 1, n, ratt - 2], 3, 0, p.max + 2, 4)),
-          felbild: { typ: "saker", grupper: [{ antal: n, sak }, { antal: n, sak, farg: true }], layout: "rad", numrera: true },
+          felbild: { typ: "saker", grupper: [{ antal: n, sak }, { antal: n, sak, farg: true }], layout: "spegel", numrera: true },
         };
       }
       const ratt = s.heltal(1, Math.floor(p.max / 2));
@@ -299,6 +299,7 @@
           const dd = s.heltal(1, d);
           v = runda(s.heltal(Math.round(p.fran * 10 ** dd), Math.round(p.till * 10 ** dd)) / 10 ** dd);
         } else v = s.heltal(p.fran, p.till);
+        if (v === 0) continue; // 0 är för lätt att välja bort (eller välja)
         if (!lista.some((x) => runda(x) === v)) lista.push(v);
       }
       const storst = s.valj([true, false]);
@@ -306,7 +307,7 @@
       const fran = Math.floor(Math.min(...lista)), till = Math.ceil(Math.max(...lista));
       return {
         nyckel: "jt" + lista.join("|") + storst,
-        text: storst ? "🔝 " + tt("störst?", "largest?") : "🔻 " + tt("minst?", "smallest?"),
+        text: storst ? "⬆️ " + tt("störst", "largest") : "⬇️ " + tt("minst", "smallest"),
         bild: null,
         svar: ratt,
         knappar: lista.map((v) => ({ varde: v, text: tal(v) })),
@@ -368,7 +369,7 @@
       const c = a * ratt;
       return {
         nyckel: "sf" + a + "-" + ratt,
-        text: `${a} · ? = ${c}`,
+        text: `? · ${a} = ${c}`,
         bild: null,
         svar: ratt,
         knappar: null,
@@ -422,31 +423,38 @@
 
     // Var pekar pilen på tallinjen?
     tallinje(p, s) {
-      const d = p.decimaler || 0, k = 10 ** d;
+      const d = p.decimaler || 0;
       const streck = p.streck; // avståndet mellan två streck
-      const antalStreck = Math.round((p.till - p.fran) / streck);
-      const i = s.heltal(1, antalStreck - 1);
-      const ratt = runda(p.fran + i * streck);
       const etikett = p.etikett || streck * 5; // vilka streck som har en siffra
+      // Med fonster visas bara en bit av talområdet, som börjar på ett tal med siffra
+      let fran = p.fran, till = p.till;
+      if (p.fonster) {
+        const forsta = Math.ceil(p.fran / etikett), sista = Math.floor((p.till - p.fonster) / etikett);
+        fran = runda(s.heltal(forsta, sista) * etikett);
+        till = runda(fran + p.fonster);
+      }
+      const antalStreck = Math.round((till - fran) / streck);
+      const i = s.heltal(1, antalStreck - 1);
+      const ratt = runda(fran + i * streck);
       const harEtikett = (v) => Math.abs(runda(v / etikett) - Math.round(v / etikett)) < 1e-9;
       if (harEtikett(ratt) && antalStreck > 2) return TYPER.tallinje(p, s); // pilen ska peka på ett streck utan siffra
+      const hoppFran = runda(Math.floor(runda(ratt / etikett)) * etikett);
       return {
         nyckel: "tl" + ratt,
-        text: "↓ = ?",
-        bild: { typ: "tallinje", fran: p.fran, till: p.till, steg: streck, etikett, pil: ratt },
+        text: "▼ = ?",
+        bild: { typ: "tallinje", fran, till, steg: streck, etikett, pil: ratt },
         svar: ratt,
         knappar: null,
         decimal: d > 0,
-        felbild: { typ: "tallinje", fran: p.fran, till: p.till, steg: streck, etikett, pil: ratt, visaPil: true, hoppFran: runda(Math.floor(ratt / etikett) * etikett) },
-        hjalp: { typ: "tallinje", fran: p.fran, till: p.till, steg: streck, etikett, pil: ratt, hoppFran: runda(Math.floor(ratt / etikett) * etikett), raknaHopp: true },
-        _k: k,
+        felbild: { typ: "tallinje", fran, till, steg: streck, etikett, pil: ratt, visaPil: true, hoppFran },
+        hjalp: { typ: "tallinje", fran, till, steg: streck, etikett, pil: ratt, hoppFran, raknaHopp: true },
       };
     },
 
     // Gånger som grupper: 3 · 4 = ?
     gangerGrupp(p, s) {
       const a = s.valj(p.tabeller);
-      const b = s.heltal(1, p.maxFaktor || 10);
+      const b = s.heltal(2, p.maxFaktor || 10);
       const ratt = a * b;
       return {
         nyckel: "gg" + b + "x" + a,
@@ -467,11 +475,11 @@
       return {
         nyckel: "dd" + hel + "/" + katter,
         text: `${hel} / ${katter} = ?`,
-        bild: hel <= 30 ? { typ: "dela", fiskar: hel, katter } : null,
+        bild: hel <= 20 ? { typ: "dela", fiskar: hel, katter } : null,
         svar: ratt,
         knappar: null,
         felbild: { typ: "dela", fiskar: hel, katter, utdelat: ratt },
-        hjalp: hel <= 30 ? null : { typ: "dela", fiskar: hel, katter },
+        hjalp: hel <= 20 ? null : { typ: "dela", fiskar: hel, katter },
       };
     },
 
@@ -494,7 +502,7 @@
       }
       // Bråket visas, man väljer pizzan
       const alt = [[k, n]];
-      const kandidater = s.blanda([[n - k, n], [k, n + 1], [k + 1, n], [k, Math.max(2, n - 1)], [1, n === 2 ? 3 : 2]]);
+      const kandidater = s.blanda([[n - k, n], [k, n + 1], [k + 1, n], [k, Math.max(2, n - 1)], [1, n === 2 ? 3 : 2], [1, 4], [3, 4]]);
       for (const [a, b] of kandidater) if (alt.length < 3 && a > 0 && a < b && !alt.some(([x, y]) => x * b === a * y)) alt.push([a, b]);
       return {
         nyckel: "bp" + ratt,
@@ -519,7 +527,7 @@
         text: "",
         brakText: `${k}/${n}`,
         textEfter: ` ${tt("av", "of")} ${hel} = ?`,
-        bild: hel <= 24 ? { typ: "saker", grupper: [{ antal: hel, sak: "🐟" }], layout: "rad" } : null,
+        bild: hel <= 24 ? { typ: "brakGrupper", delar: n, per, markerade: 0 } : null,
         svar: ratt,
         knappar: null,
         felbild: { typ: "brakGrupper", delar: n, per, markerade: k },
@@ -531,7 +539,7 @@
       const d = p.decimaler || 0, k = 10 ** d;
       for (let f = 0; f < 500; f++) {
         const a = s.heltal(p.aMin * k, p.aMax * k);
-        if (d && a % 10 === 0) continue; // ska ha en decimal
+        if (a % 10 === 0) continue; // ska ha en decimal, eller ental att dela upp
         const b = s.heltal(p.bMin, p.bMax);
         const ratt = runda((a * b) / k);
         if (ratt > p.max) continue;
@@ -564,7 +572,7 @@
       const fel = [`${k + 1}/${n}`, `${k}/${n + 1}`, `${n - k}/${n}`, `${Math.max(1, k - 1)}/${n}`].filter((b, i, l) => b !== ratt && l.indexOf(b) === i);
       return {
         nyckel: "bt" + ratt,
-        text: "↓ = ?",
+        text: "▼ = ?",
         bild: { typ: "tallinje", fran: 0, till: 1, delar: n, pil: k / n },
         svar: ratt,
         knappar: s.blanda([ratt, ...fel.slice(0, 3)]).map((v) => ({ varde: v, brak: v })),
@@ -615,7 +623,7 @@
       if (till === "decimal") fel = [tal(runda(t1 + t2 / 100)), tal(runda(d * 10)), tal(runda(d / 10)), tal(runda(1 - d))];
       else if (till === "procent") fel = [t1 + "" + t2 + " %", Math.round(d * 10) + " %", t2 + " %", Math.round(100 - pr) + " %"];
       else fel = [`${t2}/${t1}`, `${t1}/${t2 + 1}`, `${pr}/10`, `${Math.max(1, t2 - t1)}/${t2}`];
-      fel = [...new Set(fel)].filter((x) => x !== ratt && !/^0\/|\/0$/.test(x));
+      fel = [...new Set(fel)].filter((x) => x !== ratt && !/^0\/|\/0$/.test(x) && !/^0(\s|$)/.test(x));
       const alternativ = s.blanda([ratt, ...s.blanda(fel).slice(0, 3)]);
       return {
         nyckel: "sm" + b + fran + till,
@@ -637,7 +645,7 @@
         text: "? %",
         bild: { typ: "rutnat", fyllda: pr },
         svar: pr,
-        knappar: s.blanda([pr, ...felSvar(s, pr, fel, 3, 1, 100)]).map((v) => ({ varde: v, text: v + " %" })),
+        knappar: s.blanda([pr, ...felSvar(s, pr, fel, 3, 5, 95)]).map((v) => ({ varde: v, text: v + " %" })),
         felbild: { typ: "rutnat", fyllda: pr, raknaRader: true },
       };
     },
@@ -666,7 +674,9 @@
     // · och / med 10 och 100
     gangerTio(p, s) {
       const d = s.heltal(1, 2);
-      const a = runda(s.heltal(11, 999) / 10 ** d);
+      let a;
+      do a = runda(s.heltal(11, 999) / 10 ** d);
+      while (a % 1 === 0);
       const m = s.valj([10, 100]);
       const ganger = s() < 0.6;
       const ratt = runda(ganger ? a * m : a / m);
@@ -677,7 +687,7 @@
         svar: ratt,
         knappar: null,
         decimal: true,
-        felbild: { typ: "rader", rader: [`${tal(a)} ${ganger ? "·" : "/"} ${m} = ${tal(ratt)}`, ganger ? tt(`Siffrorna flyttar ${m === 10 ? "ett steg" : "två steg"} åt vänster.`, `The digits move ${m === 10 ? "one place" : "two places"} to the left.`) : tt(`Siffrorna flyttar ${m === 10 ? "ett steg" : "två steg"} åt höger.`, `The digits move ${m === 10 ? "one place" : "two places"} to the right.`)] },
+        felbild: { typ: "rader", rader: [ganger ? tt(`Siffrorna flyttar ${m === 10 ? "ett steg" : "två steg"} åt vänster.`, `The digits move ${m === 10 ? "one place" : "two places"} to the left.`) : tt(`Siffrorna flyttar ${m === 10 ? "ett steg" : "två steg"} åt höger.`, `The digits move ${m === 10 ? "one place" : "two places"} to the right.`)] },
       };
     },
 
@@ -691,23 +701,26 @@
         return {
           nyckel: "vb" + a + "-" + b + "-" + c + "-" + x,
           text: ekv(`${a}x + ${b} = ${c}x + ${dd}`),
+          rad2: "x = ?",
           bild: { typ: "vag", vanster: { lador: a, fiskar: b }, hoger: { lador: c, fiskar: dd } },
           svar: x,
           knappar: null,
-          felbild: { typ: "rader", rader: [ekv(`${a}x + ${b} = ${c}x + ${dd}`), ekv(`${a - c}x + ${b} = ${dd}`), ekv(`${a - c}x = ${dd - b}`), `x = ${x}`] },
+          felbild: { typ: "rader", rader: [ekv(`${a - c}x + ${b} = ${dd}`), ekv(`${a - c}x = ${dd - b}`), `x = ${x}`] },
         };
       }
       const a = s.heltal(p.form === "ett" ? 1 : 2, p.maxA || 5);
       const b = s.heltal(p.form === "ett" ? 1 : 0, 10);
       const c = a * x + b;
-      const text = a === 1 ? `x + ${b} = ${c}` : `${a}x + ${b} = ${c}`.replace(" + 0 ", " ");
+      const ax = a === 1 ? "x" : p.punkt ? `${a} · x` : `${a}x`;
+      const text = (b ? `${ax} + ${b} = ${c}` : `${ax} = ${c}`);
       return {
         nyckel: "v" + a + "-" + b + "-" + x,
         text,
+        rad2: "x = ?",
         bild: { typ: "vag", vanster: { lador: a, fiskar: b }, hoger: { lador: 0, fiskar: c } },
         svar: x,
         knappar: null,
-        felbild: { typ: "rader", rader: b ? [text, `${a === 1 ? "" : a}x = ${c} − ${b} = ${c - b}`, a === 1 ? `x = ${x}` : `x = ${c - b} / ${a} = ${x}`] : [text, `x = ${c} / ${a} = ${x}`] },
+        felbild: { typ: "rader", rader: b ? [`${ax} = ${c} − ${b} = ${c - b}`, a === 1 ? `x = ${x}` : `x = ${c - b} / ${a} = ${x}`] : [`x = ${c} / ${a} = ${x}`] },
       };
     },
 
@@ -869,7 +882,7 @@
         const vanner = s.valj([2, 3, 4, 5]), per = s.heltal(3, 9);
         const alla = (vanner + 1) * per;
         return {
-          text: tt(`Göran har ${alla} räkor. Han delar lika med ${vanner} vänner. Hur många får var och en?`, `Gerald has ${alla} prawns. He shares them equally with ${vanner} friends. How many does each get?`),
+          text: tt(`Göran och ${vanner} vänner delar lika på ${alla} räkor. Hur många räkor får var och en?`, `Gerald and ${vanner} friends share ${alla} prawns equally. How many prawns does each cat get?`),
           bild: { typ: "emoji", text: "🍤 🐱" + " 🐈".repeat(vanner) },
           svar: per,
           felbild: { typ: "rader", rader: [tt(`${vanner} vänner + Göran = ${vanner + 1} katter`, `${vanner} friends + Gerald = ${vanner + 1} cats`), `${alla} / ${vanner + 1} = ${per}`] },
@@ -947,7 +960,7 @@
     ],
     6: [
       { typer: ["rakna"], fran: 1, till: 10, layout: "tioruta", knappar: 4 },
-      { typer: ["jamforTal"], fran: 0, till: 20, antal: 3 },
+      { typer: ["jamforTal"], fran: 1, till: 20, antal: 3 },
       { typer: ["talrad"], fran: 0, till: 20, knappar: 4 },
       { typer: ["plusBild"], max: 10, knappar: 4 },
       { typer: ["minusBild", "tiokamrat"], max: 10, knappar: 4 },
@@ -958,7 +971,7 @@
       { typer: ["tiotalEntal"], fran: 11, till: 99 },
       { typer: ["plus", "minus"], aMin: 1, aMax: 19, bMin: 1, bMax: 9, max: 20, vaxling: false },
       { typer: ["plus", "minus"], aMin: 2, aMax: 18, bMin: 2, bMax: 9, max: 20, vaxling: true },
-      { typer: ["jamforTal", "talrad"], fran: 0, till: 100, antal: 3, knappsats: true },
+      { typer: ["jamforTal", "talrad"], fran: 1, till: 100, antal: 3, knappsats: true },
       { typer: ["saknadTerm"], max: 20, knappsats: true },
       { typer: ["talmonster"], fran: 0, till: 50, steg: [2, 5, 10, -1], max: 100 },
       { typer: ["plus", "minus"], aMin: 11, aMax: 99, bMin: 1, bMax: 9, max: 99, vaxling: false },
@@ -972,7 +985,7 @@
       { typer: ["gangerGrupp"], tabeller: [2, 5, 10] },
       { typer: ["delatDelning"], tabeller: [2, 5, 10] },
       { typer: ["brakPizza", "brakAvAntal"], namnare: [2, 3, 4], taljare: 1, max: 20 },
-      { typer: ["tallinje"], fran: 0, till: 100, streck: 2, etikett: 10 },
+      { typer: ["tallinje"], fran: 0, till: 100, streck: 2, etikett: 10, fonster: 30 },
       { typer: ["saknadTerm", "talmonster"], min: 20, max: 100, fran: 0, till: 60, steg: [3, 4, -5, -10] },
     ],
     9: [
@@ -982,21 +995,21 @@
       { typer: ["gangerGrupp"], tabeller: [2, 3, 4, 5, 10] },
       { typer: ["delatDelning"], tabeller: [2, 3, 4, 5, 10] },
       { typer: ["brakAvAntal"], namnare: [2, 3, 4, 5], max: 30 },
-      { typer: ["tallinje"], fran: 0, till: 1000, streck: 20, etikett: 100 },
+      { typer: ["tallinje"], fran: 0, till: 1000, streck: 20, etikett: 100, fonster: 300 },
       { typer: ["talmonster"], fran: 0, till: 100, steg: [3, 4, 5, 25, -10, "x2"], max: 200 },
       { typer: ["saknadFaktor", "saknadTerm"], tabeller: [2, 3, 4, 5, 10], min: 50, max: 200 },
       { typer: ["plus", "gangerGrupp"], aMin: 100, aMax: 600, bMin: 12, bMax: 399, max: 1000, vaxling: true, tabeller: [3, 4, 6] },
     ],
     10: [
-      { typer: ["tiotalEntal", "tallinje"], fran: 1001, till: 9999, streck: 200, etikett: 1000 },
+      { typer: ["tiotalEntal", "tallinje"], fran: 1001, till: 9999, streck: 200, etikett: 1000, fonster: 3000 },
       { typer: ["gangerGrupp"], tabeller: [3, 4, 6, 7, 8, 9] },
       { typer: ["delatDelning"], tabeller: [3, 4, 6, 7, 8, 9] },
-      { typer: ["tallinje"], fran: 0, till: 2, streck: 0.1, etikett: 1, decimaler: 1 },
+      { typer: ["tallinje"], fran: 0, till: 2, streck: 0.1, etikett: 0.5, decimaler: 1, fonster: 1.5 },
       { typer: ["brakPizza", "brakTallinje"], namnare: [3, 4, 5, 6, 8], lage: "brak" },
       { typer: ["negativ"], min: -10, max: 10, maxSteg: 8, krav: "korsa" },
       { typer: ["ganger"], aMin: 12, aMax: 49, bMin: 2, bMax: 6, max: 300 },
       { typer: ["talmonster"], fran: 1, till: 30, steg: [3, 4, 6, 7, 9, 11, -4, -6, "x2"], max: 200 },
-      { typer: ["vag"], maxX: 10, maxA: 5 },
+      { typer: ["vag"], maxX: 10, maxA: 5, punkt: true },
       { typer: ["lastal"], steg: 1 },
     ],
     11: [
@@ -1007,12 +1020,12 @@
       { typer: ["negativ"], min: -20, max: 20, maxSteg: 12 },
       { typer: ["gangerTio"] },
       { typer: ["brakAvAntal"], namnare: [3, 4, 5, 10], max: 100 },
-      { typer: ["vag"], maxX: 20, maxA: 9 },
+      { typer: ["vag"], maxX: 20, maxA: 9, punkt: true },
       { typer: ["proportion"], max: 100, maxGgr: 6 },
       { typer: ["lastal"], steg: 2 },
     ],
     12: [
-      { typer: ["jamforTal", "tallinje"], fran: 0, till: 1, decimaler: 3, antal: 4, streck: 0.05, etikett: 0.5 },
+      { typer: ["jamforTal", "tallinje"], fran: 0, till: 1, decimaler: 3, antal: 4, streck: 0.05, etikett: 0.25, fonster: 0.75 },
       { typer: ["ganger"], aMin: 0.1, aMax: 9.9, bMin: 2, bMax: 9, max: 100, decimaler: 1 },
       { typer: ["procentAvAntal"], procent: [5, 10, 20, 25, 50, 75], max: 1000 },
       { typer: ["sammaTal"] },
