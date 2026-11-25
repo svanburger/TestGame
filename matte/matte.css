@@ -391,3 +391,13 @@ button {
 @media (prefers-reduced-motion: reduce) {
   .animerar .bild [data-steg], .animerar .fragtext .svarstal { animation: none; }
 }
+
+/* Skylten för "flest": en liten hög och en stor hög som handen pekar på */
+.flestskylt { display: inline-flex; align-items: center; gap: 28px; padding: 10px 26px 4px; border: 4px solid #2a1f14; border-radius: 22px; background: #fff; }
+.flestskylt > div { display: flex; flex-direction: column; align-items: center; }
+.flestskylt .hog { display: grid; grid-template-columns: repeat(3, auto); justify-items: center; font-size: 44px; line-height: 1.1; }
+.flestskylt .liten { opacity: 0.45; }
+.flestskylt .liten .hog { grid-template-columns: auto; }
+.flestskylt .stor { padding: 0 12px 8px; border-radius: 16px; background: #c8ebcb; }
+.flestskylt .hand { font-size: 44px; line-height: 1; margin-top: -6px; animation: peka 0.8s ease-in-out infinite alternate; }
+@keyframes peka { to { translate: 0 8px; } }

@@ -136,7 +136,9 @@
       const sak = s.valj(SAKER);
       return {
         nyckel: "f" + tal.join("-") + flest,
-        text: tt("Tryck där det finns flest " + sak, "Tap where there are the most " + sak),
+        text: "",
+        // En skylt i stället för text: en liten hög och en stor hög, och handen pekar på den stora
+        skylt: { typ: "flestSkylt", sak },
         mest: flest,
         bild: null,
         svar: ratt,

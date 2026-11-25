@@ -532,6 +532,11 @@ const BILDER = {
     return `<svg viewBox="0 0 ${w} ${H + 72}" width="${w}" height="${H + 72}">${s}</svg>`;
   },
 
+  flestSkylt(b) {
+    const hog = (n) => `<span class="hog">${Array.from({ length: n }, () => `<span>${b.sak}</span>`).join("")}</span>`;
+    return `<div class="flestskylt"><div class="liten">${hog(1)}</div><div class="stor"><span class="hand">👇</span>${hog(6)}</div></div>`;
+  },
+
   emoji(b) {
     return `<div class="emojibild">${esc(b.text)}</div>`;
   },
@@ -828,6 +833,7 @@ function fragtextHtml(q, visaSvar) {
   const delar = [];
   if (q.fore) delar.push(q.fore.brak ? brakHtml(q.fore.brak) : esc(q.fore.text));
   if (q.brakText) delar.push(brakHtml(q.brakText));
+  if (q.skylt) return `<div class="fragtext">${ritaBild(q.skylt)}</div>`;
   let text = esc(q.text || "") + esc(q.textEfter || "");
   if (q.stor) return `<div class="fragtext jatte">${text}</div>`;
   // Ekvationer: frågan står på en egen rad under ("x = ?")
