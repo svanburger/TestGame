@@ -81,7 +81,7 @@ const REPLIKER_SMA = {
   ratt: [t("Kattenkelt! 🐾", "Easy-peasy! 🐾"), t("Purrfekt! ⭐", "Purrfect! ⭐"), t("Rätt! 😺", "Right! 😺"), t("Mjau-bra! 🎉", "Meow-great! 🎉")],
   iRad3: [t("Tre i rad! 🐟🐟🐟", "Three in a row! 🐟🐟🐟")],
   iRad5: [t("Fem i rad! ⭐", "Five in a row! ⭐")],
-  fel: [t("Nästan! Titta här 👇", "Almost! Look here 👇"), t("Vi tittar tillsammans 👀", "Let's look together 👀")],
+  fel: [t("Nästan! Titta här 👆", "Almost! Look here 👆"), t("Vi tittar tillsammans 👀", "Let's look together 👀")],
   visa: [t("Titta! 👀", "Look! 👀"), t("Följ min tass 🐾", "Follow my paw 🐾")],
 };
 
@@ -329,7 +329,10 @@ const BILDER = {
   },
 
   tallinje(b) {
-    const B = 860, X0 = 40, X1 = B - 40, Y = 110;
+    // Få streck: en kortare linje som inte behöver krympas lika mycket bredvid knappsatsen
+    const antalStreck = b.delar || (b.utanStreck ? 0 : Math.round((b.till - b.fran) / b.steg));
+    const B = antalStreck && antalStreck <= 16 ? 660 : 860, X0 = 40, X1 = B - 40, Y = 110;
+    const textStorlek = B < 860 ? 32 : 28;
     const x = (v) => X0 + ((v - b.fran) / (b.till - b.fran)) * (X1 - X0);
     let s = "";
     // Linjen (termometern är blå under noll och röd över)
@@ -350,11 +353,13 @@ const BILDER = {
     streck.forEach((v, k) => {
       const lang = harEtikett(v, k);
       s += `<line x1="${x(v)}" y1="${Y - (lang ? 18 : 11)}" x2="${x(v)}" y2="${Y + (lang ? 18 : 11)}" stroke="#2b1d0e" stroke-width="${lang ? 4 : 2.5}"/>`;
+      const vidPil = b.visaPil && b.pil !== undefined && Math.abs(v - b.pil) < 1e-9;
+      if (vidPil) return; // Under pilen står svaret i grönt i stället
       if (b.brakEtiketter && b.delar) s += `<text x="${x(v)}" y="${Y + 50}" font-size="24" text-anchor="middle" font-weight="800">${k === 0 ? 0 : k === b.delar ? 1 : k + "/" + b.delar}</text>`;
       else if (lang) {
         medSiffra.add(F.runda(v));
         const farg = b.hopp && F.runda(v) === F.runda(b.hopp[1]) ? "#2e9e4f" : b.hopp && F.runda(v) === F.runda(b.hopp[0]) ? "#d0702a" : "#2b1d0e";
-        s += `<text x="${x(v)}" y="${Y + 50}" font-size="28" text-anchor="middle" font-weight="800" fill="${farg}">${tal(v)}</text>`;
+        s += `<text x="${x(v)}" y="${Y + 52}" font-size="${textStorlek}" text-anchor="middle" font-weight="800" fill="${farg}">${tal(v)}</text>`;
       }
     });
     if (b.utanStreck) {
@@ -381,7 +386,16 @@ const BILDER = {
       let nr = 0;
       for (let v = b.hoppFran; v < b.pil - 1e-9 && nr++ < 30; v = F.runda(v + st)) s += bage(v, F.runda(v + st), "+" + tal(st), "#3d8be0");
     }
-    if (b.prickar) for (const v of b.prickar) s += punkt(x(v), Y, v === b.markera ? "#2e9e4f" : "#3d8be0", tal(v), true, true);
+    if (b.prickar) {
+      const sorterade = [...b.prickar].sort((a, c) => a - c);
+      sorterade.forEach((v, i) => {
+        const nara = sorterade.some((w) => w !== v && Math.abs(x(w) - x(v)) < 110);
+        const ovanfor = !nara || i % 2 === 0;
+        const ty = ovanfor ? Y - 28 : Y + 56;
+        if (v === b.markera) s += `<circle cx="${x(v)}" cy="${Y}" r="15" fill="#2e9e4f" stroke="#2b1d0e" stroke-width="2"/><text x="${x(v)}" y="${ty}" font-size="36" text-anchor="middle" font-weight="900" fill="#2e9e4f">✔ ${tal(v)}</text>`;
+        else s += `<circle cx="${x(v)}" cy="${Y}" r="10" fill="#3d8be0" stroke="#2b1d0e" stroke-width="2"/><text x="${x(v)}" y="${ty}" font-size="30" text-anchor="middle" font-weight="900" fill="#3d8be0">${tal(v)}</text>`;
+      });
+    }
     if (b.pil !== undefined) {
       s += `<path d="M${x(b.pil)} ${Y - 20} l-18 -32 h36 z" fill="#e0533d" stroke="#2b1d0e" stroke-width="2.5"/>`;
       if (b.visaPil) {
@@ -486,11 +500,11 @@ const BILDER = {
     let s = "";
     for (let i = 0; i < b.delar; i++) {
       s += `<rect x="${i * del + 2}" y="2" width="${del}" height="64" fill="${i < b.markerade ? "#ffd95e" : "#fff"}" stroke="#2b1d0e" stroke-width="3"/>`;
-      const text = b.visaVarden ? tal(b.hel / b.delar) : i < b.markerade && b.delar <= 10 ? "?" : "";
+      const text = b.visaVarden ? (b.delar <= 10 || i < b.markerade ? tal(b.hel / b.delar) : "") : i < b.markerade && b.delar <= 10 ? "?" : "";
       if (text) s += `<text x="${i * del + del / 2 + 2}" y="44" font-size="${b.delar > 10 ? 14 : 24}" font-weight="800" text-anchor="middle">${text}</text>`;
     }
     s += `<path d="M2 80 v10 h${B} v-10" stroke="#2b1d0e" stroke-width="3" fill="none"/><text x="${B / 2}" y="120" font-size="28" font-weight="900" text-anchor="middle">${tal(b.hel)}</text>`;
-    return `<svg viewBox="0 0 ${B + 6} 130" width="${B + 6}" height="130">${s}</svg>${b.visaVarden ? `<div class="under">${b.markerade} · ${tal(b.hel / b.delar)} = ${tal((b.markerade * b.hel) / b.delar)}</div>` : ""}`;
+    return `<svg viewBox="0 0 ${B + 6} 130" width="${B + 6}" height="130">${s}</svg>${b.visaVarden && b.markerade > 1 ? `<div class="under">${b.markerade} · ${tal(b.hel / b.delar)} = ${tal((b.markerade * b.hel) / b.delar)}</div>` : ""}`;
   },
 
   vag(b) {
@@ -704,7 +718,7 @@ function fragtextHtml(q, visaSvar) {
   if (q.rad2) text += "<br>" + esc(q.rad2);
   if (text.trim() === "?" || text.trim() === "? ") text = svar;
   else if (text.includes("?")) text = text.replace("?", svar);
-  else if (visaSvar && !q.knappar) text += " = " + svar;
+  else if (visaSvar && !q.knappar && text.trim()) text += " = " + svar;
   // Samma röda pil som på tallinjen
   text = text.replace("▼", '<span class="rodpil">▼</span>');
   const html = delar.join(" ") + " " + text;
@@ -867,7 +881,7 @@ function svara(givet, knapp) {
       // Rätt knapp visas också
       // Den rätta knappen visas också, men bara när svaret inte redan står grönt i frågan
       const rattKnapp = q.knappar && q.knappar.find((k) => String(k.varde) === String(q.svar));
-      if (rattKnapp && rattKnapp.bild) ny.querySelector(".fragyta").insertAdjacentHTML("beforeend", `<div class="rattknapp">✔ ${ritaBild(rattKnapp.bild)}</div>`);
+      if (rattKnapp && rattKnapp.bild && q.typ !== "flest") ny.querySelector(".fragyta").insertAdjacentHTML("beforeend", `<div class="rattknapp">✔ ${ritaBild(rattKnapp.bild)}</div>`);
       krympBild(ny);
     }, 450);
   }

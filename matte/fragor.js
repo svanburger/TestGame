@@ -299,6 +299,7 @@
           const dd = s.heltal(1, d);
           v = runda(s.heltal(Math.round(p.fran * 10 ** dd), Math.round(p.till * 10 ** dd)) / 10 ** dd);
         } else v = s.heltal(p.fran, p.till);
+        if (v === 0) continue; // 0 är för lätt att välja bort (eller välja)
         if (!lista.some((x) => runda(x) === v)) lista.push(v);
       }
       const storst = s.valj([true, false]);
@@ -453,7 +454,7 @@
     // Gånger som grupper: 3 · 4 = ?
     gangerGrupp(p, s) {
       const a = s.valj(p.tabeller);
-      const b = s.heltal(1, p.maxFaktor || 10);
+      const b = s.heltal(2, p.maxFaktor || 10);
       const ratt = a * b;
       return {
         nyckel: "gg" + b + "x" + a,
@@ -474,11 +475,11 @@
       return {
         nyckel: "dd" + hel + "/" + katter,
         text: `${hel} / ${katter} = ?`,
-        bild: hel <= 30 ? { typ: "dela", fiskar: hel, katter } : null,
+        bild: hel <= 20 ? { typ: "dela", fiskar: hel, katter } : null,
         svar: ratt,
         knappar: null,
         felbild: { typ: "dela", fiskar: hel, katter, utdelat: ratt },
-        hjalp: hel <= 30 ? null : { typ: "dela", fiskar: hel, katter },
+        hjalp: hel <= 20 ? null : { typ: "dela", fiskar: hel, katter },
       };
     },
 
@@ -526,7 +527,7 @@
         text: "",
         brakText: `${k}/${n}`,
         textEfter: ` ${tt("av", "of")} ${hel} = ?`,
-        bild: hel <= 40 ? { typ: "brakGrupper", delar: n, per, markerade: 0 } : null,
+        bild: hel <= 24 ? { typ: "brakGrupper", delar: n, per, markerade: 0 } : null,
         svar: ratt,
         knappar: null,
         felbild: { typ: "brakGrupper", delar: n, per, markerade: k },
@@ -622,7 +623,7 @@
       if (till === "decimal") fel = [tal(runda(t1 + t2 / 100)), tal(runda(d * 10)), tal(runda(d / 10)), tal(runda(1 - d))];
       else if (till === "procent") fel = [t1 + "" + t2 + " %", Math.round(d * 10) + " %", t2 + " %", Math.round(100 - pr) + " %"];
       else fel = [`${t2}/${t1}`, `${t1}/${t2 + 1}`, `${pr}/10`, `${Math.max(1, t2 - t1)}/${t2}`];
-      fel = [...new Set(fel)].filter((x) => x !== ratt && !/^0\/|\/0$/.test(x));
+      fel = [...new Set(fel)].filter((x) => x !== ratt && !/^0\/|\/0$/.test(x) && !/^0(\s|$)/.test(x));
       const alternativ = s.blanda([ratt, ...s.blanda(fel).slice(0, 3)]);
       return {
         nyckel: "sm" + b + fran + till,
@@ -1003,7 +1004,7 @@
       { typer: ["tiotalEntal", "tallinje"], fran: 1001, till: 9999, streck: 200, etikett: 1000, fonster: 3000 },
       { typer: ["gangerGrupp"], tabeller: [3, 4, 6, 7, 8, 9] },
       { typer: ["delatDelning"], tabeller: [3, 4, 6, 7, 8, 9] },
-      { typer: ["tallinje"], fran: 0, till: 2, streck: 0.1, etikett: 1, decimaler: 1 },
+      { typer: ["tallinje"], fran: 0, till: 2, streck: 0.1, etikett: 0.5, decimaler: 1, fonster: 1.5 },
       { typer: ["brakPizza", "brakTallinje"], namnare: [3, 4, 5, 6, 8], lage: "brak" },
       { typer: ["negativ"], min: -10, max: 10, maxSteg: 8, krav: "korsa" },
       { typer: ["ganger"], aMin: 12, aMax: 49, bMin: 2, bMax: 6, max: 300 },
@@ -1024,7 +1025,7 @@
       { typer: ["lastal"], steg: 2 },
     ],
     12: [
-      { typer: ["jamforTal", "tallinje"], fran: 0, till: 1, decimaler: 3, antal: 4, streck: 0.05, etikett: 0.5 },
+      { typer: ["jamforTal", "tallinje"], fran: 0, till: 1, decimaler: 3, antal: 4, streck: 0.05, etikett: 0.25, fonster: 0.75 },
       { typer: ["ganger"], aMin: 0.1, aMax: 9.9, bMin: 2, bMax: 9, max: 100, decimaler: 1 },
       { typer: ["procentAvAntal"], procent: [5, 10, 20, 25, 50, 75], max: 1000 },
       { typer: ["sammaTal"] },
