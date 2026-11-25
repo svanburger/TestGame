@@ -52,7 +52,7 @@ const REPLIKER = {
   iRad5: [t("Fem i rad! Det är lika mycket som fem fiskpinnar. Jag har räknat.", "Five in a row! That's as many as five fish fingers. I counted.")],
   fel: [
     t("Mjaa… nästan. Titta här.", "Meeow… almost. Look here."), t("Bra försök! Så här gör man.", "Good try! This is how it's done."),
-    t("Det där var svårt. Jag fick tänka länge själv. Jag somnade.", "That was hard. I had to think for ages myself. I fell asleep."), t("Vi tittar tillsammans.", "Let's look together."),
+    t("Det där var svårt. Jag fick också tänka länge.", "That was a hard one. I had to think for a while too."), t("Vi tittar tillsammans.", "Let's look together."),
   ],
   visa: [
     t("Jag har lyssnat på en podd om det här. Följ min tass. 🐾", "I've listened to a podcast about this. Follow my paw. 🐾"),
@@ -74,6 +74,15 @@ const REPLIKER = {
     t("Jag har bokat in en tupplur klockan två. Och tre. Och fyra.", "I've booked a nap at two. And three. And four."),
     t("Jag har köpt ett gymkort. Jag har inte varit där, men jag tänker på det.", "I've bought a gym membership. I haven't been, but I think about it."),
   ],
+};
+
+// Kortare repliker för 5–7 år, som går att förstå utan att läsa så mycket
+const REPLIKER_SMA = {
+  ratt: [t("Kattenkelt! 🐾", "Easy-peasy! 🐾"), t("Purrfekt! ⭐", "Purrfect! ⭐"), t("Rätt! 😺", "Right! 😺"), t("Mjau-bra! 🎉", "Meow-great! 🎉")],
+  iRad3: [t("Tre i rad! 🐟🐟🐟", "Three in a row! 🐟🐟🐟")],
+  iRad5: [t("Fem i rad! ⭐", "Five in a row! ⭐")],
+  fel: [t("Nästan! Titta här 👇", "Almost! Look here 👇"), t("Vi tittar tillsammans 👀", "Let's look together 👀")],
+  visa: [t("Titta! 👀", "Look! 👀"), t("Följ min tass 🐾", "Follow my paw 🐾")],
 };
 
 // ---------- Göran, ritad med former ----------
@@ -146,7 +155,7 @@ function sparaInstallning(namn, varde) {
 
 const senastSagt = {};
 function replik(sort) {
-  const lista = REPLIKER[sort];
+  const lista = (S.alder <= 7 && REPLIKER_SMA[sort]) || REPLIKER[sort];
   let r;
   do r = lista[Math.floor(Math.random() * lista.length)];
   while (lista.length > 1 && r === senastSagt[sort]);
@@ -289,7 +298,8 @@ const BILDER = {
     if (b.layout === "pase") return `<div class="pase">${alla.map(sak).join("")}</div>${under}`;
     if (b.layout === "grupper" || b.layout === "spegel") {
       const grupper = b.grupper.map((g, gi) => `<div class="sakgrupp">${alla.filter((s) => s.grupp === gi).map(sak).join("")}</div>`);
-      return `<div class="sakgrupper${b.layout === "spegel" ? " spegel" : ""}">${grupper.join(b.layout === "spegel" ? '<div class="spegellinje"></div>' : "")}</div>${under}`;
+      const mellan = b.layout === "spegel" ? '<div class="spegellinje"></div>' : b.tecken ? `<div class="tecken">${b.tecken}</div>` : "";
+      return `<div class="sakgrupper${b.layout === "spegel" ? " spegel" : ""}${b.tecken ? " med-tecken" : ""}">${grupper.join(mellan)}</div>${under}`;
     }
     return `<div class="sakrad">${alla.map(sak).join("")}</div>${under}`;
   },
@@ -369,11 +379,11 @@ const BILDER = {
     if (b.hoppFran !== undefined && b.pil !== undefined && b.hoppFran !== b.pil) {
       const st = b.steg;
       let nr = 0;
-      for (let v = b.hoppFran; v < b.pil - 1e-9 && nr < 30; v = F.runda(v + st)) s += bage(v, F.runda(v + st), b.raknaHopp || b.visaPil ? String(++nr) : "", "#3d8be0");
+      for (let v = b.hoppFran; v < b.pil - 1e-9 && nr++ < 30; v = F.runda(v + st)) s += bage(v, F.runda(v + st), "+" + tal(st), "#3d8be0");
     }
     if (b.prickar) for (const v of b.prickar) s += punkt(x(v), Y, v === b.markera ? "#2e9e4f" : "#3d8be0", tal(v), true, true);
     if (b.pil !== undefined) {
-      s += `<path d="M${x(b.pil)} ${Y - 22} l-14 -26 h28 z" fill="#e0533d" stroke="#2b1d0e" stroke-width="2"/>`;
+      s += `<path d="M${x(b.pil)} ${Y - 20} l-18 -32 h36 z" fill="#e0533d" stroke="#2b1d0e" stroke-width="2.5"/>`;
       if (b.visaPil) {
         const text = b.delar ? Math.round(b.pil * b.delar) + "/" + b.delar : tal(b.pil);
         s += `<text x="${x(b.pil)}" y="${Y + 84}" font-size="32" text-anchor="middle" font-weight="900" fill="#2e9e4f">${text}</text>`;
@@ -391,14 +401,15 @@ const BILDER = {
     const delar = [];
     const grupp = (antal, rita, varde) => {
       if (!antal) return;
-      delar.push(`<div class="buntgrupp"><div class="buntar">${Array.from({ length: antal }, rita).join("")}</div>${b.visaTal ? `<b>${antal} · ${varde}</b>` : ""}</div>`);
+      delar.push(`<div class="buntgrupp"><div class="buntar">${Array.from({ length: antal }, rita).join("")}</div>${b.visaTal ? `<b>${tal(antal * varde)}</b>` : ""}</div>`);
     };
     grupp(b.tusental, () => '<span class="tusen">1000</span>', 1000);
     grupp(b.hundratal, () => '<span class="hundra"></span>', 100);
     grupp(b.tiotal, () => '<span class="tia"></span>', 10);
     grupp(b.ental, () => '<span class="etta"></span>', 1);
     const summa = b.tusental * 1000 + b.hundratal * 100 + b.tiotal * 10 + b.ental;
-    return `<div class="buntbild">${delar.join("")}</div>${b.visaTal ? `<div class="under">= ${tal(summa)}</div>` : ""}`;
+    const termer = [b.tusental * 1000, b.hundratal * 100, b.tiotal * 10, b.ental].filter((v) => v > 0);
+    return `<div class="buntbild">${delar.join("")}</div>${b.visaTal ? `<div class="under">${termer.map(tal).join(" + ")} = ${tal(summa)}</div>` : ""}`;
   },
 
   grupper(b) {
@@ -406,8 +417,8 @@ const BILDER = {
     let summa = 0;
     const skalar = Array.from({ length: b.antal }, () => {
       summa += b.per;
-      const innehall = fisk ? "🐟".repeat(b.per) : '<i class="prick"></i>'.repeat(b.per);
-      return `<div class="skal"><div class="skalinne${fisk ? "" : " prickar"}">${innehall}</div>${b.numrera ? `<b>${summa}</b>` : ""}</div>`;
+      const innehall = fisk ? "<span>🐟</span>".repeat(b.per) : '<i class="prick"></i>'.repeat(b.per);
+      return `<div class="skal"><div class="skalinne${fisk ? "" : " prickar"}" style="${skalKolumner(b.per)}">${innehall}</div>${b.numrera ? `<b>${summa}</b>` : ""}</div>`;
     });
     return `<div class="skalar${b.antal > 5 ? " tva-rader" : ""}">${skalar.join("")}</div>`;
   },
@@ -443,8 +454,10 @@ const BILDER = {
   },
 
   brakGrupper(b) {
-    const grupper = Array.from({ length: b.delar }, (_, i) => `<div class="skal${i < b.markerade ? " vald" : ""}"><div class="skalinne">${"🐟".repeat(Math.min(b.per, 12))}${b.per > 12 ? "…" : ""}</div><b>${b.per}</b></div>`);
-    return `<div class="skalar${b.delar > 5 ? " tva-rader" : ""}">${grupper.join("")}</div><div class="under">${b.markerade} · ${b.per} = ${b.markerade * b.per}</div>`;
+    // Bara i felbilden står det hur många det är i varje skål
+    const visa = b.markerade > 0;
+    const grupper = Array.from({ length: b.delar }, (_, i) => `<div class="skal${i < b.markerade ? " vald" : ""}"><div class="skalinne" style="${skalKolumner(Math.min(b.per, 12))}">${"<span>🐟</span>".repeat(Math.min(b.per, 12))}${b.per > 12 ? "…" : ""}</div>${visa ? `<b>${b.per}</b>` : ""}</div>`);
+    return `<div class="skalar${b.delar > 5 ? " tva-rader" : ""}">${grupper.join("")}</div>${b.markerade > 1 ? `<div class="under">${b.markerade} · ${b.per} = ${b.markerade * b.per}</div>` : ""}`;
   },
 
   rader(b) {
@@ -507,6 +520,12 @@ const BILDER = {
     return `<div class="emojibild">${esc(b.text)}</div>`;
   },
 };
+
+// Fiskarna i en skål ligger i jämna rader: 6 blir 3 + 3, 10 blir 5 + 5
+function skalKolumner(antal) {
+  const kolumner = antal <= 3 ? antal : antal <= 10 ? Math.ceil(antal / 2) : Math.ceil(antal / 3);
+  return `grid-template-columns: repeat(${kolumner}, auto)`;
+}
 
 function ritaBild(b) {
   if (!b) return "";
@@ -681,13 +700,18 @@ function fragtextHtml(q, visaSvar) {
   if (q.brakText) delar.push(brakHtml(q.brakText));
   let text = esc(q.text || "") + esc(q.textEfter || "");
   if (q.stor) return `<div class="fragtext jatte">${text}</div>`;
+  // Ekvationer: frågan står på en egen rad under ("x = ?")
+  if (q.rad2) text += "<br>" + esc(q.rad2);
   if (text.trim() === "?" || text.trim() === "? ") text = svar;
   else if (text.includes("?")) text = text.replace("?", svar);
-  else if (visaSvar && !q.knappar) text += " " + svar;
+  else if (visaSvar && !q.knappar) text += " = " + svar;
+  // Samma röda pil som på tallinjen
+  text = text.replace("▼", '<span class="rodpil">▼</span>');
   const html = delar.join(" ") + " " + text;
-  const langd = (q.text || "").length + (q.textEfter || "").length;
+  const langd = Math.max((q.text || "").length + (q.textEfter || "").length, (q.rad2 || "").length);
+  const smal = !q.knappar; // Bredvid knappsatsen är det mindre plats
   if (!html.trim()) return "";
-  return `<div class="fragtext${langd > 22 ? " liten" : langd > 12 ? " mellan" : ""}">${html}</div>`;
+  return `<div class="fragtext${langd > (smal ? 16 : 22) ? " liten" : langd > (smal ? 8 : 12) ? " mellan" : ""}">${html}</div>`;
 }
 
 function ritaFraga(efterFel = false) {
@@ -699,7 +723,7 @@ function ritaFraga(efterFel = false) {
   const hjalp = !efterFel && S.hjalpTyper.has(q.typ) && q.hjalp;
   const bildHtml = efterFel ? ritaBild(q.felbild) : ritaBild(q.bild);
   const text = q.lastal
-    ? `<div class="lastext">${esc(q.text)}${efterFel ? ` <span class="svarstal">= ${esc(tal(q.svar))}</span>` : ""}</div>`
+    ? `<div class="lastext">${esc(q.text)}</div>`
     : fragtextHtml(q, efterFel);
   const testSvar = params.has("test") ? `<div style="position:absolute;right:8px;bottom:4px;font-size:14px;opacity:.5">${esc(String(q.svar))}</div>` : "";
   const el = visa(`
@@ -712,7 +736,7 @@ function ritaFraga(efterFel = false) {
     <div class="goran fraggoran" style="left:10px; bottom:10px; width:200px; height:170px;">${goranSvg("vaken")}</div>
     <div class="bubbla fragbubbla" style="left:150px; bottom:180px; font-size:19px;"></div>
     ${efterFel ? `<button class="knapp guld vidare" type="button" id="vidare" aria-label="${t("Nästa", "Next")}">▶</button>` : `<button class="knapp glasogon" type="button" id="visaIgen" aria-label="${t("Visa hur man gör", "Show how")}">👓</button>`}
-    ${testSvar}`, knappsats && !efterFel ? "med-knappsats" : "");
+    ${testSvar}`, efterFel ? "utan-svar" : knappsats ? "med-knappsats" : "");
   el.style.background = `linear-gradient(${plats.farg[0]}, ${plats.farg[1]})`;
   // Passar bilden inte på skärmen görs den mindre
   krympBild(el);
@@ -841,7 +865,9 @@ function svara(givet, knapp) {
       ny.querySelector(".topprad").outerHTML = topprad(false, true);
       ny.querySelector(".fragbubbla").textContent = replik("fel");
       // Rätt knapp visas också
-      if (q.knappar) ny.querySelector(".fragyta").insertAdjacentHTML("beforeend", `<div class="rattknapp">✔ ${q.knappar.find((k) => String(k.varde) === String(q.svar))?.bild ? ritaBild(q.knappar.find((k) => String(k.varde) === String(q.svar)).bild) : ""}</div>`);
+      // Den rätta knappen visas också, men bara när svaret inte redan står grönt i frågan
+      const rattKnapp = q.knappar && q.knappar.find((k) => String(k.varde) === String(q.svar));
+      if (rattKnapp && rattKnapp.bild) ny.querySelector(".fragyta").insertAdjacentHTML("beforeend", `<div class="rattknapp">✔ ${ritaBild(rattKnapp.bild)}</div>`);
       krympBild(ny);
     }, 450);
   }
@@ -855,10 +881,10 @@ function visaExempel(typ, sedan) {
   let ex;
   for (let f = 0; f < 20; f++) {
     ex = F.TYPER[typ](recept, exempelSlump);
-    if (!fraga || ex.nyckel !== fraga.nyckel) break;
+    if ((!fraga || ex.nyckel !== fraga.nyckel) && !(typ === "rakna" && ex.svar < 3)) break;
   }
   const plats = platsFor(S.niva);
-  const text = ex.lastal ? `<div class="lastext">${esc(ex.text)} <span class="svarstal">= ${esc(tal(ex.svar))}</span></div>` : fragtextHtml(ex, true);
+  const text = ex.lastal ? `<div class="lastext">${esc(ex.text)}</div>` : fragtextHtml(ex, true);
   const el = visa(`
     ${topprad()}
     <div class="fragyta exempel">
@@ -868,7 +894,7 @@ function visaExempel(typ, sedan) {
     </div>
     <div class="goran fraggoran" style="left:10px; bottom:10px; width:200px; height:170px;">${goranSvg("stolt")}</div>
     <div class="bubbla fragbubbla" style="left:150px; bottom:180px; font-size:19px;">${esc(replik("visa"))}</div>
-    <button class="knapp guld vidare" type="button" id="nuDu" style="width:240px">${t("Nu du!", "Your turn!")} ▶</button>`);
+    <button class="knapp guld vidare" type="button" id="nuDu" style="width:240px">${t("Nu du!", "Your turn!")} ▶</button>`, "utan-svar");
   el.style.background = `linear-gradient(${plats.farg[0]}, ${plats.farg[1]})`;
   krympBild(el);
   el.querySelector("#nuDu").addEventListener("click", sedan);
