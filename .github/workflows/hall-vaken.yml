@@ -1,0 +1,49 @@
+# Håller Supabase vaken
+#
+# Supabase pausar gratisprojekt som inte har använts på en vecka. Den här
+# körningen hämtar topplistan var tredje dag, precis som spelen gör, så att
+# projektet räknas som använt. Den bara läser och sparar ingenting.
+#
+# Adressen och den publika nyckeln läses från topplista.js, så de finns
+# bara på ett ställe.
+#
+# Körningarna syns under fliken Actions på GitHub. Där kan man också köra
+# den för hand: Actions → Håll Supabase vaken → Run workflow.
+
+name: Håll Supabase vaken
+
+on:
+  schedule:
+    - cron: "17 5 */3 * *" # Klockan 05.17 (UTC) var tredje dag
+  workflow_dispatch: # Knappen "Run workflow"
+
+permissions:
+  contents: read
+
+jobs:
+  hall-vaken:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Hämta topplistan från Supabase
+        run: |
+          adress=$(sed -n 's/.*supabaseAdress: "\([^"]*\)".*/\1/p' topplista.js)
+          nyckel=$(sed -n 's/.*supabaseNyckel: "\([^"]*\)".*/\1/p' topplista.js)
+          if [ -z "$adress" ] || [ -z "$nyckel" ]; then
+            echo "Hittar inte supabaseAdress eller supabaseNyckel i topplista.js"
+            exit 1
+          fi
+          # Den gamla anon-nyckeln ska också skickas som Authorization, den nya (sb_...) ska inte det
+          extra=()
+          case "$nyckel" in sb_*) ;; *) extra=(-H "Authorization: Bearer $nyckel") ;; esac
+          status=$(curl -s -o svar.json -w "%{http_code}" -X POST "${adress%/}/rest/v1/rpc/hamta_topplista" \
+            -H "Content-Type: application/json" -H "apikey: $nyckel" "${extra[@]}" \
+            -d '{"p_familj": "GLOBAL00"}')
+          echo "Supabase svarade $status"
+          if [ "$status" != "200" ]; then
+            cat svar.json
+            echo "Är projektet pausat? Väck det på supabase.com med Restore project."
+            exit 1
+          fi
+          echo "Antal rader på topplistorna: $(grep -o '"spel"' svar.json | wc -l)"

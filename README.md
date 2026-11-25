@@ -124,6 +124,12 @@ Då finns en ruta längst ner under **🏆 Topplista** i menyn:
 använt dem på en vecka. Då fungerar spelen ändå, men resultaten skickas
 inte förrän man har väckt projektet igen (Restore project på supabase.com).
 
+För att projektet inte ska somna hämtar GitHub topplistan var tredje dag
+(`.github/workflows/hall-vaken.yml`). Körningarna syns under **Actions** på
+GitHub, och där kan man också köra den för hand (**Run workflow**). Har
+ingen ändrat något i repot på 60 dagar stänger GitHub av den. Då kommer ett
+mejl, och man slår på den igen under **Actions**.
+
 Så här kopplar man in topplistan i ett spel:
 
 ```js
