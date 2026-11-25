@@ -1045,7 +1045,7 @@ function visaExempel(typ, sedan) {
     </div>
     <div class="goran fraggoran" style="left:10px; bottom:10px; width:200px; height:170px;">${goranSvg("stolt")}</div>
     <div class="bubbla fragbubbla" style="left:150px; bottom:180px; font-size:19px;">${esc(replik("visa"))}</div>
-    <button class="knapp guld vidare" type="button" id="nuDu" style="width:240px">${t("Nu du!", "Your turn!")} ▶</button>`, "utan-svar");
+    <button class="knapp guld vidare" type="button" id="nuDu" style="width:240px">${t("Prova själv!", "Your turn!")} ▶</button>`, "utan-svar");
   el.style.background = `linear-gradient(${plats.farg[0]}, ${plats.farg[1]})`;
   krympBild(el);
   animera(el);
