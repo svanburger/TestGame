@@ -369,3 +369,7 @@ button {
 /* Fiskarna i skålarna: större och i jämna rader */
 .skalinne { display: grid; justify-content: center; font-size: 28px; max-width: none; }
 .rodpil { color: #e0533d; }
+/* 🔊 läser upp frågan: bredvid 👓 */
+.lasknapp { position: absolute; top: 84px; right: 100px; width: 64px; height: 64px; border-radius: 50%; font-size: 30px; }
+.med-knappsats .lasknapp { top: auto; right: auto; left: 310px; bottom: 30px; }
+.staende .med-knappsats .lasknapp { left: auto; right: 100px; bottom: 600px; }

@@ -698,6 +698,9 @@ karta med en ny plats för varje nivå.
   bonus på 20 × nivån. Poängen är de klarade nivåerna plus de rätt svaren
   på nivån man slutade på.
 - **Topplista per ålder**, som visar namn, högsta klarade nivå och poäng.
+- **Röst:** frågan läses upp av sig själv för barn upp till 8 år, och 🔊
+  läser upp den igen. Det kan stängas av i pausmenyn. Rösten är enhetens
+  egen (på iPad finns en svensk röst).
 - Lugn bakgrundsmusik (`musik.js`), som kan stängas av i pausmenyn.
 
 Nivåtrappan och frågorna finns i `matte/fragor.js` (`NIVAER` och `TYPER`).

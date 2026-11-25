@@ -23,6 +23,7 @@ const INSTALLNINGAR = {
   tidEfterRatt: 1.1,      // Sekunder innan nästa fråga kommer efter ett rätt svar
   sovEfter: 25,           // Sekunder utan tryck innan Göran somnar (bara på låtsas)
   musikTempo: 84,         // Den lugna musiken (slag per minut)
+  lasUppTill: 8,          // Frågan läses upp av sig själv för barn upp till den här åldern
 };
 
 // Kartan: en ny plats för varje nivå. Har en ålder färre nivåer än 10
@@ -566,6 +567,120 @@ function spridda(n, fro) {
   return rutor.map((r) => [((r % sida) + 0.5 + (s() - 0.5) * 0.4) / sida, (Math.floor(r / sida) + 0.5 + (s() - 0.5) * 0.4) / sida]);
 }
 
+// ---------- Rösten: läser upp frågan ----------
+//  Webbläsarens egen talsyntes (svensk eller engelsk röst). För de yngsta
+//  (upp till INSTALLNINGAR.lasUppTill år) läses frågan upp av sig själv,
+//  och alla kan trycka på 🔊. Finns ingen röst på enheten syns ingen 🔊.
+
+let rost = null;
+let rostPa = lasInstallning("matte-rost") !== "av";
+function hittaRost() {
+  if (!("speechSynthesis" in window)) return;
+  const roster = speechSynthesis.getVoices();
+  const sprak = SPRAK === "sv" ? /^sv/i : /^en/i;
+  const passande = roster.filter((v) => sprak.test(v.lang));
+  // Helst en lokal röst (fungerar utan internet)
+  rost = passande.find((v) => v.localService) || passande[0] || null;
+}
+if ("speechSynthesis" in window) {
+  hittaRost();
+  speechSynthesis.addEventListener?.("voiceschanged", () => {
+    hittaRost();
+    if (lage === "fraga") document.querySelectorAll(".lasknapp").forEach((b) => (b.hidden = !rost));
+  });
+}
+
+function prata(text) {
+  if (!rost || !text) return;
+  try {
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = rost.lang;
+    try {
+      u.voice = rost;
+    } catch (e) {
+      // Rösten går inte att välja – då används språket
+    }
+    u.rate = 0.9;
+    speechSynthesis.speak(u);
+  } catch (e) {
+    // Ingen röst – spelet fungerar ändå
+  }
+}
+function tystna() {
+  try {
+    if ("speechSynthesis" in window) speechSynthesis.cancel();
+  } catch (e) {
+    // ingenting att tysta
+  }
+}
+
+// Bråk med ord: "tre fjärdedelar", "three quarters"
+function brakOrd(b) {
+  const [k, n] = String(b).split("/").map(Number);
+  if (SPRAK === "sv") {
+    if (n === 2) return k === 1 ? "en halv" : k + " halvor";
+    const del = { 3: "tredjedel", 4: "fjärdedel", 5: "femtedel", 6: "sjättedel", 7: "sjundedel", 8: "åttondel", 9: "niondel", 10: "tiondel", 100: "hundradel" }[n] || n + "-del";
+    return k === 1 ? "en " + del : k + " " + del + "ar";
+  }
+  const del = { 2: "half", 3: "third", 4: "quarter", 5: "fifth", 6: "sixth", 7: "seventh", 8: "eighth", 9: "ninth", 10: "tenth", 100: "hundredth" }[n] || n + "th";
+  return k === 1 ? "one " + del : k + " " + (del === "half" ? "halves" : del + "s");
+}
+
+// Räknesätten med ord
+function ordFor(text) {
+  return String(text)
+    .replace(/½ av|½ of/g, t("hälften av", "half of"))
+    .replace(/(\d+)\/(\d+)/g, (m) => brakOrd(m))
+    .replace(/ \+ /g, t(" plus ", " plus "))
+    .replace(/ − /g, t(" minus ", " minus "))
+    .replace(/−/g, t("minus ", "minus "))
+    .replace(/ · /g, t(" gånger ", " times "))
+    .replace(/ \/ /g, t(" delat med ", " divided by "))
+    .replace(/(\d)x/g, "$1 x")
+    .replace(/%/g, t("procent", "percent"));
+}
+
+// Det som läses upp för en fråga
+function lasText(q) {
+  const ra = (q.text || "").trim();
+  // Uttryck som "3 + 2 = ?": "Vad blir 3 plus 2?"
+  const vadBlir = () => {
+    if (/= \?$/.test(ra)) return t("Vad blir ", "What is ") + ordFor(ra.replace(/ = \?$/, "")) + "?";
+    // "6 + ? = 10": "6 plus hur många blir 10?"
+    const mening = ordFor(ra.replace("?", t("hur många", "what")).replace(" = ", t(" blir ", " makes "))) + "?";
+    return mening.charAt(0).toUpperCase() + mening.slice(1);
+  };
+  switch (q.typ) {
+    case "rakna": return t("Hur många är det? Räkna!", "How many are there? Count!");
+    case "flest": return ra.startsWith("⬆️") ? t("Vilken tallrik har flest?", "Which plate has the most?") : t("Vilken tallrik har minst?", "Which plate has the fewest?");
+    case "siffraAntal": return t(`Vilken bild har ${q.svar} stycken?`, `Which picture has ${q.svar} things?`);
+    case "talrad": return t("Vilket tal saknas?", "Which number is missing?");
+    case "monster": return t("Vad kommer sedan?", "What comes next?");
+    case "delHelhet": return t(`Det är ${q.text.split("= ")[1]} möss. Hur många gömmer sig i lådan?`, `There are ${q.text.split("= ")[1]} mice. How many are hiding in the box?`);
+    case "tiokamrat": return t("Hur många fattas för att det ska bli tio?", "How many more to make ten?");
+    case "jamforTal": return ra.startsWith("⬆️") ? t("Vilket tal är störst?", "Which number is the largest?") : t("Vilket tal är minst?", "Which number is the smallest?");
+    case "tiotalEntal": return t("Vilket tal visar bilden?", "Which number does the picture show?");
+    case "talmonster": return t("Vilket tal kommer sedan?", "Which number comes next?");
+    case "tallinje":
+    case "brakTallinje": return t("Vilket tal pekar den röda pilen på?", "Which number is the red arrow pointing at?");
+    case "brakPizza": return q.brakText ? t(`Vilken pizza visar ${brakOrd(q.brakText)}?`, `Which pizza shows ${brakOrd(q.brakText)}?`) : t("Hur stor del av pizzan är färgad?", "How much of the pizza is coloured?");
+    case "brakAvAntal": return t(`Vad är ${brakOrd(q.brakText)} av ${q.textEfter.match(/\d+/)[0]}?`, `What is ${brakOrd(q.brakText)} of ${q.textEfter.match(/\d+/)[0]}?`);
+    case "sammaTal": return t("Vilket är samma tal som ", "Which is the same number as ") + (q.fore.brak ? brakOrd(q.fore.brak) : ordFor(q.fore.text)) + "?";
+    case "procentRutnat": return t("Hur många procent av rutorna är gula?", "What percentage of the squares are yellow?");
+    case "vag": return t("Vad är x? ", "What is x? ") + ordFor(ra.replace(" = ", t(" är lika med ", " equals "))) + ".";
+    case "proportion": {
+      const [[f, k], [, k2]] = q.bild.rader;
+      return t(`${f} fiskar räcker till ${k} katter. Hur många fiskar behövs till ${k2} katter?`, `${f} fish are enough for ${k} cats. How many fish are needed for ${k2} cats?`);
+    }
+    case "medelvarde": return t("Vad är medelvärdet?", "What is the mean?");
+    case "typvardeMedian": return ra.startsWith("median") ? t("Vad är medianen?", "What is the median?") : t("Vad är typvärdet?", "What is the mode?");
+    case "chans": return t("Hur stor är chansen att få en fisk ur påsen?", "What is the chance of getting a fish from the bag?");
+    case "lastal": return q.text;
+    default: return vadBlir();
+  }
+}
+
 // ---------- Spelets läge ----------
 
 const S = {
@@ -728,6 +843,7 @@ function fragtextHtml(q, visaSvar) {
   return `<div class="fragtext${langd > (smal ? 16 : 22) ? " liten" : langd > (smal ? 8 : 12) ? " mellan" : ""}">${html}</div>`;
 }
 
+const ritadFraga = new WeakSet(); // Frågor som redan har lästs upp (när skärmen ritas om)
 function ritaFraga(efterFel = false) {
   lage = "fraga";
   ritaOm = () => ritaFraga(efterFel);
@@ -749,7 +865,7 @@ function ritaFraga(efterFel = false) {
     ${efterFel ? "" : knappsats ? knappsatsHtml(q) : svarsknapparHtml(q)}
     <div class="goran fraggoran" style="left:10px; bottom:10px; width:200px; height:170px;">${goranSvg("vaken")}</div>
     <div class="bubbla fragbubbla" style="left:150px; bottom:180px; font-size:19px;"></div>
-    ${efterFel ? `<button class="knapp guld vidare" type="button" id="vidare" aria-label="${t("Nästa", "Next")}">▶</button>` : `<button class="knapp glasogon" type="button" id="visaIgen" aria-label="${t("Visa hur man gör", "Show how")}">👓</button>`}
+    ${efterFel ? `<button class="knapp guld vidare" type="button" id="vidare" aria-label="${t("Nästa", "Next")}">▶</button>` : `<button class="knapp glasogon" type="button" id="visaIgen" aria-label="${t("Visa hur man gör", "Show how")}">👓</button><button class="knapp lasknapp" type="button" id="lasUpp" aria-label="${t("Läs upp frågan", "Read the question")}"${rost ? "" : " hidden"}>🔊</button>`}
     ${testSvar}`, efterFel ? "utan-svar" : knappsats ? "med-knappsats" : "");
   el.style.background = `linear-gradient(${plats.farg[0]}, ${plats.farg[1]})`;
   // Passar bilden inte på skärmen görs den mindre
@@ -762,6 +878,9 @@ function ritaFraga(efterFel = false) {
     return el;
   }
   el.querySelector("#visaIgen").addEventListener("click", () => visaExempel(q.typ, () => ritaFraga()));
+  el.querySelector("#lasUpp").addEventListener("click", () => prata(lasText(q)));
+  if (rostPa && S.alder <= INSTALLNINGAR.lasUppTill && !ritadFraga.has(q)) prata(lasText(q));
+  ritadFraga.add(q);
   if (knappsats) kopplaKnappsats(el, q);
   else el.querySelectorAll(".svarsknapp").forEach((b) => b.addEventListener("click", () => svara(b.dataset.varde, b)));
   return el;
@@ -844,6 +963,7 @@ let svarar = false;
 function svara(givet, knapp) {
   if (svarar || lage !== "fraga") return;
   svarar = true;
+  tystna();
   const q = fraga;
   const ratt = F.arRatt(q, givet);
   const el = scen.firstElementChild;
@@ -1034,6 +1154,7 @@ function visaRuta(text, sedan) {
 function pausa() {
   if (!(lage === "fraga" || lage === "karta")) return;
   pausmeny.hidden = false;
+  tystna();
   if (window.Musik) Musik.paus(true);
 }
 function fortsatt() {
@@ -1058,13 +1179,20 @@ document.addEventListener("keydown", (e) => {
 
 const musikKnapp = document.getElementById("musikKnapp");
 const ljudKnapp = document.getElementById("ljudKnapp");
+const rostKnapp = document.getElementById("rostKnapp");
 function visaLjudKnappar() {
   const musikPa = window.Musik ? Musik.arPa() : false;
   musikKnapp.textContent = musikPa ? t("♪ Musik: på", "♪ Music: on") : t("♪ Musik: av", "♪ Music: off");
   ljudKnapp.textContent = ljudPa ? t("🔊 Ljud: på", "🔊 Sound: on") : t("🔇 Ljud: av", "🔇 Sound: off");
+  rostKnapp.textContent = rostPa ? t("🗣️ Läs upp frågan: på", "🗣️ Read questions aloud: on") : t("🗣️ Läs upp frågan: av", "🗣️ Read questions aloud: off");
 }
 musikKnapp.addEventListener("click", () => {
   if (window.Musik) Musik.vaxla();
+  visaLjudKnappar();
+});
+rostKnapp.addEventListener("click", () => {
+  rostPa = !rostPa;
+  sparaInstallning("matte-rost", rostPa ? "pa" : "av");
   visaLjudKnappar();
 });
 ljudKnapp.addEventListener("click", () => {

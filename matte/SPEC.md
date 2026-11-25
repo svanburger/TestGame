@@ -550,9 +550,18 @@ som stör talen).
 
 ---
 
-## 6. Ljud och musik
+## 6. Ljud, röst och musik
 Ljuden skapas med Web Audio i koden, som i de andra spelen. Det finns inga
-ljudfiler och inget tal.
+ljudfiler.
+
+**Röst** (Andreas beslut efter att ha provat spelet): frågan kan läsas
+upp med enhetens egen talsyntes, till exempel "Vad blir 3 plus 2?" eller
+"Vilken tallrik har flest?".
+- För barn upp till 8 år läses frågan upp av sig själv när den visas.
+- Alla kan trycka på 🔊 bredvid 👓 för att höra frågan igen.
+- I pausmenyn kan man stänga av uppläsningen (*🗣️ Läs upp frågan*).
+- Finns ingen svensk (eller engelsk) röst på enheten syns ingen 🔊.
+- Texterna som läses upp skrivs i `lasText` i `game.js`.
 
 | När | Ljud |
 |---|---|
