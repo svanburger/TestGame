@@ -135,7 +135,8 @@
       const sak = s.valj(SAKER);
       return {
         nyckel: "f" + tal.join("-") + flest,
-        text: flest ? "⬆️ " + tt("flest", "most") : "⬇️ " + tt("minst", "fewest"),
+        text: flest ? tt("Tryck där det finns flest " + sak, "Tap where there are the most " + sak) : tt("Tryck där det finns minst " + sak, "Tap where there are the fewest " + sak),
+        mest: flest,
         bild: null,
         svar: ratt,
         knappar: tal.map((n) => ({ varde: n, bild: { typ: "saker", grupper: [{ antal: n, sak }], layout: "spritt", liten: true } })),
@@ -307,7 +308,8 @@
       const fran = Math.floor(Math.min(...lista)), till = Math.ceil(Math.max(...lista));
       return {
         nyckel: "jt" + lista.join("|") + storst,
-        text: storst ? "⬆️ " + tt("störst", "largest") : "⬇️ " + tt("minst", "smallest"),
+        text: storst ? tt("Tryck på det största talet", "Tap the largest number") : tt("Tryck på det minsta talet", "Tap the smallest number"),
+        mest: storst,
         bild: null,
         svar: ratt,
         knappar: lista.map((v) => ({ varde: v, text: tal(v) })),

@@ -654,13 +654,13 @@ function lasText(q) {
   };
   switch (q.typ) {
     case "rakna": return t("Hur många är det? Räkna!", "How many are there? Count!");
-    case "flest": return ra.startsWith("⬆️") ? t("Vilken tallrik har flest?", "Which plate has the most?") : t("Vilken tallrik har minst?", "Which plate has the fewest?");
+    case "flest": return q.mest ? t("Tryck där det finns flest.", "Tap where there are the most.") : t("Tryck där det finns minst.", "Tap where there are the fewest.");
     case "siffraAntal": return t(`Vilken bild har ${q.svar} stycken?`, `Which picture has ${q.svar} things?`);
     case "talrad": return t("Vilket tal saknas?", "Which number is missing?");
     case "monster": return t("Vad kommer sedan?", "What comes next?");
     case "delHelhet": return t(`Det är ${q.text.split("= ")[1]} möss. Hur många gömmer sig i lådan?`, `There are ${q.text.split("= ")[1]} mice. How many are hiding in the box?`);
     case "tiokamrat": return t("Hur många fattas för att det ska bli tio?", "How many more to make ten?");
-    case "jamforTal": return ra.startsWith("⬆️") ? t("Vilket tal är störst?", "Which number is the largest?") : t("Vilket tal är minst?", "Which number is the smallest?");
+    case "jamforTal": return q.mest ? t("Tryck på det största talet.", "Tap the largest number.") : t("Tryck på det minsta talet.", "Tap the smallest number.");
     case "tiotalEntal": return t("Vilket tal visar bilden?", "Which number does the picture show?");
     case "talmonster": return t("Vilket tal kommer sedan?", "Which number comes next?");
     case "tallinje":
