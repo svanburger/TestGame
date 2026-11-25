@@ -122,7 +122,7 @@
       };
     },
 
-    // Vilken tallrik har flest (eller minst)?
+    // Vilken grupp har flest?
     flest(p, s) {
       const antal = p.grupper || 2;
       let tal = [];
@@ -130,12 +130,13 @@
         const n = s.heltal(p.fran, p.till);
         if (!tal.includes(n)) tal.push(n);
       }
-      const flest = s.valj([true, false]);
-      const ratt = flest ? Math.max(...tal) : Math.min(...tal);
+      // Bara "flest": "färst" är ett ovanligt ord och "minst" är fel om antal
+      const flest = true;
+      const ratt = Math.max(...tal);
       const sak = s.valj(SAKER);
       return {
         nyckel: "f" + tal.join("-") + flest,
-        text: flest ? tt("Tryck där det finns flest " + sak, "Tap where there are the most " + sak) : tt("Tryck där det finns minst " + sak, "Tap where there are the fewest " + sak),
+        text: tt("Tryck där det finns flest " + sak, "Tap where there are the most " + sak),
         mest: flest,
         bild: null,
         svar: ratt,
