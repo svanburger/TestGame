@@ -22,6 +22,7 @@ inget att installera. Startsidan är en meny där man väljer spel.
 | `godis/`     | Spelet "Bus eller godis".                                 |
 | `aventyr/`   | Äventyret "Ensamma hemma på lördag", i 3D (kapitel 1–3). Storyn finns i `aventyr/STORY.md`. |
 | `bajsbyn/`   | Spelet "Bajsbyn", i 3D: banor, jakten, kedjan och lugnt läge. |
+| `matte/`     | Mattespelet "Katten Görans matteresa". Specifikationen finns i `matte/SPEC.md`. |
 | `test3d/`    | Testsida för 3D (inte i menyn): visar vad iPad/Xbox klarar. |
 | `three.min.js` | Three.js r159, som 3D-spelen använder (MIT-licens, se `three-LICENSE.txt`). |
 
@@ -666,6 +667,46 @@ närmaste bajs.
 Styrning: joystick + HOPP på iPad, piltangenter/WASD + mellanslag på
 datorn, och vänster spak + A på Xbox-handkontrollen (höger spak vrider
 kameran, menyknappen pausar).
+
+## Katten Görans matteresa 🐱🎓
+
+Ett lugnt mattespel för barn som är 5–12 år. Katten Göran (från
+Bordsplaceringen) har tappat sin guldbjällra, och man följer honom på en
+karta med en ny plats för varje nivå.
+
+- **Välj ålder** på startskärmen (5–12 år). Man får välja en annan ålder
+  än sin egen. Varje ålder har en fast trappa av nivåer: 6 nivåer för 5 år,
+  sedan en till för varje år upp till 10 nivåer från 9 år. Frågorna slumpas,
+  men alla med samma ålder får lika svåra frågor.
+- **En nivå:** samla 8 ⭐ (8 rätt). Man har 3 🐟 (Görans fiskar), och ett
+  fel kostar en fisk. Det finns ingen tidsgräns, och antalet fel visas
+  aldrig. Vid fel visas rätt svar med en bild, och nästa fråga av samma
+  sort får en hjälpbild.
+- **Första gången** en ny sorts fråga kommer visar Göran hur man gör.
+  👓-knappen visar det igen.
+- **Svar:** de minsta trycker på stora knappar med bilder, de äldre skriver
+  på en sifferknappsats (eller tangentbordet på datorn).
+- **Tredje fisken borta:** *Försök igen* (nivån börjar om från noll
+  stjärnor) eller *Skriv in mig* på topplistan.
+- **Poäng:** varje rätt svar ger 10 × nivån och en klarad nivå ger en
+  bonus på 20 × nivån. Poängen är de klarade nivåerna plus de rätt svaren
+  på nivån man slutade på.
+- **Topplista per ålder**, som visar namn, högsta klarade nivå och poäng.
+- Lugn bakgrundsmusik (`musik.js`), som kan stängas av i pausmenyn.
+
+Nivåtrappan och frågorna finns i `matte/fragor.js` (`NIVAER` och `TYPER`).
+Kartan, Görans repliker och poängen finns högst upp i `matte/game.js`
+(`PLATSER`, `REPLIKER`, `INSTALLNINGAR`). Vilken del av Skolverkets
+kursplan varje nivå bygger på står i `matte/SPEC.md`.
+
+Testa frågorna med `node matte/test.js`. Testlänkar (resultaten kommer
+inte med på topplistan): `matte/?alder=9&niva=7` börjar på en nivå,
+`?fro=42` ger samma frågor varje gång och `?test` visar rätt svar i ett
+hörn.
+
+**Supabase:** topplistan sparar nu också nivån. Kör hela `supabase.sql`
+igen i Supabase (SQL Editor → New query → klistra in → Run). Tills dess
+sparas resultaten ändå, men utan nivå.
 
 ## Ensamma hemma på lördag 🏠
 

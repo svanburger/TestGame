@@ -13,6 +13,7 @@
 //  Så här använder ett spel topplistan:
 //
 //    När spelet är slut:   Topplista.nyttResultat("stjarnor", poang);
+//    Med nivån (visas på raden): Topplista.nyttResultat("mattesju", poang, { niva: 7 });
 //    En knapp som visar topplistan (t.ex. i pausmenyn):
 //      <button data-topplista="stjarnor">🏆 Topplista</button>
 //    Utan namn på spelet (data-topplista="") visas alla spelen, som i menyn.
@@ -40,6 +41,8 @@
   };
 
   // Spelen som har en topplista, i samma ordning som i menyn.
+  //  grupp: spel med samma grupp får en flik i menyns topplista och knappar för varje lista (etikett)
+  //  niva: raderna visar nivån man klarade, t.ex. "Elsa · nivå 7 · 640 poäng"
   // Bordsplaceringen räknar stjärnor: alla man har samlat, när man har spelat klart en fest.
   const SPELEN = [
     { id: "stjarnor", ikon: "⭐", namn: t("Fånga stjärnorna", "Catch the Stars") },
@@ -53,6 +56,16 @@
     { id: "bajsbanor", ikon: "🗺️", namn: t("Bajsbyn – Banor", "Poop Village – Levels"), enhet: "⭐" },
     { id: "bajsjakt", ikon: "⏱️", namn: t("Bajsbyn – Jakten", "Poop Village – The Hunt") },
     { id: "bajskedja", ikon: "🔗", namn: t("Bajsbyn – Kedjan", "Poop Village – The Chain"), enhet: "🔗" },
+    // Katten Görans matteresa: en lista per ålder. Raderna visar också nivån.
+    // Spel-id får bara ha bokstäver (se supabase.sql), därför "mattefem" och inte "matte5".
+    ...[[5, "fem"], [6, "sex"], [7, "sju"], [8, "atta"], [9, "nio"], [10, "tio"], [11, "elva"], [12, "tolv"]].map(([alder, ord]) => ({
+      id: "matte" + ord,
+      ikon: "🐱",
+      namn: t("Katten Görans matteresa – " + alder + " år", "Gerald the Cat's Maths Trip – age " + alder),
+      grupp: "matte",
+      etikett: String(alder),
+      niva: true,
+    })),
   ];
 
   const MEDALJER = ["🥇", "🥈", "🥉"];
@@ -130,8 +143,9 @@
     return plats <= INSTALLNINGAR.antal ? plats : 0;
   }
 
-  function laggTill(spelId, namn, poang) {
+  function laggTill(spelId, namn, poang, niva) {
     const rad = { namn, poang, tid: Date.now() };
+    if (Number.isInteger(niva)) rad.niva = niva;
     listor = las("topplista", {}); // Ett annat spel i en annan flik kan ha sparat under tiden
     listor[spelId] = sortera([...egenLista(spelId), rad]).slice(0, INSTALLNINGAR.antal);
     spara("topplista", listor);
@@ -193,13 +207,21 @@
         // En i taget. Det som kommer till medan vi skickar följer med i samma vända.
         for (let varv = 0; ko.length && varv < 500; varv++) {
           const rad = ko[0];
-          await anropa("spara_resultat", { p_familj: familj, p_spel: rad.spel, p_namn: rad.namn, p_poang: rad.poang, p_tid: rad.tid });
+          const data = { p_familj: familj, p_spel: rad.spel, p_namn: rad.namn, p_poang: rad.poang, p_tid: rad.tid };
+          if (Number.isInteger(rad.niva)) {
+            // Har Supabase inte fått den nya SQL:en (med nivån) än sparas resultatet utan nivå
+            try {
+              await anropa("spara_resultat", { ...data, p_niva: rad.niva });
+            } catch (e) {
+              await anropa("spara_resultat", data);
+            }
+          } else await anropa("spara_resultat", data);
           ko = ko.filter((r) => r !== rad);
           spara("topplista-ko", ko);
         }
         const rader = await anropa("hamta_topplista", { p_familj: familj });
         const nya = {};
-        for (const r of rader || []) (nya[r.spel] = nya[r.spel] || []).push({ namn: r.namn, poang: r.poang, tid: Number(r.tid) });
+        for (const r of rader || []) (nya[r.spel] = nya[r.spel] || []).push({ namn: r.namn, poang: r.poang, tid: Number(r.tid), ...(Number.isInteger(r.niva) ? { niva: r.niva } : {}) });
         familjListor = nya;
         spara("topplista-familjlistor", familjListor);
         natStatus = "";
@@ -323,6 +345,7 @@
       li.append(
         skapa("span", "tl-plats", MEDALJER[i] || String(i + 1)),
         skapa("span", "tl-namn", rad.namn),
+        ...(spel.niva && Number.isInteger(rad.niva) ? [skapa("span", "tl-niva", t("nivå ", "level ") + rad.niva)] : []),
         skapa("span", "tl-poang", visaPoang(spel, rad.poang))
       );
       ol.append(li);
@@ -442,20 +465,38 @@
     let valt = null;
     function valj(spel) {
       valt = spel;
-      plats.replaceChildren(skapa("h3", "tl-spelnamn", spel.ikon + " " + spel.namn), ritaLista(spel, markera));
+      plats.replaceChildren(skapa("h3", "tl-spelnamn", spel.ikon + " " + spel.namn));
+      // Spel med flera listor (t.ex. en per ålder) får en rad med knappar
+      if (spel.grupp) {
+        const rad = skapa("div", "tl-grupp");
+        for (const annat of SPELEN.filter((s) => s.grupp === spel.grupp)) {
+          const b = skapa("button", "tl-gruppknapp", annat.etikett);
+          b.type = "button";
+          b.setAttribute("aria-pressed", String(annat.id === spel.id));
+          b.addEventListener("click", () => valj(annat));
+          rad.append(b);
+        }
+        plats.append(rad);
+      }
+      plats.append(ritaLista(spel, markera));
       if (MED_SUPABASE) plats.append(varListan()); // Bara när det finns två sorters listor
-      for (const f of flikar.children) f.setAttribute("aria-selected", String(f.dataset.spel === spel.id));
+      for (const f of flikar.children) f.setAttribute("aria-selected", String(f.dataset.spel === spel.id || f.dataset.grupp === spel.grupp));
     }
 
     const flikar = skapa("div", "tl-flikar");
     flikar.setAttribute("role", "tablist");
     if (!spelId) {
+      const sedda = new Set();
       for (const spel of SPELEN) {
+        // Spel i en grupp får bara en flik
+        if (spel.grupp && sedda.has(spel.grupp)) continue;
+        if (spel.grupp) sedda.add(spel.grupp);
         const f = skapa("button", "tl-flik", spel.ikon);
+        if (spel.grupp) f.dataset.grupp = spel.grupp;
         f.type = "button";
         f.dataset.spel = spel.id;
         f.setAttribute("role", "tab");
-        f.setAttribute("aria-label", spel.namn);
+        f.setAttribute("aria-label", spel.grupp ? spel.namn.replace(/ – .*/, "") : spel.namn);
         f.addEventListener("click", () => valj(spel));
         flikar.append(f);
       }
@@ -489,7 +530,7 @@
   }
 
   // Man har kommit med på topplistan – skriv sitt namn
-  function fragaNamn(spel, poang, plats, klar) {
+  function fragaNamn(spel, poang, plats, klar, niva) {
     const rubrik = skapa("h2", "tl-rubrik", t("🏆 Du kom med på topplistan!", "🏆 You made the high scores!"));
     const info = skapa("p", "tl-info", (MEDALJER[plats - 1] || "") + " " +
       t("Plats " + plats + " med " + visaPoang(spel, poang), "Place " + plats + " with " + visaPoang(spel, poang)));
@@ -541,7 +582,7 @@
       const namn = falt.value.trim().slice(0, INSTALLNINGAR.langstaNamn);
       if (!namn) return;
       falt.blur(); // Fäll ner tangentbordet på iPad/telefon
-      const rad = laggTill(spel.id, namn, poang);
+      const rad = laggTill(spel.id, namn, poang, niva);
       narStangd = null; // Rutan byts mot listan, spelet ska inte få veta något än
       visa(spel.id, rad);
       narStangd = klar;
@@ -563,7 +604,7 @@
     if (!plats) return false;
     const spel = hittaSpel(spelId);
     const fordrojning = val.fordrojning ?? INSTALLNINGAR.fordrojning;
-    setTimeout(() => fragaNamn(spel, poang, plats, val.narKlar), fordrojning * 1000);
+    setTimeout(() => fragaNamn(spel, poang, plats, val.narKlar, val.niva), fordrojning * 1000);
     return true;
   }
 
@@ -655,6 +696,22 @@
     .tl-plats { text-align: center; font-weight: 800; }
     .tl-namn { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 700; }
     .tl-poang { font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .tl-rad:has(.tl-niva) { grid-template-columns: 2.2em 1fr auto auto; }
+    .tl-niva { font-size: 0.85em; color: #6b5a48; white-space: nowrap; }
+    .tl-grupp { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; }
+    .tl-gruppknapp {
+      min-width: 2.2em;
+      padding: 6px 5px;
+      border: 0;
+      border-radius: 12px;
+      font: inherit;
+      font-weight: 800;
+      color: #2b1d0e;
+      background: #e6ecf5;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+    .tl-gruppknapp[aria-pressed="true"] { background: #ffd95e; box-shadow: inset 0 0 0 3px #2b1d0e; }
     .tl-flikar {
       display: flex;
       justify-content: center;
