@@ -351,7 +351,7 @@ vid nästa fråga av samma sort är samma bild, fast utan svaret.
 | Typ | Så ser frågan ut | Slump | Typiska fel (felalternativ) | Felbild |
 |---|---|---|---|---|
 | `rakna` | 3–10 saker (🐟🧶🐭) i tärningsmönster, tioruta eller utspridda. Text: `? ` | antal i området; saken slumpas | ±1, ±2 | Sakerna räknas en i taget med en siffra som ploppar upp. |
-| `flest` | 2–3 tallrikar med saker. Göran håller upp en skylt med en symbol: 🔝 (flest) eller 🔻 (minst). Man trycker på tallriken. | grupperna skiljer sig med minst 1 | de andra grupperna | Grupperna ställs upp i rader bredvid varandra, så att man ser vilken som är längst. |
+| `flest` | 2–3 tallrikar med saker. Ingen text: en skylt visar en liten och en stor hög, och en hand pekar på den stora. Rösten säger "Tryck där det finns flest". Bara flest – "färst" är ett ovanligt ord för små barn. Man trycker på gruppen. | grupperna skiljer sig med minst 1 | de andra grupperna | Grupperna ställs upp i rader bredvid varandra, så att man ser vilken som är längst. |
 | `siffraAntal` | En stor siffra. Svar: bilder med olika många saker | siffran; bilderna = siffran ± 1–2 | ±1, ±2 | Bilden med rätt antal räknas. |
 | `talrad` | Stenar på en stig med tal, en sten har `?` | var hålet är, startvärde | ±1, ±2, siffrorna omvända (14 → 41) | Grodor hoppar sten för sten fram till hålet. |
 | `monster` | 🍎🍌🍎🍌🍎 ? | mönstertyp ABAB, AAB, ABC; sakerna | de andra sakerna i mönstret | Mönstret ritas igen, med ram runt varje upprepning. |

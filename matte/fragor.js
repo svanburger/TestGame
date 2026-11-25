@@ -122,7 +122,7 @@
       };
     },
 
-    // Vilken tallrik har flest (eller minst)?
+    // Vilken grupp har flest?
     flest(p, s) {
       const antal = p.grupper || 2;
       let tal = [];
@@ -130,12 +130,16 @@
         const n = s.heltal(p.fran, p.till);
         if (!tal.includes(n)) tal.push(n);
       }
-      const flest = s.valj([true, false]);
-      const ratt = flest ? Math.max(...tal) : Math.min(...tal);
+      // Bara "flest": "färst" är ett ovanligt ord och "minst" är fel om antal
+      const flest = true;
+      const ratt = Math.max(...tal);
       const sak = s.valj(SAKER);
       return {
         nyckel: "f" + tal.join("-") + flest,
-        text: flest ? "⬆️ " + tt("flest", "most") : "⬇️ " + tt("minst", "fewest"),
+        text: "",
+        // En skylt i stället för text: en liten hög och en stor hög, och handen pekar på den stora
+        skylt: { typ: "flestSkylt", sak },
+        mest: flest,
         bild: null,
         svar: ratt,
         knappar: tal.map((n) => ({ varde: n, bild: { typ: "saker", grupper: [{ antal: n, sak }], layout: "spritt", liten: true } })),
@@ -307,7 +311,8 @@
       const fran = Math.floor(Math.min(...lista)), till = Math.ceil(Math.max(...lista));
       return {
         nyckel: "jt" + lista.join("|") + storst,
-        text: storst ? "⬆️ " + tt("störst", "largest") : "⬇️ " + tt("minst", "smallest"),
+        text: storst ? tt("Tryck på det största talet", "Tap the largest number") : tt("Tryck på det minsta talet", "Tap the smallest number"),
+        mest: storst,
         bild: null,
         svar: ratt,
         knappar: lista.map((v) => ({ varde: v, text: tal(v) })),
