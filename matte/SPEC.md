@@ -573,6 +573,14 @@ upp med enhetens egen talsyntes, till exempel "Vad blir 3 plus 2?" eller
 | Knapptryck | Ett tyst *klick*. |
 | Bjällran hittas | Tre klara bjällerklangar. |
 
+**Animering** (Andreas beslut): i Görans exempel och i felbilden byggs
+bilden upp steg för steg. Hoppen på tallinjen kommer ett i taget, sakerna
+räknas, fiskarna delas ut till katterna och pizzabitarna fylls i. Det
+gröna svaret i frågan kommer sist. Hela animeringen tar högst cirka
+4 sekunder. Själva frågorna är stilla, så att barnen kan titta i lugn och
+ro. Element som ska animeras har `data-steg="0, 1, 2 …"` i `BILDER` i
+`game.js`, och `animera()` sätter takten.
+
 **Musik** (Andreas beslut): den gemensamma lugna melodin i `musik.js`
 spelas i bakgrunden, lite långsammare än i de andra spelen (tempo 84).
 I pausmenyn kan man stänga av musiken (*♪ Musik*) och ljuden (*🔊 Ljud*)

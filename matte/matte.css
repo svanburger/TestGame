@@ -373,3 +373,21 @@ button {
 .lasknapp { position: absolute; top: 84px; right: 100px; width: 64px; height: 64px; border-radius: 50%; font-size: 30px; }
 .med-knappsats .lasknapp { top: auto; right: auto; left: 310px; bottom: 30px; }
 .staende .med-knappsats .lasknapp { left: auto; right: 100px; bottom: 600px; }
+
+/* ---------- Animering: bilden som visar hur man tänker byggs upp steg för steg ---------- */
+.animerar .bild [data-steg] {
+  animation: steg-in 0.35s ease-out both;
+  animation-delay: calc(0.3s + var(--i, 0) * var(--takt, 0.5s));
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.animerar .fragtext .svarstal { animation: steg-in 0.4s ease-out both; animation-delay: var(--slut, 0.3s); display: inline-block; }
+/* "scale" i stället för "transform", så att elementens egen placering (t.ex. siffrorna under sakerna) behålls */
+@keyframes steg-in {
+  from { opacity: 0; scale: 0.4; }
+  70% { opacity: 1; scale: 1.15; }
+  to { opacity: 1; scale: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .animerar .bild [data-steg], .animerar .fragtext .svarstal { animation: none; }
+}

@@ -287,7 +287,7 @@ const BILDER = {
     if (b.liten) storlek = Math.round(storlek * 0.55);
     const sak = (s) => s.lada
       ? `<span class="sak lada" style="font-size:${storlek * 1.4}px">🎁<b>?</b></span>`
-      : `<span class="sak${s.farg ? " farg" : ""}${s.struken ? " struken" : ""}" style="font-size:${storlek}px">${s.sak}${b.numrera && s.nr ? `<i>${s.nr}</i>` : ""}</span>`;
+      : `<span class="sak${s.farg ? " farg" : ""}${s.struken ? " struken" : ""}" style="font-size:${storlek}px">${s.sak}${b.numrera && s.nr ? `<i data-steg="${s.nr - 1}">${s.nr}</i>` : ""}</span>`;
     const under = b.under ? `<div class="under">${esc(b.under)}</div>` : "";
 
     if ((b.layout === "tarning" || b.layout === "spritt") && b.grupper.length === 1) {
@@ -306,14 +306,14 @@ const BILDER = {
   },
 
   jamforRader(b) {
-    return `<div class="jamfor">${b.rader.map((r) => `<div class="jamforrad${r.markera ? " markerad" : ""}">${`<span>${r.sak}</span>`.repeat(r.antal)}<b>${r.antal}</b></div>`).join("")}</div>`;
+    return `<div class="jamfor">${b.rader.map((r, i) => `<div class="jamforrad${r.markera ? " markerad" : ""}" data-steg="${i}">${`<span>${r.sak}</span>`.repeat(r.antal)}<b>${r.antal}</b></div>`).join("")}</div>`;
   },
 
   tioruta(b) {
     let html = "";
     for (let i = 0; i < 10; i++) {
       const fylld = i < b.fyllda;
-      html += `<span class="tiocell${!fylld && b.tomma ? " tomcell" : ""}">${fylld ? b.sak : b.tomma ? `<i>${i - b.fyllda + 1}</i>` : ""}</span>`;
+      html += `<span class="tiocell${!fylld && b.tomma ? " tomcell" : ""}">${fylld ? b.sak : b.tomma ? `<i data-steg="${i - b.fyllda}">${i - b.fyllda + 1}</i>` : ""}</span>`;
     }
     return `<div class="tioruta">${html}</div>`;
   },
@@ -321,10 +321,11 @@ const BILDER = {
   rad(b) {
     const delar = [];
     b.rutor.forEach((v, i) => {
-      if (i > 0 && b.pilar) delar.push(`<span class="pil"><small>${esc(b.pilar[i - 1] || "")}</small>➜</span>`);
+      if (i > 0 && b.pilar) delar.push(`<span class="pil" data-steg="${i - 1}"><small>${esc(b.pilar[i - 1] || "")}</small>➜</span>`);
       if (i > 0 && b.grupp && i % b.grupp === 0) delar.push('<span class="avdelare"></span>');
       const markerad = b.markera === i || (b.markeraVarde !== undefined && v === b.markeraVarde);
-      delar.push(`<span class="rruta${b.stenar ? " sten" : ""}${b.emoji ? " emojiruta" : ""}${markerad ? " markerad" : ""}${v === "?" ? " fraga" : ""}">${esc(v)}</span>`);
+      const steg = markerad ? ` data-steg="${b.pilar ? b.pilar.length : 0}"` : "";
+      delar.push(`<span class="rruta${b.stenar ? " sten" : ""}${b.emoji ? " emojiruta" : ""}${markerad ? " markerad" : ""}${v === "?" ? " fraga" : ""}"${steg}>${esc(v)}</span>`);
     });
     return `<div class="radbild${b.rutor.length > 6 ? " tat" : ""}">${delar.join("")}</div>`;
   },
@@ -373,19 +374,20 @@ const BILDER = {
         `<path d="M${x(c)} ${Y - 14} l${x(c) > x(a) ? -10 : 10} -8 M${x(c)} ${Y - 14} l${x(c) > x(a) ? -2 : 2} -12" stroke="${farg}" stroke-width="4" fill="none"/>` +
         (text ? `<text x="${(x(a) + x(c)) / 2}" y="${Y - 20 - h * 0.8}" font-size="24" text-anchor="middle" font-weight="800" fill="${farg}">${esc(text)}</text>` : "");
     };
+    let hopp = 0; // Hoppen visas ett i taget
     if (b.hopp) {
       const [a, c] = b.hopp;
       if (b.enHoppPerSteg) {
         const st = c > a ? 1 : -1;
-        for (let v = a; v !== c; v += st) s += bage(v, v + st, st > 0 ? "+1" : "−1");
-      } else s += bage(a, c, b.hoppText || "");
+        for (let v = a; v !== c; v += st) s += `<g data-steg="${hopp++}">${bage(v, v + st, st > 0 ? "+1" : "−1")}</g>`;
+      } else s += `<g data-steg="${hopp++}">${bage(a, c, b.hoppText || "")}</g>`;
       s += punkt(x(a), Y, "#d0702a", tal(a), !medSiffra.has(F.runda(a)));
-      s += punkt(x(c), Y, "#2e9e4f", tal(c), !medSiffra.has(F.runda(c)));
+      s += `<g data-steg="${hopp}">${punkt(x(c), Y, "#2e9e4f", tal(c), !medSiffra.has(F.runda(c)))}</g>`;
     }
     if (b.hoppFran !== undefined && b.pil !== undefined && b.hoppFran !== b.pil) {
       const st = b.steg;
       let nr = 0;
-      for (let v = b.hoppFran; v < b.pil - 1e-9 && nr++ < 30; v = F.runda(v + st)) s += bage(v, F.runda(v + st), "+" + tal(st), "#3d8be0");
+      for (let v = b.hoppFran; v < b.pil - 1e-9 && nr++ < 30; v = F.runda(v + st)) s += `<g data-steg="${hopp++}">${bage(v, F.runda(v + st), "+" + tal(st), "#3d8be0")}</g>`;
     }
     if (b.prickar) {
       const sorterade = [...b.prickar].sort((a, c) => a - c);
@@ -393,7 +395,7 @@ const BILDER = {
         const nara = sorterade.some((w) => w !== v && Math.abs(x(w) - x(v)) < 110);
         const ovanfor = !nara || i % 2 === 0;
         const ty = ovanfor ? Y - 28 : Y + 56;
-        if (v === b.markera) s += `<circle cx="${x(v)}" cy="${Y}" r="15" fill="#2e9e4f" stroke="#2b1d0e" stroke-width="2"/><text x="${x(v)}" y="${ty}" font-size="36" text-anchor="middle" font-weight="900" fill="#2e9e4f">✔ ${tal(v)}</text>`;
+        if (v === b.markera) s += `<g data-steg="0"><circle cx="${x(v)}" cy="${Y}" r="15" fill="#2e9e4f" stroke="#2b1d0e" stroke-width="2"/><text x="${x(v)}" y="${ty}" font-size="36" text-anchor="middle" font-weight="900" fill="#2e9e4f">✔ ${tal(v)}</text></g>`;
         else s += `<circle cx="${x(v)}" cy="${Y}" r="10" fill="#3d8be0" stroke="#2b1d0e" stroke-width="2"/><text x="${x(v)}" y="${ty}" font-size="30" text-anchor="middle" font-weight="900" fill="#3d8be0">${tal(v)}</text>`;
       });
     }
@@ -401,7 +403,7 @@ const BILDER = {
       s += `<path d="M${x(b.pil)} ${Y - 20} l-18 -32 h36 z" fill="#e0533d" stroke="#2b1d0e" stroke-width="2.5"/>`;
       if (b.visaPil) {
         const text = b.delar ? Math.round(b.pil * b.delar) + "/" + b.delar : tal(b.pil);
-        s += `<text x="${x(b.pil)}" y="${Y + 84}" font-size="32" text-anchor="middle" font-weight="900" fill="#2e9e4f">${text}</text>`;
+        s += `<text x="${x(b.pil)}" y="${Y + 84}" font-size="32" text-anchor="middle" font-weight="900" fill="#2e9e4f" data-steg="${hopp}">${text}</text>`;
       }
     }
     return `<svg class="tallinje" viewBox="0 0 ${B} 200" width="${B}" height="200">${s}</svg>`;
@@ -416,7 +418,7 @@ const BILDER = {
     const delar = [];
     const grupp = (antal, rita, varde) => {
       if (!antal) return;
-      delar.push(`<div class="buntgrupp"><div class="buntar">${Array.from({ length: antal }, rita).join("")}</div>${b.visaTal ? `<b>${tal(antal * varde)}</b>` : ""}</div>`);
+      delar.push(`<div class="buntgrupp"><div class="buntar">${Array.from({ length: antal }, rita).join("")}</div>${b.visaTal ? `<b data-steg="${delar.length}">${tal(antal * varde)}</b>` : ""}</div>`);
     };
     grupp(b.tusental, () => '<span class="tusen">1000</span>', 1000);
     grupp(b.hundratal, () => '<span class="hundra"></span>', 100);
@@ -424,23 +426,24 @@ const BILDER = {
     grupp(b.ental, () => '<span class="etta"></span>', 1);
     const summa = b.tusental * 1000 + b.hundratal * 100 + b.tiotal * 10 + b.ental;
     const termer = [b.tusental * 1000, b.hundratal * 100, b.tiotal * 10, b.ental].filter((v) => v > 0);
-    return `<div class="buntbild">${delar.join("")}</div>${b.visaTal ? `<div class="under">${termer.map(tal).join(" + ")} = ${tal(summa)}</div>` : ""}`;
+    return `<div class="buntbild">${delar.join("")}</div>${b.visaTal ? `<div class="under" data-steg="${delar.length}">${termer.map(tal).join(" + ")} = ${tal(summa)}</div>` : ""}`;
   },
 
   grupper(b) {
     const fisk = b.antal * b.per <= 40;
     let summa = 0;
-    const skalar = Array.from({ length: b.antal }, () => {
+    const skalar = Array.from({ length: b.antal }, (_, i) => {
       summa += b.per;
       const innehall = fisk ? "<span>🐟</span>".repeat(b.per) : '<i class="prick"></i>'.repeat(b.per);
-      return `<div class="skal"><div class="skalinne${fisk ? "" : " prickar"}" style="${skalKolumner(b.per)}">${innehall}</div>${b.numrera ? `<b>${summa}</b>` : ""}</div>`;
+      return `<div class="skal"${b.numrera ? ` data-steg="${i}"` : ""}><div class="skalinne${fisk ? "" : " prickar"}" style="${skalKolumner(b.per)}">${innehall}</div>${b.numrera ? `<b>${summa}</b>` : ""}</div>`;
     });
     return `<div class="skalar${b.antal > 5 ? " tva-rader" : ""}">${skalar.join("")}</div>`;
   },
 
   dela(b) {
     if (b.utdelat) {
-      return `<div class="dela">${Array.from({ length: b.katter }, () => `<div class="delkatt"><span>🐱</span><div>${"🐟".repeat(b.utdelat)}</div><b>${b.utdelat}</b></div>`).join("")}</div>`;
+      const takt = Math.max(1, Math.floor((b.utdelat * b.katter) / 16)); // Många fiskar: några i taget
+      return `<div class="dela">${Array.from({ length: b.katter }, (_, k) => `<div class="delkatt"><span>🐱</span><div>${Array.from({ length: b.utdelat }, (_, j) => `<span data-steg="${Math.floor((j * b.katter + k) / takt)}">🐟</span>`).join("")}</div><b data-steg="${Math.ceil((b.utdelat * b.katter) / takt)}">${b.utdelat}</b></div>`).join("")}</div>`;
     }
     return `<div class="delabild"><div class="sakrad">${'<span class="sak" style="font-size:30px">🐟</span>'.repeat(b.fiskar)}</div><div class="sakrad">${'<span class="sak" style="font-size:44px">🐱</span>'.repeat(b.katter)}</div></div>`;
   },
@@ -452,31 +455,29 @@ const BILDER = {
       const v1 = (k / b.delar) * 2 * Math.PI - Math.PI / 2, v2 = ((k + 1) / b.delar) * 2 * Math.PI - Math.PI / 2;
       const stor = b.delar === 1 ? 1 : 0;
       const p = `M${c} ${c} L${c + r * Math.cos(v1)} ${c + r * Math.sin(v1)} A${r} ${r} 0 ${stor} 1 ${c + r * Math.cos(v2)} ${c + r * Math.sin(v2)} Z`;
-      s += `<path d="${p}" fill="${k < b.markerade ? "#e8743b" : "#ffe1a0"}" stroke="#8a4b1f" stroke-width="3"/>`;
-      if (k < b.markerade) {
-        const vm = (v1 + v2) / 2;
-        s += `<circle cx="${c + r * 0.6 * Math.cos(vm)}" cy="${c + r * 0.6 * Math.sin(vm)}" r="${r * 0.1}" fill="#b3261e"/>`;
-      }
-      if (b.numrera && k < b.markerade) {
-        const vm = (v1 + v2) / 2;
-        s += `<text x="${c + r * 0.35 * Math.cos(vm)}" y="${c + r * 0.35 * Math.sin(vm) + 9}" font-size="26" font-weight="900" text-anchor="middle" fill="#fff">${k + 1}</text>`;
-      }
+      const vm = (v1 + v2) / 2;
+      if (b.numrera) s += `<path d="${p}" fill="#ffe1a0" stroke="#8a4b1f" stroke-width="3"/>`; // Bitarna fylls i en i taget ovanpå
+      let bit = `<path d="${p}" fill="${k < b.markerade ? "#e8743b" : "#ffe1a0"}" stroke="#8a4b1f" stroke-width="3"/>`;
+      if (k < b.markerade) bit += `<circle cx="${c + r * 0.6 * Math.cos(vm)}" cy="${c + r * 0.6 * Math.sin(vm)}" r="${r * 0.1}" fill="#b3261e"/>`;
+      if (b.numrera && k < b.markerade) bit += `<text x="${c + r * 0.35 * Math.cos(vm)}" y="${c + r * 0.35 * Math.sin(vm) + 9}" font-size="26" font-weight="900" text-anchor="middle" fill="#fff">${k + 1}</text>`;
+      if (b.numrera && k >= b.markerade) bit = "";
+      s += b.numrera && k < b.markerade ? `<g data-steg="${k}">${bit}</g>` : bit;
     }
     const svg = `<svg viewBox="0 0 ${2 * c} ${2 * c}" width="${2 * c}" height="${2 * c}">${s}</svg>`;
     if (!b.brak) return svg;
     const [k, n] = b.brak.split("/");
-    return `<div class="pizzarad">${svg}<div class="under">${t(`${k} av ${n} bitar =`, `${k} of ${n} slices =`)} ${brakHtml(b.brak)}</div></div>`;
+    return `<div class="pizzarad">${svg}<div class="under" data-steg="${k}">${t(`${k} av ${n} bitar =`, `${k} of ${n} slices =`)} ${brakHtml(b.brak)}</div></div>`;
   },
 
   brakGrupper(b) {
     // Bara i felbilden står det hur många det är i varje skål
     const visa = b.markerade > 0;
-    const grupper = Array.from({ length: b.delar }, (_, i) => `<div class="skal${i < b.markerade ? " vald" : ""}"><div class="skalinne" style="${skalKolumner(Math.min(b.per, 12))}">${"<span>🐟</span>".repeat(Math.min(b.per, 12))}${b.per > 12 ? "…" : ""}</div>${visa ? `<b>${b.per}</b>` : ""}</div>`);
-    return `<div class="skalar${b.delar > 5 ? " tva-rader" : ""}">${grupper.join("")}</div>${b.markerade > 1 ? `<div class="under">${b.markerade} · ${b.per} = ${b.markerade * b.per}</div>` : ""}`;
+    const grupper = Array.from({ length: b.delar }, (_, i) => `<div class="skal${i < b.markerade ? " vald" : ""}"${i < b.markerade ? ` data-steg="${i}"` : ""}><div class="skalinne" style="${skalKolumner(Math.min(b.per, 12))}">${"<span>🐟</span>".repeat(Math.min(b.per, 12))}${b.per > 12 ? "…" : ""}</div>${visa ? `<b>${b.per}</b>` : ""}</div>`);
+    return `<div class="skalar${b.delar > 5 ? " tva-rader" : ""}">${grupper.join("")}</div>${b.markerade > 1 ? `<div class="under" data-steg="${b.markerade}">${b.markerade} · ${b.per} = ${b.markerade * b.per}</div>` : ""}`;
   },
 
   rader(b) {
-    return `${b.staplar ? BILDER.staplar(b.staplar) : ""}<div class="rader">${b.rader.map((r) => `<div>${esc(r)}</div>`).join("")}</div>`;
+    return `${b.staplar ? BILDER.staplar(b.staplar) : ""}<div class="rader">${b.rader.map((r, i) => `<div data-steg="${i}">${esc(r)}</div>`).join("")}</div>`;
   },
 
   rutnat(b) {
@@ -488,7 +489,7 @@ const BILDER = {
     if (b.raknaRader) {
       for (let rad = 0; rad * 10 < b.fyllda; rad++) {
         const varde = Math.min(b.fyllda, (rad + 1) * 10);
-        s += `<text x="${266}" y="${rad * 26 + 21}" font-size="18" font-weight="800">${varde}</text>`;
+        s += `<text x="${266}" y="${rad * 26 + 21}" font-size="18" font-weight="800" data-steg="${rad}">${varde}</text>`;
       }
     }
     const svg = `<svg viewBox="0 0 ${b.raknaRader ? 300 : 264} 264" width="${b.raknaRader ? 300 : 264}" height="264">${s}</svg>`;
@@ -502,7 +503,7 @@ const BILDER = {
     for (let i = 0; i < b.delar; i++) {
       s += `<rect x="${i * del + 2}" y="2" width="${del}" height="64" fill="${i < b.markerade ? "#ffd95e" : "#fff"}" stroke="#2b1d0e" stroke-width="3"/>`;
       const text = b.visaVarden ? (b.delar <= 10 || i < b.markerade ? tal(b.hel / b.delar) : "") : i < b.markerade && b.delar <= 10 ? "?" : "";
-      if (text) s += `<text x="${i * del + del / 2 + 2}" y="44" font-size="${b.delar > 10 ? 14 : 24}" font-weight="800" text-anchor="middle">${text}</text>`;
+      if (text) s += `<text${b.visaVarden && i < b.markerade ? ` data-steg="${i}"` : ""} x="${i * del + del / 2 + 2}" y="44" font-size="${b.delar > 10 ? 14 : 24}" font-weight="800" text-anchor="middle">${text}</text>`;
     }
     s += `<path d="M2 80 v10 h${B} v-10" stroke="#2b1d0e" stroke-width="3" fill="none"/><text x="${B / 2}" y="120" font-size="28" font-weight="900" text-anchor="middle">${tal(b.hel)}</text>`;
     return `<svg viewBox="0 0 ${B + 6} 130" width="${B + 6}" height="130">${s}</svg>${b.visaVarden && b.markerade > 1 ? `<div class="under">${b.markerade} · ${tal(b.hel / b.delar)} = ${tal((b.markerade * b.hel) / b.delar)}</div>` : ""}`;
@@ -514,7 +515,7 @@ const BILDER = {
   },
 
   recept(b) {
-    return `<div class="recept">${b.rader.map((r, i) => `<div class="receptrad${b.markera === i ? " markerad" : ""}"><span>🐟 ${esc(String(r[0]))}</span><span>➜</span><span>🐱 ${esc(String(r[1]))}</span></div>`).join("")}</div>`;
+    return `<div class="recept">${b.rader.map((r, i) => `<div class="receptrad${b.markera === i ? " markerad" : ""}" data-steg="${i}"><span>🐟 ${esc(String(r[0]))}</span><span>➜</span><span>🐱 ${esc(String(r[1]))}</span></div>`).join("")}</div>`;
   },
 
   staplar(b) {
@@ -526,7 +527,7 @@ const BILDER = {
       s += `<text x="${i * (B + 18) + 10 + B / 2}" y="${H - h + 22}" font-size="26" font-weight="900" text-anchor="middle">${v}</text>`;
       s += `<text x="${i * (B + 18) + 10 + B / 2}" y="${H + 62}" font-size="30" text-anchor="middle">🐱</text>`;
     });
-    if (b.linje) s += `<line x1="0" x2="${b.varden.length * (B + 18) + 10}" y1="${H - (b.linje / max) * H + 30}" y2="${H - (b.linje / max) * H + 30}" stroke="#2e9e4f" stroke-width="4" stroke-dasharray="10 6"/>`;
+    if (b.linje) s += `<line x1="0" x2="${b.varden.length * (B + 18) + 10}" y1="${H - (b.linje / max) * H + 30}" y2="${H - (b.linje / max) * H + 30}" stroke="#2e9e4f" stroke-width="4" stroke-dasharray="10 6" data-steg="0"/>`;
     const w = b.varden.length * (B + 18) + 14;
     return `<svg viewBox="0 0 ${w} ${H + 72}" width="${w}" height="${H + 72}">${s}</svg>`;
   },
@@ -871,6 +872,7 @@ function ritaFraga(efterFel = false) {
   // Passar bilden inte på skärmen görs den mindre
   krympBild(el);
   if (efterFel) {
+    animera(el);
     el.querySelector("#vidare").addEventListener("click", () => {
       if (S.forsok.fiskar <= 0) visaMisslyckad();
       else nastaFraga();
@@ -884,6 +886,21 @@ function ritaFraga(efterFel = false) {
   if (knappsats) kopplaKnappsats(el, q);
   else el.querySelectorAll(".svarsknapp").forEach((b) => b.addEventListener("click", () => svara(b.dataset.varde, b)));
   return el;
+}
+
+// Bilden som visar hur man tänker byggs upp steg för steg (element med data-steg).
+// Hela animeringen tar högst cirka 4 sekunder. Det gröna svaret i frågan kommer sist.
+function animera(el) {
+  const bild = el.querySelector(".fragyta > .bild");
+  if (!bild) return;
+  const steg = [...bild.querySelectorAll("[data-steg]")];
+  if (!steg.length) return;
+  const sista = Math.max(...steg.map((s) => Number(s.dataset.steg)));
+  const takt = Math.min(0.55, 4 / (sista + 1));
+  steg.forEach((s) => s.style.setProperty("--i", s.dataset.steg));
+  bild.style.setProperty("--takt", takt + "s");
+  el.style.setProperty("--slut", (0.3 + (sista + 1) * takt).toFixed(2) + "s");
+  el.classList.add("animerar");
 }
 
 function krympBild(el) {
@@ -1031,6 +1048,7 @@ function visaExempel(typ, sedan) {
     <button class="knapp guld vidare" type="button" id="nuDu" style="width:240px">${t("Nu du!", "Your turn!")} ▶</button>`, "utan-svar");
   el.style.background = `linear-gradient(${plats.farg[0]}, ${plats.farg[1]})`;
   krympBild(el);
+  animera(el);
   el.querySelector("#nuDu").addEventListener("click", sedan);
 }
 
