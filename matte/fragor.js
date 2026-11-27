@@ -962,6 +962,11 @@
       { typer: ["talrad", "monster"], fran: 0, till: 10, knappar: 3 },
       { typer: ["plusBild"], max: 5, knappar: 3 },
       { typer: ["minusBild", "delHelhet"], max: 5, knappar: 3 },
+      // Nivå 7–10 är en mjuk bro till 6 år
+      { typer: ["rakna"], fran: 4, till: 10, layout: "tioruta", knappar: 3 },
+      { typer: ["plusBild", "jamforTal"], max: 10, fran: 1, till: 10, antal: 2, knappar: 3 },
+      { typer: ["talrad", "minusBild"], fran: 0, till: 20, max: 10, knappar: 3 },
+      { typer: ["plusBild", "minusBild", "tiokamrat"], max: 10, knappar: 3 },
     ],
     6: [
       { typer: ["rakna"], fran: 1, till: 10, layout: "tioruta", knappar: 4 },
@@ -971,6 +976,10 @@
       { typer: ["minusBild", "tiokamrat"], max: 10, knappar: 4 },
       { typer: ["dubbeltHalften", "talmonster"], max: 20, fran: 0, till: 10, steg: [2], knappsats: false },
       { typer: ["saknadTerm"], max: 10 },
+      // Nivå 8–10 är en bro till 7 år
+      { typer: ["plus", "minus"], aMin: 1, aMax: 10, bMin: 1, bMax: 9, max: 10 },
+      { typer: ["tiotalEntal"], fran: 11, till: 20 },
+      { typer: ["plus", "minus"], aMin: 10, aMax: 19, bMin: 1, bMax: 9, max: 20, vaxling: false },
     ],
     7: [
       { typer: ["tiotalEntal"], fran: 11, till: 99 },
@@ -981,6 +990,9 @@
       { typer: ["talmonster"], fran: 0, till: 50, steg: [2, 5, 10, -1], max: 100 },
       { typer: ["plus", "minus"], aMin: 11, aMax: 99, bMin: 1, bMax: 9, max: 99, vaxling: false },
       { typer: ["brakPizza", "dubbeltHalften"], namnare: [2, 4], taljare: 1, max: 20, knappsats: true },
+      // Nivå 9–10 är en bro till 8 år
+      { typer: ["plus", "minus"], aMin: 10, aMax: 90, bMin: 10, bMax: 90, max: 100, multipel: 10 },
+      { typer: ["gangerGrupp"], tabeller: [2, 10] },
     ],
     8: [
       { typer: ["plus", "minus"], aMin: 10, aMax: 90, bMin: 10, bMax: 90, max: 100, multipel: 10 },
@@ -992,6 +1004,8 @@
       { typer: ["brakPizza", "brakAvAntal"], namnare: [2, 3, 4], taljare: 1, max: 20 },
       { typer: ["tallinje"], fran: 0, till: 100, streck: 2, etikett: 10, fonster: 30 },
       { typer: ["saknadTerm", "talmonster"], min: 20, max: 100, fran: 0, till: 60, steg: [3, 4, -5, -10] },
+      // Nivå 10 är en bro till 9 år
+      { typer: ["tiotalEntal", "plus", "minus"], fran: 101, till: 500, aMin: 20, aMax: 150, bMin: 12, bMax: 89, max: 200, vaxling: true },
     ],
     9: [
       { typer: ["tiotalEntal"], fran: 101, till: 999 },

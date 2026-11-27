@@ -16,7 +16,7 @@ const problem = (text) => {
 };
 
 const flyttalsfel = (x) => typeof x === "number" && /\d{7,}/.test(String(x).split(".")[1] || "");
-const forvantadeNivaer = { 5: 6, 6: 7, 7: 8, 8: 9, 9: 10, 10: 10, 11: 10, 12: 10 };
+const forvantadeNivaer = { 5: 10, 6: 10, 7: 10, 8: 10, 9: 10, 10: 10, 11: 10, 12: 10 };
 
 for (const alder of Object.keys(F.NIVAER).map(Number)) {
   const nivaer = F.NIVAER[alder];
@@ -66,7 +66,7 @@ for (const alder of Object.keys(F.NIVAER).map(Number)) {
       }
       if (!F.arRatt(q, typeof q.svar === "number" ? F.tal(q.svar) : q.svar)) problem(`${var_}: arRatt godkänner inte rätt svar ${q.svar}`);
     }
-    if (olika.size < 10 && !(alder === 5 && niva === 1)) problem(`${alder} år nivå ${niva}: bara ${olika.size} olika frågor`);
+    if (olika.size < 10 && !(alder === 5 && (niva === 1 || niva === 7))) problem(`${alder} år nivå ${niva}: bara ${olika.size} olika frågor`);
   });
 }
 

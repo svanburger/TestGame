@@ -1082,10 +1082,13 @@ function nivaKlar() {
       ${t("Poäng", "Score")} ⭐ <b id="poangSiffra">${fore}</b>
     </div>
     <div style="position:absolute; bottom:50px; width:100%; text-align:center;">
-      <button class="knapp" type="button" id="vidare" style="width:320px; height:84px; font-size:34px;">▶ ${sista ? t("Vidare", "Onwards") : t("Vidare", "Onwards")}</button>
+      ${sista ? "" : `<button class="knapp" type="button" id="sparaSluta" style="width:300px; height:84px; font-size:28px; margin-right:16px;">🏆 ${t("Sluta och spara", "Stop and save")}</button>`}
+      <button class="knapp guld" type="button" id="vidare" style="width:300px; height:84px; font-size:34px;">▶ ${t("Vidare", "Onwards")}</button>
     </div>`);
   el.style.background = "radial-gradient(circle at 50% 40%, #fff3c4, #ffc96b)";
   raknaUpp(el.querySelector("#poangSiffra"), fore, S.poang);
+  // Vill man inte spela mer kommer poängen ändå med på topplistan
+  el.querySelector("#sparaSluta")?.addEventListener("click", () => avsluta(S.poang, n));
   el.querySelector("#vidare").addEventListener("click", () => {
     if (sista) visaFinal();
     else {

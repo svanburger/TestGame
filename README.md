@@ -681,9 +681,11 @@ Bordsplaceringen) har tappat sin guldbjällra, och man följer honom på en
 karta med en ny plats för varje nivå.
 
 - **Välj ålder** på startskärmen (5–12 år). Man får välja en annan ålder
-  än sin egen. Varje ålder har en fast trappa av nivåer: 6 nivåer för 5 år,
-  sedan en till för varje år upp till 10 nivåer från 9 år. Frågorna slumpas,
+  än sin egen. Varje ålder har en fast trappa med 10 nivåer, och de
+  sista nivåerna leder mjukt mot nästa ålder. Frågorna slumpas,
   men alla med samma ålder får lika svåra frågor.
+- **Sluta och spara:** när en nivå är klar kan man sluta och ändå skriva in
+  sin poäng på topplistan.
 - **En nivå:** samla 8 ⭐ (8 rätt). Man har 3 🐟 (Görans fiskar), och ett
   fel kostar en fisk. Det finns ingen tidsgräns, och antalet fel visas
   aldrig. Vid fel visas rätt svar med en bild, och nästa fråga av samma
