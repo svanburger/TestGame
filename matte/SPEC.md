@@ -157,9 +157,13 @@ Ett barn som är 6 år i oktober går ofta i förskoleklass, så trappan för
 6 år börjar lätt.
 
 ### 2.2 Så läser man tabellerna
-- **Antal nivåer:** yngre barn har färre nivåer (Andreas beslut): 5 år har
-  6, 6 år 7, 7 år 8, 8 år 9 och 9–12 år 10. Bjällran hittas på sista
-  nivån.
+- **Antal nivåer:** alla åldrar har 10 nivåer (Andreas beslut, nov 2026;
+  tidigare hade de yngre färre). De sista nivåerna för 5–8 år är en mjuk
+  bro till nästa ålder, så att steget uppåt inte blir för stort. Bjällran
+  hittas på sista nivån. Fler nivåer kan komma senare.
+- **Sluta och spara:** när en nivå är klar kan man trycka "🏆 Sluta och
+  spara" i stället för "Vidare". Poängen och den klarade nivån skrivs då
+  in på topplistan.
 - Varje nivå har ett **recept**: en eller två frågetyper (se 3) och
   talområdet. Har en nivå två typer kommer de om vartannat, alltid i samma
   ordning (A B A B …), så att varje försök blir lika svårt.
@@ -168,7 +172,7 @@ Ett barn som är 6 år i oktober går ofta i förskoleklass, så trappan för
 - Exakt samma recept står i `NIVAER` i `fragor.js`. Ändrar man där ska
   tabellerna här ändras också.
 
-### 2.3 Fem år, 6 nivåer (K-FK, BS)
+### 2.3 Fem år, 10 nivåer (K-FK, BS)
 
 | Nivå | Frågetyp(er) | Talområde | Svar | Källa |
 |---|---|---|---|---|
@@ -178,12 +182,16 @@ Ett barn som är 6 år i oktober går ofta i förskoleklass, så trappan för
 | 4 | `talrad` (vilket tal saknas på stigen?) + `monster` (bildmönster) | 0–10 | 🔘3 | K-FK (ordning, mönster) |
 | 5 | `plusBild` | summa ≤ 5 | 🔘3 | K-FK, BS |
 | 6 | `minusBild` (Göran äter upp några) + `delHelhet` (hur många är i lådan?) | ≤ 5 | 🔘3 | K-FK ("del av helhet") |
+| 7 | `rakna` (i tioruta), bro till 6 år | 4–10 | 🔘3 | K-FK, BS |
+| 8 | `plusBild` + `jamforTal` (vilket tal är störst/minst?) | ≤ 10 | 🔘3 | K-FK |
+| 9 | `talrad` + `minusBild` | 0–20 / ≤ 10 | 🔘3 | K-FK |
+| 10 | `plusBild` + `minusBild` + `tiokamrat` | ≤ 10 | 🔘3 | K-FK |
 
 *Tolkning:* Plus och minus med symboler står inte som innehåll i
 förskoleklassen. Därför visas `+` och `−` för 5 år alltid med bilder
 under, och talen hålls inom 5.
 
-### 2.4 Sex år, 7 nivåer
+### 2.4 Sex år, 10 nivåer
 
 | Nivå | Frågetyp(er) | Talområde | Svar | Källa |
 |---|---|---|---|---|
@@ -194,8 +202,11 @@ under, och talen hålls inom 5.
 | 5 | `minusBild` + `tiokamrat` (7 + ? = 10) | ≤ 10 | 🔘4 | K13-T |
 | 6 | `dubbeltHalften` + `talmonster` (hoppa 2 steg) | ≤ 20 | 🔘4 | K13-S, K13-A |
 | 7 | `saknadTerm` (3 + ? = 7) | ≤ 10 | 🔘4 | K13-A (likhetstecknet) |
+| 8 | `plus` + `minus` utan bilder, bro till 7 år | ≤ 10 | ⌨ | K13-T |
+| 9 | `tiotalEntal` (en tiobunt och lösa pinnar) | 11–20 | ⌨ | K13-T |
+| 10 | `plus` + `minus` utan tiotalsövergång (14 + 3) | ≤ 20 | ⌨ | K13-T |
 
-### 2.5 Sju år (åk 1), 8 nivåer
+### 2.5 Sju år (åk 1), 10 nivåer
 
 | Nivå | Frågetyp(er) | Talområde | Svar | Källa |
 |---|---|---|---|---|
@@ -207,8 +218,10 @@ under, och talen hålls inom 5.
 | 6 | `talmonster` (+2, +5, +10, −1) | ≤ 100 | ⌨ | K13-A |
 | 7 | `plus` + `minus` tvåsiffrigt och ensiffrigt utan växling (34 + 5) | ≤ 99 | ⌨ | K13-T |
 | 8 | `brakPizza` (½, ¼) + `dubbeltHalften` | ≤ 20 | 🔘 bilder / ⌨ | K13-T (bråk), K13-S |
+| 9 | `plus` + `minus` med hela tiotal (40 + 30), bro till 8 år | ≤ 100 | ⌨ | K13-T |
+| 10 | `gangerGrupp` (2:ans och 10:ans tabell) | ≤ 100 | ⌨ | K13-T |
 
-### 2.6 Åtta år (åk 2), 9 nivåer
+### 2.6 Åtta år (åk 2), 10 nivåer
 
 | Nivå | Frågetyp(er) | Talområde | Svar | Källa |
 |---|---|---|---|---|
@@ -221,6 +234,7 @@ under, och talen hålls inom 5.
 | 7 | `brakPizza` (½, ⅓, ¼) + `brakAvAntal` (⅓ av 12) | ≤ 20 | 🔘 bilder / ⌨ | K13-T (del av helhet och del av antal) |
 | 8 | `tallinje` (var pekar pilen?) | 0–100 | ⌨ | K13-T |
 | 9 | `saknadTerm` + `talmonster` (+3, +4, −5, −10) | ≤ 100 | ⌨ | K13-A |
+| 10 | `tiotalEntal` med hundratal + `plus` + `minus` med växling, bro till 9 år | ≤ 500 | ⌨ | K13-T |
 
 Inga lästal för 8 år (Andreas beslut).
 
@@ -414,8 +428,8 @@ Exempel:
 |---|---|---|---|
 | Klarade nivå 1–6 och fick 3 rätt i sista försöket på nivå 7 | 50 · 6 · 7 + 3 · 70 = 2 100 + 210 | **2 310** | 6 |
 | Klarade nivå 1–3, misslyckades två gånger på nivå 4, och fick 2 rätt i sista försöket | 50 · 3 · 4 + 2 · 40 = 600 + 80 | **680** | 3 |
-| 9 år: klarade alla 10 nivåer | 50 · 10 · 11 | **5 500** (högst möjliga) | 10 |
-| 5 år: klarade alla 6 nivåer | 50 · 6 · 7 | **2 100** (högst för 5 år) | 6 |
+| Klarade alla 10 nivåer (alla åldrar) | 50 · 10 · 11 | **5 500** (högst möjliga) | 10 |
+| Klarade nivå 1–4 och tryckte "Sluta och spara" | 50 · 4 · 5 | **1 000** | 4 |
 | Fick 3 rätt på nivå 1 och skrev sedan in sig | 3 · 10 | **30** | 0 |
 
 ### 4.2 Topplista per ålder
